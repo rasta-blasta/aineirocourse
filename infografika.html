@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Внутри «Внутри нейросети»</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#F1F1EE; --surface:#FBFAF7; --surface2:#E9E8E2; --ink:#20242B; --muted:#68707A;
+  --accent:#A76A15; --accent-bright:#E9A63A; --accent-soft:rgba(233,166,58,.14);
+  --wire:#DAD8CE; --good:#2E7D4F;
+  --shadow:0 1px 2px rgba(32,36,43,.05),0 10px 28px rgba(32,36,43,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14161A; --surface:#1C1F24; --surface2:#262A31; --ink:#E9E7E1; --muted:#9AA0A8;
+    --accent:#E0A23F; --accent-bright:#EFB255; --accent-soft:rgba(239,178,85,.12);
+    --wire:#32363D; --good:#5CB585;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14161A; --surface:#1C1F24; --surface2:#262A31; --ink:#E9E7E1; --muted:#9AA0A8;
+  --accent:#E0A23F; --accent-bright:#EFB255; --accent-soft:rgba(239,178,85,.12);
+  --wire:#32363D; --good:#5CB585;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.62 "Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:48px 26px 80px}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;display:flex;align-items:center;gap:10px}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--wire)}
+h1{font-family:"Unbounded",sans-serif;font-weight:700;font-size:clamp(24px,4.4vw,36px);line-height:1.18;text-wrap:balance;margin:14px 0 0}
+.standfirst{font-size:17.5px;color:var(--muted);margin-top:14px;max-width:64ch}
+h2{font-family:"Unbounded",sans-serif;font-weight:500;font-size:19px;margin:52px 0 8px;text-wrap:balance}
+.sub{color:var(--muted);font-size:14.5px;max-width:70ch;margin-bottom:18px}
+.mono{font-family:"JetBrains Mono",monospace}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:28px}
+.tile{border:1px solid var(--wire);border-radius:13px;background:var(--surface);box-shadow:var(--shadow);padding:16px 16px 13px}
+.tile b{font-family:"Unbounded",sans-serif;font-weight:700;font-size:clamp(19px,2.6vw,25px);display:block;font-variant-numeric:tabular-nums}
+.tile span{font-size:11.5px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+
+.panel{border:1px solid var(--wire);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);padding:20px 22px}
+
+.layers{display:flex;flex-direction:column;gap:8px}
+.layer{display:grid;grid-template-columns:190px 1fr 74px;gap:12px;align-items:center;font-size:14px}
+.layer .nm{font-weight:600;text-align:right}
+.layer .nm small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.layer .track{height:30px;background:var(--surface2);border-radius:7px;overflow:hidden}
+.layer .fill{height:100%;border-radius:7px;background:var(--accent-bright);min-width:6px}
+.layer .kb{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+@media(max-width:620px){.layer{grid-template-columns:1fr 74px}.layer .nm{text-align:left;order:-1;grid-column:1/-1}}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:680px){.grid2{grid-template-columns:1fr}}
+.tech{border:1px solid var(--wire);border-radius:13px;background:var(--surface);padding:15px 17px}
+.tech h3{font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.tech h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent-bright);flex:0 0 8px}
+.tech p{font-size:13.5px;color:var(--muted);line-height:1.55}
+.tech p strong{color:var(--ink);font-weight:600}
+
+svg{display:block;width:100%;height:auto}
+.svgpanel{border:1px solid var(--wire);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);padding:14px;overflow-x:auto}
+.callout{border-left:3px solid var(--accent-bright);background:var(--accent-soft);border-radius:0 10px 10px 0;padding:13px 17px;margin:20px 0;font-size:14.5px}
+.foot{margin-top:56px;padding-top:18px;border-top:1px solid var(--wire);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Техническая инфографика</div>
+  <h1>Внутри «Внутри нейросети»</h1>
+  <p class="standfirst">Весь курс — одиннадцать модулей, десять демонстраций, тесты и повторные проверки, упражнения, экзамен, обучаемая нейросеть и 2 500 настоящих рукописных цифр — это <strong>один HTML-файл</strong>. Он открывается двойным кликом в любом браузере, не требует установки, интернета и сервера, и его можно переслать как обычный документ.</p>
+
+  <div class="tiles">
+    <div class="tile"><b>1</b><span>файл — и всё</span></div>
+    <div class="tile"><b>5</b><span>языков</span></div>
+    <div class="tile"><b>~2 МБ</b><span>полный размер</span></div>
+    <div class="tile"><b>~13 400</b><span>строк кода</span></div>
+    <div class="tile"><b>0</b><span>серверов</span></div>
+    <div class="tile"><b>0</b><span>фреймворков</span></div>
+  </div>
+
+  <h2>Из чего состоит файл</h2>
+  <p class="sub">Если разрезать index.html на слои, бóльшая часть — это тексты и вопросы. Код, который всем этим управляет, занимает меньше четверти.</p>
+  <div class="panel layers">
+    <div class="layer">
+      <div class="nm">Тексты, тесты, упражнения<small>11 модулей, 132 вопроса, 33 упражнения — JSON</small></div>
+      <div class="track"><div class="fill" style="width:100%"></div></div>
+      <div class="kb">≈465 КБ</div>
+    </div>
+    <div class="layer">
+      <div class="nm">Рукописные цифры<small>2 500 образцов из классического датасета, hex-упаковка</small></div>
+      <div class="track"><div class="fill" style="width:33%;opacity:.85"></div></div>
+      <div class="kb">≈155 КБ</div>
+    </div>
+    <div class="layer">
+      <div class="nm">Движок, демки, игра<small>JavaScript</small></div>
+      <div class="track"><div class="fill" style="width:12%;opacity:.75"></div></div>
+      <div class="kb">≈55 КБ</div>
+    </div>
+    <div class="layer">
+      <div class="nm">Дизайн<small>CSS: светлая и тёмная темы</small></div>
+      <div class="track"><div class="fill" style="width:4%;opacity:.55"></div></div>
+      <div class="kb">≈17 КБ</div>
+    </div>
+    <div class="layer">
+      <div class="nm">Каркас страницы<small>HTML</small></div>
+      <div class="track"><div class="fill" style="width:1.5%;opacity:.45"></div></div>
+      <div class="kb">≈2 КБ</div>
+    </div>
+  </div>
+
+  <h2>На чём это написано</h2>
+  <p class="sub">Ни одной библиотеки и ни одного фреймворка — только то, что уже встроено в каждый браузер. Именно поэтому файл самодостаточен и не «протухнет» от смены версий чужого кода.</p>
+  <div class="grid2">
+    <div class="tech"><h3>Vanilla JavaScript</h3><p>«Чистый» JS без React и прочих надстроек. На нём написаны <strong>движок курса</strong> (страницы, тесты, замки́ на модулях), все 8 демонстраций и игра. Даже нейросеть в игре — это ~60 строк обычного JavaScript.</p></div>
+    <div class="tech"><h3>CSS-переменные</h3><p>Все цвета заданы как <strong>дизайн-токены</strong>: одна палитра для светлой темы, одна для тёмной. Браузер сам выбирает тему под настройки вашей системы.</p></div>
+    <div class="tech"><h3>Canvas 2D</h3><p>«Холст» для рисования пикселями: на нём работают график обучения, поле, где вы рисуете цифры, анимация на обложке — и на нём же курс <strong>сам генерирует обучающие примеры</strong>, печатая цифры разными шрифтами.</p></div>
+    <div class="tech"><h3>SVG</h3><p>Векторная графика для схем: карта слов-эмбеддингов, диаграмма архитектуры сети, стрелки векторной арифметики «король − мужчина + женщина».</p></div>
+    <div class="tech"><h3>localStorage</h3><p>Маленькое хранилище внутри браузера. Там живёт ваш <strong>прогресс</strong>: пройденные модули и результаты тестов. Ничего никуда не отправляется — данные не покидают компьютер.</p></div>
+    <div class="tech"><h3>Google Fonts</h3><p>Единственное, что подгружается из интернета, — фирменные шрифты (Unbounded, Golos Text, JetBrains Mono). <strong>Без интернета курс тоже работает</strong> — просто откроется системными шрифтами.</p></div>
+  </div>
+
+  <h2>Как устроена игровая нейросеть</h2>
+  <p class="sub">Финальная игра — настоящий конвейер машинного обучения, целиком в браузере. Обучение занимает около двух секунд.</p>
+  <div class="svgpanel">
+  <svg viewBox="0 0 860 190" role="img" aria-label="Конвейер: шрифты, сжатие до 8 на 8, нейросеть, вероятности">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker>
+    </defs>
+    <g font-family="'Golos Text',sans-serif">
+      <rect x="8" y="38" width="150" height="86" rx="12" fill="var(--surface2)" stroke="var(--wire)"/>
+      <text x="83" y="66" text-anchor="middle" font-size="26" font-weight="700" fill="var(--ink)" font-family="Georgia,serif">3 <tspan font-family="Arial">3</tspan> <tspan font-family="'Courier New'">3</tspan></text>
+      <text x="83" y="92" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">480 примеров</text>
+      <text x="83" y="108" text-anchor="middle" font-size="11" fill="var(--muted)">цифры шрифтами ОС</text>
+
+      <line x1="162" y1="81" x2="196" y2="81" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+
+      <g transform="translate(202,49)">
+        <rect x="0" y="0" width="64" height="64" rx="8" fill="var(--surface2)" stroke="var(--wire)"/>
+        <g fill="var(--accent-bright)">
+          <rect x="24" y="8" width="8" height="8"/><rect x="32" y="8" width="8" height="8"/><rect x="40" y="16" width="8" height="8"/>
+          <rect x="24" y="24" width="8" height="8"/><rect x="32" y="24" width="8" height="8"/><rect x="40" y="32" width="8" height="8"/>
+          <rect x="16" y="48" width="8" height="8"/><rect x="24" y="48" width="8" height="8"/><rect x="32" y="40" width="8" height="8"/>
+        </g>
+        <text x="32" y="84" text-anchor="middle" font-size="11" fill="var(--muted)">сжатие до 8×8</text>
+      </g>
+
+      <line x1="274" y1="81" x2="308" y2="81" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+
+      <g transform="translate(316,10)">
+        <g stroke="var(--wire)" stroke-width="1">
+          <line x1="26" y1="30" x2="106" y2="52"/><line x1="26" y1="30" x2="106" y2="86"/><line x1="26" y1="30" x2="106" y2="120"/>
+          <line x1="26" y1="71" x2="106" y2="52"/><line x1="26" y1="71" x2="106" y2="86"/><line x1="26" y1="71" x2="106" y2="120"/>
+          <line x1="26" y1="112" x2="106" y2="52"/><line x1="26" y1="112" x2="106" y2="86"/><line x1="26" y1="112" x2="106" y2="120"/>
+          <line x1="26" y1="143" x2="106" y2="86"/><line x1="26" y1="143" x2="106" y2="120"/>
+          <line x1="106" y1="52" x2="186" y2="60"/><line x1="106" y1="52" x2="186" y2="90"/><line x1="106" y1="52" x2="186" y2="120"/>
+          <line x1="106" y1="86" x2="186" y2="60"/><line x1="106" y1="86" x2="186" y2="90"/><line x1="106" y1="86" x2="186" y2="120"/>
+          <line x1="106" y1="120" x2="186" y2="60"/><line x1="106" y1="120" x2="186" y2="90"/><line x1="106" y1="120" x2="186" y2="120"/>
+        </g>
+        <g fill="var(--surface2)" stroke="var(--ink)" stroke-width="1">
+          <circle cx="26" cy="30" r="8"/><circle cx="26" cy="71" r="8"/><circle cx="26" cy="112" r="8"/><circle cx="26" cy="143" r="8"/>
+        </g>
+        <g fill="var(--accent-bright)">
+          <circle cx="106" cy="52" r="9"/><circle cx="106" cy="86" r="9"/><circle cx="106" cy="120" r="9"/>
+        </g>
+        <g fill="var(--surface2)" stroke="var(--ink)" stroke-width="1">
+          <circle cx="186" cy="60" r="8"/><circle cx="186" cy="90" r="8"/><circle cx="186" cy="120" r="8"/>
+        </g>
+        <text x="26" y="168" text-anchor="middle" font-size="10.5" fill="var(--muted)">64 входа</text>
+        <text x="106" y="168" text-anchor="middle" font-size="10.5" fill="var(--muted)">скрытый слой</text>
+        <text x="186" y="168" text-anchor="middle" font-size="10.5" fill="var(--muted)">10 цифр</text>
+      </g>
+
+      <line x1="530" y1="81" x2="564" y2="81" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+
+      <g transform="translate(572,34)">
+        <rect x="0" y="0" width="130" height="96" rx="12" fill="var(--surface2)" stroke="var(--wire)"/>
+        <g font-family="'JetBrains Mono',monospace" font-size="10.5" fill="var(--muted)">
+          <text x="12" y="24">2</text><rect x="26" y="16" width="18" height="9" rx="2" fill="var(--wire)"/>
+          <text x="12" y="47">3</text><rect x="26" y="39" width="84" height="9" rx="2" fill="var(--accent-bright)"/>
+          <text x="12" y="70">8</text><rect x="26" y="62" width="30" height="9" rx="2" fill="var(--wire)"/>
+        </g>
+        <text x="65" y="115" text-anchor="middle" font-size="11" fill="var(--muted)">softmax → проценты</text>
+      </g>
+
+      <line x1="706" y1="81" x2="740" y2="81" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+
+      <g transform="translate(748,44)">
+        <rect x="0" y="0" width="104" height="74" rx="12" fill="var(--accent-soft)" stroke="var(--accent-bright)"/>
+        <text x="52" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="var(--ink)" font-family="'Unbounded',sans-serif">Это 3</text>
+        <text x="52" y="58" text-anchor="middle" font-size="12.5" fill="var(--accent)" font-family="'JetBrains Mono',monospace">99%</text>
+      </g>
+    </g>
+  </svg>
+  </div>
+  <div class="callout">Обучение — честный <strong>градиентный спуск</strong>: сеть 30 раз проходит по всем примерам и после каждого чуть-чуть подкручивает свои ~900 весов. Тот же алгоритм, что у больших моделей, — только у них весов в миллиард раз больше и учатся они месяцами на тысячах видеокарт.</div>
+
+  <h2>Как этот курс делался</h2>
+  <p class="sub">Курс о нейросетях и написан нейросетями — целым конвейером из 13 участников с разделением ролей, как в настоящей редакции.</p>
+  <div class="svgpanel">
+  <svg viewBox="0 0 860 150" role="img" aria-label="Конвейер производства: архитектор, 9 авторов, 3 редактора, сборка, публикация">
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+    <g font-family="'Golos Text',sans-serif">
+      <rect x="8" y="40" width="150" height="70" rx="12" fill="var(--surface2)" stroke="var(--wire)"/>
+      <text x="83" y="68" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">Claude</text>
+      <text x="83" y="86" text-anchor="middle" font-size="11" fill="var(--muted)">архитектура, движок,</text>
+      <text x="83" y="100" text-anchor="middle" font-size="11" fill="var(--muted)">демки, игра, дизайн</text>
+      <line x1="162" y1="75" x2="192" y2="75" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <g>
+        <rect x="210" y="52" width="168" height="70" rx="12" fill="var(--surface2)" stroke="var(--wire)"/>
+        <rect x="204" y="46" width="168" height="70" rx="12" fill="var(--surface2)" stroke="var(--wire)"/>
+        <rect x="198" y="40" width="168" height="70" rx="12" fill="var(--surface)" stroke="var(--wire)"/>
+        <text x="282" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">20 агентов-авторов</text>
+        <text x="282" y="84" text-anchor="middle" font-size="11" fill="var(--muted)">модули, вопросы, упражнения —</text>
+        <text x="282" y="98" text-anchor="middle" font-size="11" fill="var(--muted)">параллельно · ~23 000 слов</text>
+      </g>
+      <line x1="382" y1="75" x2="412" y2="75" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <g>
+        <rect x="428" y="49" width="168" height="70" rx="12" fill="var(--surface2)" stroke="var(--wire)"/>
+        <rect x="422" y="43" width="168" height="70" rx="12" fill="var(--surface)" stroke="var(--wire)"/>
+        <text x="506" y="68" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">7 фактчекеров</text>
+        <text x="506" y="86" text-anchor="middle" font-size="11" fill="var(--muted)">перерешали все 132 вопроса,</text>
+        <text x="506" y="100" text-anchor="middle" font-size="11" fill="var(--muted)">нашли 8 ошибок</text>
+      </g>
+      <line x1="600" y1="75" x2="630" y2="75" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <rect x="638" y="40" width="100" height="70" rx="12" fill="var(--surface2)" stroke="var(--wire)"/>
+      <text x="688" y="68" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink)">Сборка</text>
+      <text x="688" y="86" text-anchor="middle" font-size="11" fill="var(--muted)">тексты + движок</text>
+      <text x="688" y="100" text-anchor="middle" font-size="11" fill="var(--muted)">= один файл</text>
+      <line x1="742" y1="75" x2="772" y2="75" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar2)"/>
+      <rect x="780" y="40" width="72" height="70" rx="12" fill="var(--accent-soft)" stroke="var(--accent-bright)"/>
+      <text x="816" y="70" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Прогон</text>
+      <text x="816" y="88" text-anchor="middle" font-size="11" fill="var(--accent)">в браузере ✓</text>
+    </g>
+  </svg>
+  </div>
+
+  <h2>Как этим делиться</h2>
+  <div class="grid2">
+    <div class="tech"><h3>Сейчас: просто файлом</h3><p>Перешлите архив или сам <strong>index.html</strong> — почтой, в мессенджере, на флешке. Получатель делает двойной клик — и курс работает. У каждого будет свой личный прогресс.</p></div>
+    <div class="tech"><h3>Потом: GitHub Pages</h3><p>Когда захотите публичную ссылку: создать репозиторий → загрузить index.html → включить Pages в настройках. Через минуту у курса будет адрес вида <span class="mono">имя.github.io/neurocourse</span>.</p></div>
+  </div>
+
+  <p class="foot">«Внутри нейросети» · один HTML-файл · без серверов, трекеров и сбора данных · август 2026</p>
+</div>
+</body>
+</html>
