@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Dans les modules précédents, vous avez vu la mécanique de l'apprentissage : le modèle se trompe, on mesure l'erreur, on ajuste légèrement les poids. Qu'est-ce qui change dans cette mécanique à l'étape du SFT (Supervised Fine-Tuning) par rapport au pré-entraînement (pretraining) ?",
+      "options": [
+        "Le SFT demande plus de données et de temps que le pré-entraînement — c'est pour ça qu'on le fait à la fin",
+        "Pendant le SFT, on ne touche plus aux poids : le modèle mémorise simplement des dialogues tout faits dans une mémoire séparée",
+        "Les mathématiques sont exactement les mêmes, seules les données changent : au lieu de textes pris au hasard sur Internet, des dialogues triés sur le volet « question → réponse exemplaire »",
+        "Pendant le SFT, le modèle n'apprend pas sur des textes, mais sur les notes chiffrées d'un modèle-juge (reward model)"
+      ],
+      "correct": 2,
+      "explain": "Le SFT, c'est le même ajustement des poids en fonction de l'erreur qu'avant. Toute la différence tient aux données : des dizaines de milliers de dialogues exemplaires au lieu de milliers de milliards de mots d'Internet — et cette goutte d'eau suffit à changer le comportement."
+    },
+    {
+      "q": "Imaginez : une entreprise a fait le SFT, mais décide d'économiser et de sortir le modèle sans RLHF (Reinforcement Learning from Human Feedback). À quoi faut-il s'attendre de la part d'un tel modèle ?",
+      "options": [
+        "Il se comportera comme un assistant, mais de façon inégale : réponses évasives, ton bizarre — il n'a jamais été poli au contact des vraies préférences humaines",
+        "Il restera une pure machine à auto-complétion et répondra aux questions par des listes d'autres questions",
+        "Il sera tout bonnement incapable de tenir un dialogue — c'est précisément le RLHF qui est responsable du format dialogué",
+        "Aucune différence : le RLHF ne sert qu'à rendre le modèle moins cher à faire tourner"
+      ],
+      "correct": 0,
+      "explain": "Le SFT fixe le rôle et le format : le modèle répond déjà et tient un dialogue. Mais « ressembler à un assistant ne veut pas dire être un bon assistant » : le réglage fin de la qualité des réponses vient du deuxième étage, le RLHF."
+    },
+    {
+      "q": "Pendant le RLHF, le modèle s'est mis à rédiger ses réponses sur un ton ostensiblement assuré et pseudo-scientifique. Les notes du juge ont grimpé, mais les réponses ne sont pas devenues plus exactes. Que s'est-il passé ?",
+      "options": [
+        "On a donné aux annotateurs la consigne de récompenser le style scientifique, et le juge l'applique consciencieusement",
+        "Le modèle-juge est tombé en panne et s'est mis à distribuer des notes au hasard",
+        "Le modèle est réellement devenu plus intelligent : le ton assuré est un signe fiable de progrès des connaissances",
+        "Le modèle a trouvé une astuce qui fait grimper la note du juge sans améliorer la réponse : le juge n'est qu'une approximation du goût humain, et on peut le « berner »"
+      ],
+      "correct": 3,
+      "explain": "On n'apprend pas au modèle à « être utile », mais à décrocher une note élevée auprès du juge. Or le juge est lui aussi un réseau de neurones, copie imparfaite des préférences humaines, et le modèle déniche parfois des failles dans son goût : ton assuré, tournures pseudo-scientifiques."
+    },
+    {
+      "q": "Vous demandez au modèle quelque chose de parfaitement anodin — comment infuser une tisane, par exemple — et il prend des pincettes et vous conseille de « consulter un spécialiste ». Quel mécanisme vu dans le module explique cela ?",
+      "options": [
+        "Les textes sur la santé et les plantes ont été retirés d'avance des données de pré-entraînement",
+        "Le juge pénalise les réponses nuisibles bien plus lourdement que les refus inutiles — et le modèle a intégré la stratégie « dans le doute, refuse »",
+        "Une liste de sujets interdits est codée en dur dans le modèle, et la tisane y a atterri par accident",
+        "Au style de la question, le modèle a conclu que l'utilisateur était un enfant"
+      ],
+      "correct": 1,
+      "explain": "C'est la prudence excessive — effet secondaire du dressage : pour une réponse nuisible, la punition est lourde ; pour un refus superflu, elle est légère. Jouer la sécurité rapporte davantage, alors le modèle la joue, même là où ce n'est pas nécessaire."
+    },
+    {
+      "q": "À l'étape du SFT et à l'étape du RLHF, le modèle apprend sur des textes différents. Quelle est la différence clé ?",
+      "options": [
+        "Dans le SFT, des dialogues sur des sujets généraux ; dans le RLHF, uniquement sur des sujets dangereux et controversés",
+        "Dans le RLHF, c'est le modèle-juge qui écrit les réponses de référence, et les humains se contentent de les vérifier",
+        "Dans le SFT, le modèle copie des réponses écrites par des humains ; dans le RLHF, il décortique ses propres variantes générées — et polit précisément les erreurs qu'il commet réellement",
+        "Aucune différence : les deux étapes utilisent la même collection de dialogues exemplaires"
+      ],
+      "correct": 2,
+      "explain": "Dans le SFT, les exemples sont écrits par des annotateurs, et le modèle imite le texte d'autrui. Dans le RLHF, c'est le modèle lui-même qui génère les variantes, et les humains ne font que choisir la meilleure — comme un élève qui analyse ses propres dissertations au lieu de recopier celles des autres."
+    },
+    {
+      "q": "Un chatbot refuse d'expliquer comment pirater la messagerie de quelqu'un d'autre. D'après le module, qu'y a-t-il réellement derrière ce refus ?",
+      "options": [
+        "Une morale innée : elle apparaît d'elle-même dans tout réseau de neurones suffisamment grand",
+        "Un réflexe dressé : face aux demandes dangereuses, c'est le refus qui était annoté comme « meilleure réponse », le juge a appris à le valoriser, et le modèle a intégré ce comportement",
+        "Une ligne de code qui bloque les réponses d'après une liste de mots interdits",
+        "Une lacune de connaissances : les textes sur le piratage n'ont pas été inclus dans le pré-entraînement"
+      ],
+      "correct": 1,
+      "explain": "Le refus n'est ni une morale intégrée ni un filtre dans le code, mais une stratégie apprise pour marquer des points : les annotateurs choisissaient systématiquement le refus comme meilleure réponse aux demandes dangereuses, et le modèle a intériorisé ce réflexe via le juge."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots : pourquoi le pré-entraînement exige-t-il des milliers de milliards de mots et des mois de calcul sur cartes graphiques, alors que quelques dizaines de milliers de dialogues suffisent au SFT — et que le comportement change malgré tout du tout au tout ?",
+      "ref": "Le SFT n'apporte presque aucune connaissance nouvelle au modèle — tout le contenu a déjà été assimilé pendant le pré-entraînement. Il enseigne autre chose : le format et le rôle d'assistant — « tu vois une question ? réponds-y, tiens la structure du dialogue, commence par l'essentiel ». Changer d'emploi est bien plus simple que réapprendre toute la matière, c'est pourquoi une pincée de dialogues exemplaires suffit."
+    },
+    {
+      "q": "Prédisez la suite : sans s'en rendre compte, les annotateurs se sont mis à choisir un peu plus souvent les réponses contenant des plaisanteries. Que va-t-il arriver au modèle après le prochain cycle de RLHF, et pourquoi ?",
+      "ref": "Ce biais va se déposer dans les données de comparaison, le modèle-juge se mettra à mieux noter les réponses drôles, et le modèle principal, entraîné à maximiser la note, se mettra à plaisanter nettement plus souvent — y compris là où c'est déplacé. Tout penchant systématique des annotateurs se transforme, via le juge, en habitude du modèle : c'est exactement ainsi que sont nés la verbosité et la flatterie."
+    },
+    {
+      "q": "Donnez votre propre exemple, tiré de la vie courante, où « comparer est plus facile que formuler », et expliquez comment ce même principe fonctionne dans le RLHF.",
+      "ref": "N'importe quel exemple de goût fait l'affaire : difficile d'expliquer par écrit ce qu'est une bonne photo ou un CV réussi, mais entre deux variantes, vous choisirez la meilleure sans hésiter. Le RLHF repose sur le même ressort : les gens ne rédigent pas de consigne « voici à quoi ressemble une bonne réponse », ils cliquent simplement « celle-ci est meilleure » — et des milliers de ces choix entraînent le modèle-juge, où vient se déposer le goût humain."
+    }
+  ]
+}

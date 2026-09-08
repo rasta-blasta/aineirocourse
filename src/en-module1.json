@@ -1,0 +1,103 @@
+{
+  "title": "Where It All Began: the Markov Chain",
+  "minutes": 12,
+  "intro": "Type “I’m going to the” on your phone, and the keyboard helpfully suggests: “store,” “gym,” “movies.” This trick is more than a hundred years old, invented by a Russian mathematician long before the first computers. The entire story of language models — all the way up to ChatGPT — begins with the humble game of “guess the next word.”",
+  "sections": [
+    {
+      "heading": "The problem that started it all",
+      "html": "<p>In 1913, the St. Petersburg mathematician Andrey Markov did something that looks odd at first glance: he took Pushkin’s <em>Eugene Onegin</em>, wrote out its first twenty thousand letters in a row, and counted by hand how often a consonant follows a vowel and a vowel follows a consonant. It turned out that text is not a random jumble of symbols: it has measurable statistics. Knowing the current letter, you can guess the next one with decent accuracy: Markov found, for instance, that after a consonant a vowel shows up roughly two times out of three, while after a vowel another vowel appears only about one time in eight. Thus was born the <strong>Markov chain</strong> — the first mathematical model of language.</p><p>The idea carries over easily from letters to words. The question becomes: <em>if I know the current word, which word is most likely to come next?</em> To answer it, you need no dictionary, no grammar rules, no understanding of meaning. Just grab a lot of text and count frequencies: after “good” comes “morning,” after “happy” — “birthday,” after “artificial” — “intelligence.”</p><p>That is exactly how next-word suggestions on smartphone keyboards worked for years — plenty of people still call them “T9,” although the real T9 on button phones did something different: it guessed the word you were typing from the keys you pressed. Your phone doesn’t understand what you’re about to say. It simply keeps a table of “after word X, people most often type Y” and shows you the top rows of that table. Sometimes it nails it, sometimes it serves up those legendary autocorrect howlers — and we’ll soon see why both outcomes are inevitable.</p><div class=\"callout\">Remember this formulation of the task: <strong>predict the next word from the previous ones</strong>. It is the backbone of this entire course. A Markov chain solves it by counting frequencies; ChatGPT solves it in a completely different way — but the task itself is one and the same.</div>"
+    },
+    {
+      "heading": "Building the transition table",
+      "html": "<p>Let’s work through a toy example. Real models are trained on billions of words, but the mechanics are exactly the same, so we’ll take a “corpus” — that is, a training collection of texts — of four short sentences.</p><div class=\"example\"><p><strong>The corpus</strong> — our entire “internet” of four sentences: “cat drinks milk,” “cat drinks water,” “cat likes fish,” “dog likes bones.”</p><p>We walk through the texts and count which word follows which:</p><ul><li>after “cat” (seen 3 times): “drinks” — 2 times out of 3, that is 67%; “likes” — 1 time, 33%</li><li>after “drinks” (2 times): “milk” — 50%, “water” — 50%</li><li>after “likes” (2 times): “fish” — 50%, “bones” — 50%</li><li>after “dog” (1 time): “likes” — 100%</li></ul></div><p>The recipe for a probability could not be simpler: take how many times the pair “X Y” occurred in the corpus and divide by how many times the word X itself occurred. The pair “cat drinks” showed up twice, the word “cat” three times, so the probability of hearing “drinks” after “cat” is two-thirds. That’s it — there is no other math in a Markov chain.</p><p>Notice what this table does <em>not</em> contain. No parts of speech, no subjects or predicates, no knowledge that a cat is an animal and milk is a liquid. Just word pairs and frequencies. The model’s entire “linguistics” fits into a few rows of counters — and, surprisingly, that is already enough to generate text. On a real corpus the table would run to millions of rows, but every row works exactly the same way: a word, its possible continuations, their frequencies.</p>"
+    },
+    {
+      "heading": "Generating text: rolling the dice",
+      "html": "<p>The table is ready — now let’s make it write. The algorithm: take a starting word, look up its row in the table, and pick the next word at random — not just any which way, but <strong>in proportion to the probabilities</strong>. Picture a die whose faces are different sizes: the 67% option comes up twice as often as the 33% one. The chosen word becomes the current one, and the whole thing repeats.</p><div class=\"example\"><p>Step 1. We start with the word “cat.” The table says: “drinks” — 67%, “likes” — 33%. We roll the die — it lands on “likes.”</p><p>Step 2. The current word is “likes.” The table says: “fish” — 50%, “bones” — 50%. We get “bones.”</p><p>Step 3. After “bones” the corpus always ended the sentence — so we put a period.</p><p>Result: <strong>“cat likes bones.”</strong> That sentence was never in the corpus — the model assembled it on its own out of familiar pieces.</p></div><p>Here you can see both the strength and the weakness of the approach. The strength: the model is no parrot — it combines transitions and produces brand-new sentences; “dog likes fish” could easily come up too. The weakness: every splice is made blindly, so confident nonsense is born right alongside the sensible phrases.</p><p>And one more detail that will serve us well at the end of the course: why not just always take the most frequent word? Because then the model would answer the same starting word with the same phrase every single time. A pinch of randomness is what makes the texts varied. In modern LLMs that pinch is called “temperature” — it gets a module of its own later on.</p>"
+    },
+    {
+      "heading": "Chain order: longer memory, more coherent text",
+      "html": "<p>Our chain suffers from severe amnesia: it remembers exactly one word. By the time it reaches “drinks,” it has already forgotten who is doing the drinking — the cat, the dog, or your neighbor. Over long texts this turns into incoherent drift: every adjacent pair of words looks fine, but the sentence as a whole wanders off who knows where, like a conversation in which everyone responds only to the very last remark.</p><p>An obvious cure suggests itself: let the key in the table be not one word but two in a row. This is called raising the <strong>order</strong> of the chain. Table rows now look like this: after the pair “cat drinks” — “milk” or “water”; after the pair “dog likes” — “bones” with one hundred percent probability. A sequence of n words is called an <strong>n-gram</strong>, and such models are called n-gram models.</p><div class=\"example\"><p>The second-order table for our corpus: after the pair “cat drinks” — “milk” (50%) or “water” (50%); after “cat likes” — “fish” (100%); after “dog likes” — “bones” (100%). Notice: the first-order chain could produce “dog likes fish,” but the second-order one no longer can — the pair “dog likes” leads rigidly to “bones.” The text has become more correct, but also more predictable: the model presses ever closer to the original corpus.</p></div><p>Quality really does improve. A second-order chain no longer mixes up who drinks what; a third-order one, on a large corpus, produces phrases that are locally quite smooth. These are no toys: right up into the 2010s, n-gram models did serious work inside machine translation and speech recognition systems. More context — better statistics — more sensible text.</p><p>It seems we’ve found the recipe: crank the order up to ten, to fifty words — and get ChatGPT? Alas. It is precisely on this path that the wall stands — the wall that forced Markov chains to give way to an entirely different design.</p>"
+    },
+    {
+      "heading": "Why this is a dead end",
+      "html": "<p><strong>Wall one: combinatorial explosion.</strong> Take a modest vocabulary of 50,000 words. Possible pairs — 50,000 × 50,000, which is 2.5 billion: a lot already, but bearable. Triples — 125 trillion. Quadruples — on the order of six billion billion, a number nineteen digits long. No corpus could ever be enough: even if you gathered every text on the internet — trillions of words — the overwhelming majority of meaningful four-word sequences would not appear there <em>even once</em>. Their table entries hold a zero, and the model goes mute. And the rare long sequences that did occur showed up once or twice — so a high-order chain degenerates into a book of quotations, reproducing chunks of the corpus word for word.</p><p><strong>Wall two: zero understanding.</strong> There is no meaning in the table — only frequencies. The model has no idea that “dog” and “hound” are nearly the same thing: to it, they are two entirely unrelated keys, and the statistics of one do nothing for the other. The phrase “a purple hippo yawns” is grammatical and meaningful, but if it isn’t in the corpus, its probability for a Markov chain is zero. Generalization is simply beyond the model, as a matter of principle.</p><p><strong>Wall three: a context of just a couple of words.</strong> To correctly continue the phrase “the doctor I booked an appointment with back in May has finally...,” you need to remember the word “doctor,” sitting ten words earlier. A third-order chain sees only “May has finally” — nothing else exists for it. Now recall that ChatGPT will calmly discuss a twenty-page document with you and remember what you talked about an hour ago: no frequency table could dream of that at any order.</p><div class=\"callout\">Modern Large Language Models (LLMs) solve <strong>the very same task</strong> — predicting the next word. But instead of a frequency table, they have a neural network with billions of adjustable numbers — one that can generalize (“dog” is a lot like “hound”) and keeps thousands of words of context in view. How that mechanism works is the subject of this whole course, starting with the next module, where we take apart its main building block: the neuron.</div>"
+    },
+    {
+      "heading": "Try it yourself",
+      "html": "<p>Below is a live Markov chain: a small corpus, the transition table built from it, and a generate button. Hit “generate” a few times and notice how the very same corpus produces different text every time — and how confidently the model splices together nonsense. Then switch the chain order from 1 to 2: the phrases become noticeably more coherent, but look closer — more and more often, the model is simply repeating chunks of the corpus verbatim. Those are the two sides of the dead end we just talked about.</p>"
+    },
+    {
+      "heading": "Key takeaways",
+      "html": "<ul><li>The task the entire course is built around: <strong>predict the next word from the previous ones</strong>. It is more than a hundred years old — Andrey Markov started it by counting the letters of <em>Eugene Onegin</em>.</li><li>A Markov chain is a frequency table: how many times word Y followed word X in the corpus. The transition probability is the share of such pairs among all occurrences of X.</li><li>Generation means rolling a loaded die: the next word is chosen at random, but in proportion to the probabilities. That is how the model produces both new phrases and confident nonsense.</li><li>Raising the chain’s order (looking at the 2–3 previous words) makes the text more coherent, but runs into combinatorial explosion: there are astronomically more possible triples and quadruples of words than any corpus can cover.</li><li>The chain has no understanding and no generalization: “dog” and “hound” are total strangers as table keys, and the context is limited to a couple of words.</li><li>LLMs solve the same next-word prediction task, but with a different mechanism — a neural network. We begin with its first building block, the neuron, in the next module.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "What is actually stored inside a Markov chain trained on a large amount of text?",
+      "options": [
+        "Grammar rules automatically extracted from the texts",
+        "A frequency table: how often one word (or pair of words) is followed by another",
+        "The meanings of words and semantic links between concepts",
+        "Every sentence of the corpus in full, so it can quote the right one"
+      ],
+      "correct": 1,
+      "explain": "Inside a Markov chain there is no grammar and no meaning — only transition counters of the form “after X comes Y,” turned into probabilities. Everything it does follows from that table."
+    },
+    {
+      "q": "In the corpus, the word “morning” appeared 4 times: 3 times it was followed by “was” and 1 time by “came.” What probability will a first-order chain assign to “was” after “morning”?",
+      "options": [
+        "25%",
+        "50%",
+        "75%",
+        "100% — after all, “was” occurred more often"
+      ],
+      "correct": 2,
+      "explain": "A transition probability is a share: 3 cases of “morning was” out of 4 appearances of “morning,” which is 3/4 = 75%. The more frequent option gets a bigger probability — but not all of it."
+    },
+    {
+      "q": "We raised the chain’s order from 1 to 3 — it now looks at the three previous words. What will happen to generation?",
+      "options": [
+        "The text will get more coherent, but the table will grow astronomically, and the model will start quoting the corpus verbatim more often",
+        "The model will begin to understand what words mean — the context is longer, after all",
+        "Nothing will change: the transition probabilities will stay the same",
+        "The text will get worse: extra words only muddy the statistics"
+      ],
+      "correct": 0,
+      "explain": "A longer key makes continuations more precise and the text smoother, but the number of possible triples is enormous: most occur in the corpus once or never, so the model either falls silent or reproduces memorized chunks."
+    },
+    {
+      "q": "Why can’t we just build a 50th-order Markov chain and get an equivalent of ChatGPT?",
+      "options": [
+        "There isn’t enough computing power, but that’s temporary — computers are getting faster all the time",
+        "High-order chains generate text that is too random and chaotic",
+        "Storing 50 words of context is pointless — two or three are enough for coherent text",
+        "The number of possible 50-word sequences is astronomical: almost any specific sequence never appears in any corpus even once"
+      ],
+      "correct": 3,
+      "explain": "That is the combinatorial explosion: the problem isn’t computer speed, it’s that for the overwhelming majority of long word combinations there simply is no statistics — they have never occurred, and the table is empty for them."
+    },
+    {
+      "q": "A Markov chain trained on children’s stories produced the phrase “the cat gnaws milk.” What is the reason?",
+      "options": [
+        "The corpus contained the sentence “the cat gnaws milk,” and the model quoted it",
+        "The model only sees the frequencies of adjacent words: each pair occurred somewhere in the texts on its own, and the model has no way to check the meaning of the phrase as a whole",
+        "The model understood the meaning but added randomness to make the text more varied",
+        "An error crept into the probability table — with correct counts this would be impossible"
+      ],
+      "correct": 1,
+      "explain": "The chain splices text together from individual transitions: “cat → gnaws” and “gnaws → milk” could each have occurred in different sentences. The meaning of the whole phrase does not exist for the model — it operates on pairs alone."
+    },
+    {
+      "q": "What do a century-old Markov chain and modern LLMs like ChatGPT have in common?",
+      "options": [
+        "Both store a table of transition frequencies — the LLM’s is just much bigger",
+        "Nothing at all: LLMs solve a fundamentally different task",
+        "Both solve one and the same task — predicting the next word from the previous ones — but by completely different mechanisms",
+        "Both understand the meaning of text — the Markov chain just understands it less well"
+      ],
+      "correct": 2,
+      "explain": "The task hasn’t changed in a hundred years: predict the next word. What changed is the mechanism: instead of a frequency table, a neural network that can generalize and take long context into account. That mechanism is what the rest of the course is about."
+    }
+  ]
+}

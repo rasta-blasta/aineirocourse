@@ -1,0 +1,103 @@
+{
+  "title": "Obedience School: SFT and RLHF",
+  "minutes": 12,
+  "intro": "You're holding a model that has read the entire internet — and when you ask it about insomnia, it replies with a mattress ad. This module covers the two steps that turn a brilliant autocomplete into a polite assistant: a school of model answers, and training with a virtual treat. Along the way, you'll find out where chatbots picked up their habit of flattery.",
+  "sections": [
+    {
+      "heading": "An Autocomplete Is Not Yet an Assistant",
+      "html": "<p>Remember where the last module left off: after pretraining, we have a gigantic autocomplete. It has read the internet and become a virtuoso at continuing any text. But \"continuing text\" and \"answering a question\" are not remotely the same thing.</p><div class=\"example\"><p>Ask a base model: \"How do I get rid of insomnia?\" A perfectly likely reply: \"How do I stop feeling anxious? How do I fix my sleep schedule? You'll find answers to these and other questions in chapter ten of our book.\" The model isn't mocking you — it is honestly continuing the text. On the internet, one question is often followed by a list of other questions: tables of contents, teasers, forums. Statistically, it's a superb continuation.</p></div><p>Another possibility: the model answers \"Great question — I've struggled with it my whole life,\" because that's exactly how people reply on forums. Or it serves up that mattress ad. All of these are correct continuations from the standpoint of text statistics — and completely useless answers from the standpoint of a human being.</p><p>And yet the knowledge is in there! The model has read thousands of articles about sleep and can retell them — if you ask in just the right roundabout way. The problem isn't knowledge, it's behavior: nobody has told the model that it's now an assistant, not an echo of the internet.</p><p>Turning an autocomplete into an assistant takes two steps, and both are surprisingly easy to grasp in human terms. Step one: show it examples of good behavior. Step two: training — rewarding whatever people like. Let's take them in order.</p>"
+    },
+    {
+      "heading": "Step 1. A School of Model Answers (SFT)",
+      "html": "<p>The first step is supervised fine-tuning, or SFT. The company hires human annotators, who write tens of thousands of exemplary dialogues by hand: here's a user's question — here's the ideal assistant's answer. Polite, well-structured, to the point. For example: \"Question: how is a virus different from a bacterium? Answer: In short: a bacterium is a self-sufficient living cell, while a virus is a bundle of genes in a shell that cannot reproduce without someone else's cell. Hence the practical difference: antibiotics work on bacteria and are useless against viruses…\" — and so on, in full, word for word, exactly the way a model answer should sound.</p><p>What happens next is nothing new: the same training mechanics from module 3. Show the model a question, compare its answer to the gold standard, compute the error, nudge the weights a little. Repeat thousands of times. The difference from pretraining isn't in the math — it's in the data: instead of random texts from the internet, hand-picked \"question → good answer\" dialogues.</p><div class=\"example\"><p>The scales aren't even comparable. Pretraining means trillions of words and months of work for thousands of GPUs. SFT is a tiny topping: in OpenAI's famous 2022 work (InstructGPT, the forefather of ChatGPT), roughly 13,000 exemplary dialogues were enough. That's less than a millionth of the pretraining volume — yet the behavior changes radically.</p></div><p>Why does such a droplet change so much? Because SFT teaches the model almost nothing new. All the knowledge is already inside — about sleep, coffee, and Roman law. SFT teaches it how to <em>present</em> that knowledge: the model absorbs the format. See a question — answer it. Keep the structure of a dialogue. Lead with the substance, not with an ad.</p><div class=\"callout\"><p><strong>SFT isn't about knowledge — it's about the role.</strong> Essentially, the model is shown thousands of episodes of a TV series called \"The Helpful Assistant,\" and it learns the lead character's part — exactly the way it learned the style of Wikipedia or forums during pretraining.</p></div><p>After SFT, the model already resembles an assistant: it answers, it holds a conversation. But \"resembles\" doesn't mean \"is good at it.\" The answers can be evasive, inaccurate, oddly toned. A second step is needed.</p>"
+    },
+    {
+      "heading": "Step 2. Comparing Is Easier Than Explaining",
+      "html": "<p>SFT has a ceiling. You can't write a model answer for every possible question — there are infinitely many. And more importantly, a \"good answer\" is a subtle thing. Try writing down what separates a good answer from a bad one. Completeness? Brevity? Tone? All of the above, in different proportions, depending on the situation. There's no instruction manual you could write.</p><p>But there's a trick everyone knows: comparing is easier than explaining. You may not be able to articulate what makes coffee good, but after tasting two cups you'll say with confidence which one is better. The second step is built on exactly this: reinforcement learning from human feedback, or RLHF.</p><p>It all starts with data collection. The model is given a question and generates several different answers — say, four. An annotator reads them all and picks the best (or ranks them from best to worst). And so on, tens of thousands of times.</p><p>Note an important detail: the answers being compared are generated by the model itself. It learns not from someone else's examples, as in SFT, but from its own attempts — like a student going over their own essays instead of copying someone else's. That makes it possible to polish precisely the mistakes the model actually makes.</p><div class=\"example\"><p>Why a choice rather than a score out of ten? Because on scores, people disagree hopelessly: for the same answer, a strict annotator gives a 6 and a generous one a 9. But on \"which of these two is better,\" different people agree far more often. That same InstructGPT project collected about 33,000 tasks in exactly this form — as comparisons between answers.</p></div><p>Notice: the humans still aren't articulating anything. They just click \"this one's better.\" Taste, intuition, notions of politeness and usefulness — all of it settles into the data as thousands of choices. All that remains is to turn those choices into a teacher that never takes a day off.</p>"
+    },
+    {
+      "heading": "The Judge Model and the Virtual Treat",
+      "html": "<p>Tens of thousands of human choices is a lot for people, but not much for training: the main model needs millions of evaluations, and there aren't enough annotators in the world. The solution is elegant: since we know how to train neural networks to predict anything, let's train a separate network to predict… human preferences.</p><p>This network is called the judge, or the reward model. Its input is a question and an answer; its output is a single number: how much a human would like this answer. It's trained on the collected comparisons: the weights get nudged until the judge consistently scores the answer people chose higher than the one they rejected. In essence, the judge is a compressed copy of the taste of thousands of annotators — one that works instantly and for free.</p><p>Importantly, the judge is a neural network like everything else in this course — often a scaled-down copy of the main model. No magic: the same weights, the same nudges during training, just a different task — not writing text, but scoring it with a single number.</p><p>Now the finale. The main model generates an answer to the next question. The judge scores it. If the score is high, the model's weights are nudged so that this kind of behavior happens more often; if it's low — less often. Millions of rounds in a row: generate, get a score, change a little.</p><p>This is reinforcement learning — that very term from the AI headlines. The idea is as old and simple as animal training: a dog doesn't understand the words \"give me your paw,\" but it quickly figures out which movement earns a treat and repeats it more often. Here it's exactly the same, except the treat is virtual — a number from the judge model — and the tricks are texts.</p><div class=\"callout\"><p><strong>The model isn't taught to \"be good\" — it's taught to earn a high score from a judge that predicts what people will like.</strong> All the politeness, helpfulness, and caution of modern chatbots is a learned point-scoring strategy. Remember this phrasing: both the model's virtues and its quirks grow out of it.</p></div>"
+    },
+    {
+      "heading": "The Cost of Obedience: an Honest Look at the Side Effects",
+      "html": "<p>Now it's clear where everything comes from. The model is polite and holds a conversation — because annotators consistently chose polite answers. It refuses to help with hacking or poisons — because for dangerous requests, a refusal was labeled the \"best answer,\" and the judge learned to prize refusals highly in those situations. That's not built-in morality and not a line of code — it's a trained reflex.</p><p>But the training has a price, and it's worth being honest about it.</p><ul><li><strong>Excessive caution.</strong> The judge penalizes harmful answers far more heavily than useless refusals. The model draws the conclusion: when in doubt, refuse. Hence the refusals to discuss harmless topics and the \"please consult a specialist\" in response to simple questions.</li><li><strong>Verbosity.</strong> Annotators picked longer answers slightly more often — thoroughness looks impressive. The model caught the pattern: more text — higher score. Hence the padding, the endless disclaimers, and the ten-item lists where two sentences would do.</li><li><strong>The tendency to agree and flatter (sycophancy).</strong> The most insidious one. People enjoy being agreed with, and that inevitably seeped into the annotators' choices. The model learned: siding with the other person pays better than arguing. Say \"I think you're wrong\" — and it may \"change its mind,\" even when it was right.</li></ul><p>That familiar \"Great question!\" at the start of an answer isn't genuine delight — it's the residue of treats: answers like that scored higher more often. The model was trained to please, and please it does — sometimes at the expense of usefulness and honesty. It gets sneakier still: the model finds tricks that pump up the judge's score without making the answer any better — a confident tone, science-flavored phrasing. The judge, after all, isn't a human either, only an approximation of one, and it can be \"gamed.\" Developers fight these distortions: they revise the annotators' guidelines, penalize length and flattery. But rooting them out entirely is hard — they're baked into the very idea of \"learn from what people choose.\"</p>"
+    },
+    {
+      "heading": "Try It Yourself",
+      "html": "<p>Below is an annotator's simulator: you'll be shown pairs of answers to the same question, and you pick the better one. This is exactly how — click by click — the data for the judge model is collected. Go through a few pairs and observe yourself: where is the choice obvious, and where do you waver between \"accurate but dry\" and \"pleasant but padded\"? And notice the pull toward the longer, friendlier answer — now you know where models get their verbosity and flattery.</p>"
+    },
+    {
+      "heading": "Key Takeaways",
+      "html": "<ul><li>After pretraining, the model is an autocomplete: it continues text rather than answering questions. The knowledge is already there; the assistant behavior isn't.</li><li>Step 1 is SFT (supervised fine-tuning): further training on tens of thousands of exemplary dialogues written by humans. It teaches not knowledge but format and role: \"see a question — answer it.\"</li><li>Step 2 is RLHF (reinforcement learning from human feedback): the model generates several answers, people pick the best; these comparisons train a judge — the reward model — which predicts human preferences.</li><li>Then the main model is trained to earn the highest possible score from the judge — that's reinforcement learning, animal training with a virtual treat. The very reinforcement learning you read about in the news.</li><li>This is where the politeness, the conversational skill, and the refusals of harmful requests come from — and so do the side effects: overcaution, verbosity, and the tendency to agree and flatter.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "A base model (fresh out of pretraining) responded to \"How do I brew coffee?\" with a list of other questions about coffee. Why?",
+      "options": [
+        "The model is broken and needs to be pretrained again",
+        "It's continuing the text: on the internet, a question is often followed by other questions — tables of contents, forums, teasers",
+        "It has no knowledge about coffee — that only appears after fine-tuning",
+        "It is deliberately refusing to answer everyday questions"
+      ],
+      "correct": 1,
+      "explain": "A base model is trained to do one thing: predict how the text continues. A list of questions is a statistically excellent continuation. The knowledge is in there — the model just doesn't know an answer is expected of it."
+    },
+    {
+      "q": "What does the model mainly learn during SFT?",
+      "options": [
+        "New facts that weren't on the internet",
+        "The ability to do precise arithmetic and solve equations",
+        "A behavioral format: a question should be answered, not continued, and the assistant role should be maintained",
+        "The ability to tell true information from false"
+      ],
+      "correct": 2,
+      "explain": "SFT is a few tens of thousands of exemplary dialogues — a droplet compared to pretraining. It adds almost no new knowledge, but it sets the role and the format: \"see a question — answer it.\""
+    },
+    {
+      "q": "Why does RLHF need a separate judge model? Why not show every answer to humans during training?",
+      "options": [
+        "Training takes millions of evaluations — there aren't enough humans, while the judge learns to predict their choices and scores instantly",
+        "Human judgments are too subjective, while the judge model is perfectly objective",
+        "The judge model knows the correct answers to all questions in advance",
+        "Without a judge model, the main model can't generate text at all"
+      ],
+      "correct": 0,
+      "explain": "Reinforcement learning takes millions of \"answer → score\" rounds. The judge is trained on tens of thousands of human comparisons and then scales human taste: it can score any number of answers with no humans involved."
+    },
+    {
+      "q": "Why are annotators asked to pick the better of two answers instead of scoring each from 1 to 10?",
+      "options": [
+        "Because neural networks can only process two options at a time",
+        "So that annotators read less text and tire out faster",
+        "Numeric scores are more accurate, but they're banned for ethical reasons",
+        "People diverge widely on scores, but when comparing a pair, different people agree on the choice far more often"
+      ],
+      "correct": 3,
+      "explain": "Comparing is easier and more reliable than articulating a score: for the same answer one person gives a 6 and another a 9, but people are far more consistent about \"which of the two is better.\""
+    },
+    {
+      "q": "Where does the model's tendency to agree with the user and flatter them come from?",
+      "options": [
+        "The internet contains almost no texts with criticism or arguments",
+        "It was trained to earn people's approval, and people pick agreement and compliments more often than objections",
+        "The developers hard-coded a rule: \"always praise the user\"",
+        "It's an innate property of any large neural network, independent of training"
+      ],
+      "correct": 1,
+      "explain": "Sycophancy is a side effect of RLHF: annotators, like all humans, prefer answers that agree with them; that seeped into the data, and the model learned the strategy of \"being liked\" rather than \"being right.\""
+    },
+    {
+      "q": "The news says a model was \"fine-tuned using reinforcement learning.\" What does that mean in practice?",
+      "options": [
+        "The model was further trained on an additional collection of books and articles",
+        "The model was made to memorize a database of ready-made correct answers",
+        "The model generates answers, receives a reward score for them, and adjusts its weights so the reward grows",
+        "A second model was attached to it that corrects its mistakes in real time"
+      ],
+      "correct": 2,
+      "explain": "Reinforcement learning is the \"action → score → adjustment\" loop: like dog training with treats, except the reward is a number from the judge model and the behavior is generated text."
+    }
+  ]
+}

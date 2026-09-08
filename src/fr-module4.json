@@ -1,0 +1,107 @@
+{
+  "title": "Des mots aux nombres : tokens et embeddings",
+  "minutes": 12,
+  "intro": "Le neurone du module 2 multiplie ses entrées par des poids — il lui faut donc des nombres en entrée. Avec les images, c'est facile : la luminosité des pixels, ce sont déjà des nombres. Mais que faire de la phrase « le chat dort sur le canapé » ? Dans ce module : les deux étapes qui transforment le langage en nombres — les tokens et les embeddings. Au passage, vous comprendrez pourquoi ChatGPT compte mal les lettres des mots, et comment le sens devient de l'arithmétique.",
+  "sections": [
+    {
+      "heading": "L'ordinateur ne comprend pas les mots",
+      "html": "<p>Souvenez-vous du neurone du module 2 : il prend des nombres en entrée, les multiplie par des poids et additionne le tout. Tout le réseau de neurones est une gigantesque chaîne de multiplications et d'additions. Des nombres en entrée, c'est non négociable : impossible de multiplier la lettre « c » par un poids de 0,3.</p><p>Avec les images, le tour est vite joué : une image est déjà faite de pixels, et chaque pixel est une luminosité, un nombre entre 0 et 255. Avec le son aussi : le volume de l'onde à chaque instant. Mais le langage ? Le mot « chat » n'est pas un nombre, et il ne se transforme pas tout seul en nombres.</p><p>La première idée qui vient : numéroter le dictionnaire — « à » : 1, « abat-jour » : 2, et ainsi de suite, « chat » : 7215, « chien » : 41 892. Techniquement, ça marche, mais les numéros sont arbitraires : « chat » et « charbon » peuvent se retrouver avec des numéros voisins, tandis que « chat » et « matou » atterrissent aux deux bouts de la liste. Pour un réseau qui vit de multiplications, c'est une catastrophe : la proximité des numéros ne dit rien de la proximité des sens, et apprendre à partir de tels nombres est presque impossible.</p><p>C'est pourquoi la traduction du langage en nombres se fait en deux étapes. D'abord, le texte est découpé en morceaux standardisés — les <strong>tokens</strong>. Ensuite, chaque token reçoit non pas un numéro, mais toute une série de nombres où le sens est encodé — un <strong>embedding</strong>. Examinons les deux étapes dans l'ordre.</p>"
+    },
+    {
+      "heading": "Les tokens : le texte découpé en morceaux",
+      "html": "<p>Un token (littéralement « jeton ») est l'unité par laquelle le modèle voit le texte. Parfois un token est un mot entier, plus souvent un morceau de mot, parfois un signe de ponctuation ou une espace collée au début d'un mot. Un programme spécial — le tokeniseur (tokenizer) — découpe n'importe quel texte en de tels morceaux, selon un vocabulaire (vocabulary) établi à l'avance.</p><div class=\"example\"><p>La phrase « L'hippopotame grimpe sur le canapé » peut donner à peu près ceci : <em>« L' », « hipp », « opo », « tame », « grimpe », « sur », « le », « canapé »</em> — huit tokens. Le petit mot fréquent « sur » tient en un seul token, tandis que le rare « hippopotame » s'assemble à partir de trois morceaux. Chaque token a son numéro dans le vocabulaire : disons « canapé » — 21 407, « sur » — 512.</p></div><p>On pourrait croire plus simple de découper en mots entiers. Mais un dictionnaire de mots entiers est impossible à boucler :</p><ul><li><strong>Les formes des mots.</strong> « Chanter, chante, chantons, chantiez, chanté » — pour un tel dictionnaire, ce sont cinq entrées différentes, et ainsi de suite pour chaque verbe. Avec ses conjugaisons, le français ferait gonfler le dictionnaire jusqu'à des millions d'entrées.</li><li><strong>Les mots nouveaux et les noms propres.</strong> « Zoomeur », « chatbotisation », le nom de famille de votre collègue : ils n'étaient pas dans le dictionnaire, et le modèle resterait bloqué devant un « mot inconnu ».</li><li><strong>Les fautes de frappe.</strong> « Bonjuor » n'est dans aucun dictionnaire, mais un humain le lit sans broncher. Le modèle doit y arriver aussi.</li></ul><p>Et pourquoi ne pas découper en lettres, alors ? L'alphabet n'en compte que vingt-six, plus les accents et la ponctuation — un vocabulaire minuscule, et tout texte se découpe à coup sûr. Mais la séquence deviendrait cinq à six fois plus longue, et chaque morceau perdrait son sens : la lettre « c » toute seule ne veut rien dire. Le réseau passerait toutes ses forces à réassembler des mots à partir des lettres.</p><p>Les tokens sont le compromis entre ces deux extrêmes : le vocabulaire est fini (en général 50 à 150 mille morceaux), les mots fréquents restent entiers, et les mots rares ou inconnus s'assemblent à partir de pièces, comme avec un jeu de construction. N'importe quel texte — fautes de frappe ou mots inventés de la veille compris — se découpe à coup sûr, sans reste.</p><div class=\"callout\"><p>Le modèle ne voit jamais les lettres — seulement les numéros des tokens. Voilà pourquoi un LLM peut se tromper en comptant les « l » de « parallélogramme » : pour lui, ce n'est pas une chaîne de quinze lettres, mais deux ou trois tokens — des blocs insécables.</p></div>"
+    },
+    {
+      "heading": "L'embedding : les coordonnées du sens",
+      "html": "<p>Voilà donc le texte devenu une suite de numéros de tokens. Mais un numéro reste une étiquette arbitraire. Deuxième étape : à chaque token, on associe un <strong>embedding</strong> (en français, un « plongement ») — un vecteur (vector), c'est-à-dire tout simplement une liste de centaines ou de milliers de nombres. Dans les petits modèles, 300 à 700 nombres par token ; dans les LLM modernes, plusieurs milliers.</p><p>Imaginez qu'on décrive un mot par un questionnaire de centaines d'échelles : « vivant — inanimé », « grand — petit », « agréable — désagréable », « domestique — sauvage »… Chaque nombre de l'embedding est une position sur l'une de ces échelles.</p><div class=\"example\"><p>Exemple-jouet. « Chat » — [0,82 ; −0,15 ; 0,90 ; …] : haut sur l'échelle « vivant », bien placé sur l'échelle « domestique ». « Tracteur » — [−0,74 ; 0,88 ; −0,05 ; …] : inanimé, grand. Sauf qu'il n'y a pas trois nombres de ce genre, mais disons cinq cents — et ensemble, ils définissent un point : l'endroit exact où « habite » ce mot dans un espace à cinq cents dimensions.</p></div><p>Piège important : dans les vrais modèles, personne n'a étiqueté les échelles. Il n'y a pas de rubrique « pelucheux » — il y a l'échelle n° 217, dont personne ne connaît le sens, pas même les créateurs du modèle. Les chercheurs trouvent parfois des directions qui ressemblent à des traits humains, mais dans l'ensemble, ce sont des coordonnées dans un espace qui n'est pas organisé à notre façon.</p><p>En revanche, avec des coordonnées, toute la géométrie habituelle fonctionne. Nous sommes incapables de nous représenter un espace à des milliers de dimensions — et ce n'est pas nécessaire : les règles y sont les mêmes que sur une feuille de papier, il y a juste plus de nombres-coordonnées. L'essentiel : entre les points, on peut mesurer des distances. Et c'est là que ça devient vraiment intéressant.</p>"
+    },
+    {
+      "heading": "Sens proches, points proches",
+      "html": "<p>La propriété maîtresse d'embeddings bien entraînés : <strong>les mots proches par le sens sont des points proches</strong>. « Chat » se retrouve à côté de « chatte » et de « chien », non loin de là — « souris » et « vétérinaire », tandis que « comptabilité » habite à l'autre bout de l'espace.</p><p>Et il s'agit bien d'une proximité de sens, pas d'orthographe. « Chat » et « char » ne diffèrent que d'une lettre, mais vivent très loin l'un de l'autre : l'un parmi les animaux, l'autre parmi les blindés et les champs de bataille.</p><p>Les mots se regroupent en quartiers : le quartier des animaux, celui de la nourriture, celui des pays, celui des émotions. Et comme il y a des centaines de dimensions, un même mot peut être proche de plusieurs quartiers à la fois : « médecin » voisine à la fois avec les métiers (« professeur », « ingénieur ») et avec la médecine (« hôpital », « soigner »). Sur une carte plane, c'est impossible ; dans des centaines de dimensions, c'est facile.</p><p>Reste une question : que faire des mots à plusieurs sens ? « Avocat », c'est à la fois un fruit et un juriste, mais le token n'a qu'un seul point — il flotte quelque part entre le verger et le tribunal. Départager les sens selon le contexte, ce sera le travail du mécanisme d'attention — cette superpuissance du transformeur, c'est le prochain module.</p>"
+    },
+    {
+      "heading": "L'arithmétique des sens",
+      "html": "<p>Puisque les mots sont des points avec des coordonnées, on peut faire de l'arithmétique avec eux : additionner et soustraire des vecteurs, nombre par nombre. En 2013, sur le modèle word2vec, on a découvert le fameux effet :</p><p><strong>vecteur(« roi ») − vecteur(« homme ») + vecteur(« femme ») ≈ vecteur(« reine »)</strong></p><p>Déchiffrons : on prend les coordonnées du mot « roi », on en soustrait celles de « homme » (chaque nombre du nombre correspondant), on ajoute celles de « femme » — et le point obtenu se retrouve plus près du mot « reine » que de tout autre. Le signe ≈ veut dire « à peu près égal » : on ne tombe pas sur le point exact, mais tout à côté.</p><p>Pourquoi ça marche ? La différence « roi moins homme », c'est une flèche où il ne reste que « le royal sans le masculin » : le pouvoir, le trône, la couronne. On ajoute « femme » — on obtient « le pouvoir plus le féminin ». Le plus étonnant est ailleurs : la direction « du masculin vers le féminin » est à peu près la même dans l'espace pour des paires de mots différentes. Une seule et même flèche mène de « roi » à « reine », d'« acteur » à « actrice », de « taureau » à « vache ».</p><div class=\"example\"><p>D'autres flèches : prenez « Paris », soustrayez « France », ajoutez « Japon » — vous atterrissez près de « Tokyo » : c'est la direction « pays → capitale ». Et la flèche de « marche » à « marchait » est la direction du passé : appliquez-la à « nage » — vous tombez sur « nageait ». Les relations de sens sont devenues de la géométrie.</p></div><p>Une réserve honnête : cela marche approximativement et pas sur n'importe quelles paires — sur les mots rares, les flèches ratent leur cible. Mais le fait lui-même est stupéfiant : le genre, les capitales, le temps des verbes — tout cela est devenu des directions dans l'espace, qu'on peut manier comme des flèches sur une carte.</p>"
+    },
+    {
+      "heading": "Qui a mis les mots à leur place ?",
+      "html": "<p>Le moment est venu de demander : qui a inscrit tous ces nombres ? Des centaines de coordonnées pour chacun des cent mille tokens — des dizaines de millions de nombres rien qu'à l'entrée du modèle. Réponse : personne. Aucun linguiste n'a noté que « chat » est domestique et « tracteur » est grand.</p><p>Les embeddings sont des poids réglables du réseau, exactement comme les petits poids du module 3. Au début de l'entraînement, ce sont des nombres aléatoires : « chat » et « comptabilité » sont placés n'importe où. Ensuite — le cycle que vous connaissez : le réseau essaie de prédire le token suivant, se trompe, et la descente de gradient ajuste un tout petit peu tous les poids — y compris les coordonnées de chaque mot.</p><p>Pourquoi les mots convergent-ils peu à peu vers une carte sensée ? Parce que c'est plus commode pour prédire. « Chat » et « chatte » apparaissent dans des entourages presque identiques : « … lape du lait », « … ronronne sur le canapé ». Si leurs points sont côte à côte, tout ce que le réseau a appris sur les suites de phrases avec « chat » fonctionne automatiquement pour « chatte » — les prédictions sont plus justes, l'erreur plus petite. Et le gradient, des millions de fois, pousse l'un vers l'autre les mots aux usages semblables et éloigne les mots dissemblables. La carte des sens se dessine toute seule.</p><div class=\"callout\"><p>La carte des sens n'est pas une idée d'ingénieur, mais le sous-produit d'une seule tâche monotone : prédire le token suivant un peu mieux. Il s'est avéré que, pour cela, le plus rentable est de ranger les mots selon leur sens.</p></div><p>Les linguistes appellent cela l'hypothèse distributionnelle — « dis-moi quels mots tu fréquentes, et je te dirai ce que tu signifies ». Le sens s'apprend à partir des entourages, sans dictionnaires ni professeurs. C'est exactement pour cela qu'au module 6, où le modèle lira « tout Internet », de simples textes lui suffiront — une gigantesque masse de textes bruts.</p>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Ci-dessous, une carte des mots : des centaines de dimensions projetées sur un plan, pour que nous puissions les voir. Cliquez sur différents mots et regardez qui la carte considère comme leurs plus proches voisins : les animaux se serrent contre les animaux, la nourriture contre la nourriture. Puis appuyez sur le bouton « roi − homme + femme » et suivez les flèches — c'est la fameuse arithmétique vectorielle en action. Remarquez : la flèche « du masculin vers le féminin » arrive au bon endroit, alors que personne n'a expliqué au modèle ce qu'est le genre.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Un réseau de neurones ne sait travailler qu'avec des nombres ; le texte est donc traduit en nombres en deux étapes : d'abord les tokens, puis les embeddings.</li><li>Un token est un morceau de texte standardisé, le plus souvent une partie de mot. Les mots entiers ne conviennent pas : le dictionnaire ne serait jamais bouclé, à cause des formes des mots, des mots nouveaux et des fautes de frappe. Les lettres isolées non plus : le texte devient trop long et les morceaux perdent leur sens.</li><li>Le modèle voit des numéros de tokens, pas des lettres — d'où ses fameux ratés quand il faut compter les lettres.</li><li>Un embedding est un vecteur de centaines de nombres, les « coordonnées du sens » d'un token dans un espace multidimensionnel. Chaque nombre est l'échelle d'un trait quelconque, mais personne n'a étiqueté ces échelles.</li><li>Les mots proches par le sens sont des points proches : « chat » près de « chatte » et de « chien », loin de « comptabilité ». Et les relations entre les sens sont des directions : une même flèche « du masculin vers le féminin » mène de « roi » à « reine » et d'« acteur » à « actrice ».</li><li>Personne ne fixe les coordonnées à la main : le réseau les apprend lui-même par descente de gradient, parce qu'une carte des mots bien organisée aide à mieux prédire le token suivant.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Pourquoi les modèles modernes découpent-ils le texte en morceaux de mots au lieu d'utiliser un dictionnaire de mots entiers ?",
+      "options": [
+        "Les mots entiers prennent trop de place sur le disque",
+        "Un dictionnaire de mots entiers est impossible à boucler : formes des mots, mots nouveaux et fautes de frappe n'y rentreraient pas, alors qu'avec des morceaux on assemble n'importe quoi",
+        "Les morceaux de mots sont plus jolis dans l'interface d'un chatbot",
+        "Le texte devient ainsi plus court, et le modèle répond plus vite"
+      ],
+      "correct": 1,
+      "explain": "Un vocabulaire fini de morceaux (en général 50 à 150 mille) découpe à coup sûr n'importe quel texte : les mots fréquents restent entiers, et les mots rares, nouveaux ou mal orthographiés s'assemblent à partir de pièces. Avec un dictionnaire de mots entiers, le modèle resterait bloqué à chaque mot inconnu."
+    },
+    {
+      "q": "Qu'est-ce que l'embedding d'un token ?",
+      "options": [
+        "Le numéro d'ordre du token dans le vocabulaire du modèle",
+        "Une copie compressée du token pour économiser de la mémoire",
+        "Un vecteur de centaines de nombres — les coordonnées du token dans l'« espace des sens »",
+        "La règle selon laquelle le token est découpé en lettres"
+      ],
+      "correct": 2,
+      "explain": "L'embedding est une liste de centaines ou de milliers de nombres qui définit un point dans un espace multidimensionnel. Chaque nombre est une position sur une échelle de sens, et c'est la disposition mutuelle des points qui encode le sens — contrairement à un numéro d'ordre arbitraire."
+    },
+    {
+      "q": "Les mots « chat » et « chatte » se retrouvent côte à côte dans l'espace des embeddings. Pourquoi ?",
+      "options": [
+        "Ils apparaissent dans des entourages semblables, et le réseau a intérêt à placer ces mots côte à côte — le token suivant se prédit mieux ainsi",
+        "Ils commencent par les mêmes lettres, et le modèle range les mots par ordre alphabétique",
+        "Des linguistes les ont marqués à la main comme apparentés lors de la création du modèle",
+        "Leurs numéros sont voisins dans le vocabulaire des tokens"
+      ],
+      "correct": 0,
+      "explain": "« Chat » et « chatte » apparaissent dans des contextes presque identiques, et si leurs points sont voisins, l'expérience apprise pour l'un fonctionne automatiquement pour l'autre — l'erreur de prédiction diminue. La descente de gradient rapproche ces mots d'elle-même, sans le moindre étiquetage manuel."
+    },
+    {
+      "q": "Que démontre réellement l'exemple « roi − homme + femme ≈ reine » ?",
+      "options": [
+        "Que le modèle résout les équations mieux qu'un humain",
+        "Que les mots sont stockés dans le modèle par paires : version masculine et version féminine",
+        "Que les embeddings sont aléatoires, et que tomber sur « reine » est un coup de chance",
+        "Que les relations entre les sens sont devenues des directions dans l'espace : la flèche « du masculin vers le féminin » est la même pour différentes paires de mots"
+      ],
+      "correct": 3,
+      "explain": "La différence des vecteurs isole une relation de sens — par exemple « masculin → féminin » — et cette direction est à peu près la même pour les paires roi/reine, acteur/actrice, taureau/vache. C'est pour cela que l'arithmétique des sens fonctionne : les relations sont devenues de la géométrie."
+    },
+    {
+      "q": "D'où viennent les centaines de nombres de l'embedding de chaque mot ?",
+      "options": [
+        "Le réseau les ajuste lui-même pendant l'entraînement, comme tous les autres poids — pour mieux prédire le token suivant",
+        "Des linguistes les établissent à partir de dictionnaires",
+        "Ils se calculent à partir des lettres du mot par une formule fixe",
+        "Les développeurs les fixent à la main avant le début de l'entraînement"
+      ],
+      "correct": 0,
+      "explain": "Les embeddings sont des poids ordinaires du réseau : ils démarrent comme des nombres aléatoires, puis la descente de gradient les ajuste des millions de fois, parce qu'une disposition sensée des mots réduit l'erreur de prédiction. Aucun étiquetage manuel des sens là-dedans."
+    },
+    {
+      "q": "Pourquoi un LLM peut-il se tromper en comptant les lettres du mot « parallélogramme » ?",
+      "options": [
+        "Le modèle économise ses calculs et répond au hasard",
+        "Dans les textes d'entraînement, personne ne comptait les lettres à voix haute",
+        "Le modèle ne voit pas des lettres mais des tokens : pour lui, c'est deux ou trois blocs insécables, pas une chaîne de quinze lettres",
+        "Les lettres accentuées du français occupent deux octets, et le modèle perd le compte"
+      ],
+      "correct": 2,
+      "explain": "Le texte arrive au modèle déjà découpé en tokens, et à l'intérieur d'un token, les lettres n'existent pas pour lui. Il doit compter les lettres « de mémoire », d'après la façon dont le mot s'écrit d'habitude, sans regarder le mot lui-même — d'où les erreurs."
+    }
+  ]
+}

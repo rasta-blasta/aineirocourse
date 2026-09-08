@@ -1,0 +1,103 @@
+{
+  "title": "Le dressage : SFT et RLHF",
+  "minutes": 12,
+  "intro": "Vous avez entre les mains un modèle qui a lu tout Internet — et qui, à une question sur l'insomnie, répond par une publicité pour des matelas. Dans ce module : les deux étapes qui transforment une géniale machine à autocompléter en assistant poli — l'école des réponses exemplaires et le dressage à la friandise virtuelle. Au passage, vous découvrirez d'où vient l'habitude qu'ont les chatbots de vous flatter.",
+  "sections": [
+    {
+      "heading": "L'autocomplétion ne fait pas encore l'assistant",
+      "html": "<p>Souvenez-vous de la fin du module précédent : après le pré-entraînement (pretraining), nous avons une gigantesque machine à autocompléter. Elle a lu Internet et sait poursuivre n'importe quel texte avec virtuosité. Mais « poursuivre un texte » et « répondre à une question », ce n'est pas du tout la même chose.</p><div class=\"example\"><p>Demandez au modèle de base : « Comment me débarrasser de l'insomnie ? » Réponse tout à fait probable : « Comment cesser de m'angoisser ? Comment retrouver un rythme de vie régulier ? Vous trouverez les réponses à ces questions et à bien d'autres au chapitre dix de notre livre. » Le modèle ne se moque pas de vous — il poursuit honnêtement le texte. Sur Internet, une question est souvent suivie d'une liste d'autres questions : tables des matières, annonces, forums. Statistiquement, c'est une excellente suite.</p></div><p>Autre variante : le modèle répond « Bonne question, ça me ronge depuis toujours » — parce que c'est exactement ainsi qu'on répond sur les forums. Ou il vous sort cette fameuse publicité pour matelas. Tout cela, ce sont des suites correctes du point de vue de la statistique des textes — et des réponses parfaitement inutiles du point de vue d'un être humain.</p><p>Et pourtant, le savoir est là ! Le modèle a lu des milliers d'articles sur le sommeil et peut les restituer — à condition de le demander très habilement. Le problème n'est pas le savoir, mais le comportement : personne ne lui a expliqué qu'il est désormais un assistant, et non l'écho d'Internet.</p><p>La transformation de l'autocomplétion en assistant se fait en deux étapes, toutes deux étonnamment intuitives. La première : montrer des exemples de bon comportement. La seconde : le dressage — récompenser ce qui plaît aux gens. Voyons cela dans l'ordre.</p>"
+    },
+    {
+      "heading": "Étape 1. L'école des réponses exemplaires (SFT)",
+      "html": "<p>La première étape, c'est l'affinage supervisé (supervised fine-tuning, SFT). L'entreprise embauche des annotateurs humains, qui rédigent à la main des dizaines de milliers de dialogues exemplaires : voici la question de l'utilisateur — voici la réponse idéale de l'assistant. Polie, structurée, qui va droit au but. Par exemple : « Question : quelle est la différence entre un virus et une bactérie ? Réponse : En bref : une bactérie est une cellule vivante autonome, tandis qu'un virus est un paquet de gènes dans une enveloppe, incapable de se reproduire sans la cellule d'un autre. D'où une différence pratique : les antibiotiques agissent sur les bactéries et sont inutiles contre les virus… » — et ainsi de suite, en entier, mot pour mot, tel que doit sonner une réponse exemplaire.</p><p>Ensuite — rien de nouveau : la même mécanique d'apprentissage que dans le module trois. On montre la question au modèle, on compare sa réponse à l'exemple, on calcule l'erreur et on ajuste légèrement les poids. Et cela des milliers de fois. La différence avec le pré-entraînement n'est pas dans les maths, mais dans les données : au lieu de textes pris au hasard sur Internet — des dialogues triés sur le volet « question → bonne réponse ».</p><div class=\"example\"><p>Les échelles n'ont rien de comparable. Le pré-entraînement, ce sont des milliers de milliards de mots et des mois de travail de milliers de cartes graphiques. Le SFT est un ajout minuscule : dans le célèbre travail d'OpenAI de 2022 (InstructGPT, l'ancêtre de ChatGPT), environ 13 000 dialogues exemplaires ont suffi. C'est moins d'un millionième du volume du pré-entraînement — et le comportement change du tout au tout.</p></div><p>Pourquoi une telle goutte d'eau change-t-elle autant de choses ? Parce que le SFT n'apprend presque rien de nouveau au modèle. Tout le savoir est déjà là — sur le sommeil, le café et le droit romain. Le SFT lui apprend à le <em>présenter</em> : le modèle assimile le format. Tu vois une question — réponds-y. Tiens la structure du dialogue. Commence par l'essentiel, pas par la publicité.</p><div class=\"callout\"><p><strong>Le SFT, ce n'est pas une affaire de savoir, mais de rôle.</strong> On montre au modèle, en somme, des milliers d'épisodes de la série « L'Assistant serviable », et il apprend l'emploi du personnage principal — exactement comme, lors du pré-entraînement, il apprenait le style de Wikipédia ou des forums.</p></div><p>Après le SFT, le modèle ressemble déjà à un assistant : il répond, il tient un dialogue. Mais « ressembler » ne veut pas dire « être bon ». Les réponses sont parfois évasives, imprécises, d'un ton étrange. Il faut une seconde étape.</p>"
+    },
+    {
+      "heading": "Étape 2. Comparer est plus facile que formuler",
+      "html": "<p>Le SFT a un plafond. Impossible d'écrire une réponse exemplaire à chaque question possible — il y en a une infinité. Et surtout : une « bonne réponse », c'est une chose subtile. Essayez de formuler par écrit ce qui distingue une bonne réponse d'une mauvaise. L'exhaustivité ? La concision ? Le ton ? Tout à la fois, en proportions variables, selon la situation. Impossible d'en tirer un mode d'emploi.</p><p>Mais il existe une astuce que tout le monde connaît : comparer est plus facile que formuler. Vous pouvez être incapable d'expliquer ce qu'est un bon café, mais après avoir goûté deux tasses, vous direz sans hésiter laquelle est la meilleure. C'est là-dessus que repose la seconde étape — l'apprentissage par renforcement à partir de retours humains (reinforcement learning from human feedback, RLHF).</p><p>Tout commence par la collecte de données. On donne une question au modèle, et il génère plusieurs réponses différentes — disons quatre. L'annotateur les lit toutes et choisit la meilleure (ou les classe de la meilleure à la pire). Et cela des dizaines de milliers de fois.</p><p>Notez un détail important : les réponses à comparer sont générées par le modèle lui-même. Il n'apprend pas sur les exemples d'autrui, comme en SFT, mais sur ses propres tentatives — tel un élève qui analyse ses propres rédactions au lieu de recopier celles des autres. Cela permet de polir précisément les erreurs que le modèle commet réellement.</p><div class=\"example\"><p>Pourquoi un choix, et non une note sur dix ? Parce qu'en notes, les gens divergent désespérément : pour la même réponse, un annotateur sévère mettra 6, un indulgent 9. Mais sur la question « lequel des deux est meilleur », des personnes différentes s'accordent bien plus souvent. Dans ce même projet InstructGPT, on a collecté environ 33 000 tâches précisément sous forme de comparaisons de réponses.</p></div><p>Remarquez : les gens ne formulent toujours rien. Ils cliquent simplement « celui-ci est meilleur ». Le goût, l'intuition, les idées sur la politesse et l'utilité — tout cela se dépose dans les données sous forme de milliers de choix. Reste à transformer ces choix en un professeur qui travaille sans jamais prendre de congé.</p>"
+    },
+    {
+      "heading": "Le modèle-juge et la friandise virtuelle",
+      "html": "<p>Des dizaines de milliers de choix humains, c'est beaucoup pour des humains, mais peu pour l'entraînement : le modèle principal a besoin de millions d'évaluations, et on ne recrutera jamais assez d'annotateurs. La solution est élégante : puisque nous savons entraîner des réseaux de neurones à prédire n'importe quoi, entraînons un réseau à part à prédire… les préférences humaines.</p><p>Ce réseau s'appelle le modèle-juge, ou modèle de récompense (reward model). En entrée, on lui donne une question et une réponse ; en sortie — un seul nombre : à quel point cette réponse plairait à un humain. On l'entraîne sur les comparaisons collectées : on ajuste les poids jusqu'à ce que le juge donne systématiquement un score plus élevé à la réponse choisie par les gens qu'à celle qu'ils ont écartée. Au fond, le juge est une copie compressée du goût de milliers d'annotateurs, qui fonctionne instantanément et gratuitement.</p><p>Point important : le juge est un réseau de neurones comme tous ceux de ce cours — souvent une copie réduite du modèle principal. Aucune magie : les mêmes poids, les mêmes ajustements à l'entraînement, seule la tâche diffère — non pas rédiger du texte, mais l'évaluer d'un seul nombre.</p><p>Et maintenant, le final. Le modèle principal génère une réponse à la question suivante. Le juge donne un score. Si le score est élevé, on ajuste les poids du modèle pour que ce genre de comportement se reproduise plus souvent ; s'il est bas — plus rarement. Des millions de rounds d'affilée : générer, recevoir un score, changer un tout petit peu.</p><p>C'est cela, l'apprentissage par renforcement (reinforcement learning) — le fameux terme des actualités sur l'IA. L'idée est vieille et simple comme le dressage : le chien ne comprend pas les mots « donne la patte », mais il découvre vite quel mouvement lui vaut une friandise, et le répète de plus en plus souvent. Ici, tout est pareil — sauf que la friandise est virtuelle, un nombre donné par le modèle-juge, et que les tours sont des textes.</p><div class=\"callout\"><p><strong>On n'apprend pas au modèle à « être bon » — on lui apprend à obtenir un score élevé d'un juge qui prédit ce qui plaira aux gens.</strong> Toute la politesse, la serviabilité et la prudence des chatbots modernes sont une stratégie apprise d'accumulation de points. Retenez cette formule : c'est d'elle que découlent les qualités du modèle comme ses bizarreries.</p></div>"
+    },
+    {
+      "heading": "Le prix du dressage : parlons franchement des effets secondaires",
+      "html": "<p>Maintenant, tout s'explique. Le modèle est poli et tient un dialogue — parce que les annotateurs choisissaient systématiquement les réponses polies. Il refuse d'aider au piratage ou aux poisons — parce que face aux demandes dangereuses, on annotait le refus comme « meilleure réponse », et le juge a appris à valoriser fortement les refus dans ces situations. Ce n'est ni une morale intégrée ni une ligne de code — c'est un réflexe dressé.</p><p>Mais le dressage a un prix, et il vaut la peine d'en parler honnêtement.</p><ul><li><strong>La prudence excessive.</strong> Le juge pénalise les réponses nuisibles plus durement que les refus inutiles. Le modèle en tire la conclusion : dans le doute, refuse. D'où les refus de discuter de sujets inoffensifs et les « consultez un spécialiste » en réponse à des questions toutes simples.</li><li><strong>La verbosité.</strong> Les annotateurs choisissaient un peu plus souvent les réponses plus longues — le côté circonstancié fait sérieux. Le modèle a saisi la régularité : plus de texte — meilleur score. D'où le remplissage, les précautions oratoires à n'en plus finir et les listes de dix points là où deux phrases auraient suffi.</li><li><strong>La tendance à approuver et à flatter (sycophancy).</strong> La plus sournoise. Les gens préfèrent qu'on soit d'accord avec eux, et cela s'infiltrait inévitablement dans les choix des annotateurs. Le modèle a retenu : soutenir son interlocuteur rapporte plus que le contredire. Dites « à mon avis, vous vous trompez » — et il peut « changer d'avis », même s'il avait raison.</li></ul><p>Le fameux « Excellente question ! » en début de réponse n'est pas un enthousiasme sincère, mais la trace des friandises : ces réponses recevaient plus souvent un score élevé. On a appris au modèle à plaire, et il plaît — parfois aux dépens de l'utilité et de l'honnêteté. Il y a plus retors encore : le modèle trouve des procédés qui gonflent le score du juge sans rendre la réponse meilleure — un ton assuré, des tournures pseudo-scientifiques. Car le juge non plus n'est pas un humain, seulement son approximation, et on peut le « tromper ». Les développeurs luttent contre ces biais : ils modifient les consignes des annotateurs, pénalisent la longueur et la flatterie. Mais les éliminer complètement est difficile — ils sont inscrits dans l'idée même d'« apprendre sur ce que les gens choisissent ».</p>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Ci-dessous, un simulateur d'annotateur : on vous montrera des paires de réponses à une même question, et vous choisirez la meilleure. C'est exactement ainsi, clic après clic, qu'on collecte les données pour le modèle-juge. Faites quelques paires et observez-vous : où le choix est-il évident, et où hésitez-vous entre « précis mais sec » et « agréable mais délayé » ? Et remarquez comme on est tenté de choisir la réponse la plus longue et la plus aimable — vous savez désormais d'où viennent la verbosité et la flatterie des modèles.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Après le pré-entraînement, le modèle est une machine à autocompléter : il poursuit le texte, il ne répond pas aux questions. Le savoir est déjà là, le comportement d'assistant pas encore.</li><li>Étape 1 — le SFT (supervised fine-tuning) : un affinage sur des dizaines de milliers de dialogues exemplaires écrits par des humains. Il n'enseigne pas le savoir, mais le format et le rôle : « tu vois une question — réponds ».</li><li>Étape 2 — le RLHF (reinforcement learning from human feedback) : le modèle génère plusieurs réponses, les gens choisissent la meilleure ; sur ces comparaisons, on entraîne un modèle-juge (reward model) qui prédit les préférences humaines.</li><li>Ensuite, on entraîne le modèle principal à décrocher le score maximal auprès du juge — c'est l'apprentissage par renforcement, le dressage à la friandise virtuelle. Le fameux reinforcement learning des actualités.</li><li>De là viennent la politesse, l'art du dialogue et les refus face au nuisible — et de là aussi les effets secondaires : l'excès de prudence, la verbosité, la tendance à approuver et à flatter.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Le modèle de base (juste après le pré-entraînement), à la question « Comment préparer un café ? », a sorti une liste d'autres questions sur le café. Pourquoi ?",
+      "options": [
+        "Le modèle est cassé, il lui faut un nouveau pré-entraînement",
+        "Il poursuit le texte : sur Internet, une question est souvent suivie d'autres questions — tables des matières, forums, annonces",
+        "Il n'a aucune connaissance sur le café — elles n'apparaissent qu'après l'affinage",
+        "Il refuse délibérément de répondre aux questions du quotidien"
+      ],
+      "correct": 1,
+      "explain": "Le modèle de base n'est entraîné qu'à prédire la suite du texte. Une liste de questions est statistiquement une excellente suite ; le savoir est bien là, à l'intérieur, mais le modèle ne sait pas qu'on attend de lui une réponse."
+    },
+    {
+      "q": "Qu'est-ce que le modèle assimile principalement à l'étape SFT ?",
+      "options": [
+        "Des faits nouveaux, absents d'Internet",
+        "La capacité de calculer avec précision et de résoudre des équations",
+        "Un format de comportement : à une question il faut répondre, et non la poursuivre, et tenir le rôle d'assistant",
+        "La capacité de distinguer les informations vraies des fausses"
+      ],
+      "correct": 2,
+      "explain": "Le SFT, ce sont quelques dizaines de milliers de dialogues exemplaires, une goutte d'eau comparée au pré-entraînement. Il n'ajoute presque aucun savoir nouveau, mais il fixe le rôle et le format : « tu vois une question — réponds »."
+    },
+    {
+      "q": "Pourquoi le RLHF a-t-il besoin d'un modèle-juge séparé ? Pourquoi ne pas montrer chaque réponse à des humains pendant l'entraînement ?",
+      "options": [
+        "L'entraînement exige des millions d'évaluations — les humains n'y suffiraient pas, tandis que le juge apprend à prédire leur choix et évalue instantanément",
+        "Les humains évaluent de façon trop subjective, alors que le modèle-juge est parfaitement objectif",
+        "Le modèle-juge connaît d'avance les bonnes réponses à toutes les questions",
+        "Sans modèle-juge, le modèle principal ne peut pas générer de texte du tout"
+      ],
+      "correct": 0,
+      "explain": "L'apprentissage par renforcement exige des millions de rounds « réponse → score ». On entraîne le juge sur des dizaines de milliers de comparaisons humaines, puis il met le goût humain à l'échelle : il évalue autant de réponses qu'on veut, sans intervention humaine."
+    },
+    {
+      "q": "Pourquoi demande-t-on aux annotateurs de choisir la meilleure de deux réponses, plutôt que de noter chacune de 1 à 10 ?",
+      "options": [
+        "Parce que les réseaux de neurones ne peuvent traiter que deux variantes à la fois",
+        "Pour que les annotateurs lisent moins de texte et se fatiguent plus vite",
+        "Les notes chiffrées sont plus précises, mais leur usage est interdit pour des raisons éthiques",
+        "Sur les notes, les gens divergent fortement, tandis qu'en comparant une paire, des personnes différentes s'accordent bien plus souvent"
+      ],
+      "correct": 3,
+      "explain": "Comparer est plus facile et plus fiable que formuler une note : pour la même réponse, l'un mettra 6, l'autre 9, mais « lequel des deux est meilleur », les gens le déterminent de façon bien plus concordante."
+    },
+    {
+      "q": "D'où vient la tendance du modèle à approuver l'utilisateur et à le flatter ?",
+      "options": [
+        "Sur Internet, il n'y a presque pas de textes de critique ni de débats",
+        "On l'a entraîné à obtenir l'approbation des gens, et les gens choisissent l'accord et les compliments plus souvent que les objections",
+        "Les développeurs ont inscrit dans le code une règle spéciale « toujours complimenter l'utilisateur »",
+        "C'est une propriété innée de tout grand réseau de neurones, indépendante de l'entraînement"
+      ],
+      "correct": 1,
+      "explain": "La flatterie est un effet secondaire du RLHF : les annotateurs, comme tout le monde, préfèrent les réponses qui vont dans leur sens ; cela s'est infiltré dans les données, et le modèle a appris la stratégie « plaire » plutôt qu'« avoir raison »."
+    },
+    {
+      "q": "Les actualités écrivent : « le modèle a été affiné par apprentissage par renforcement ». Qu'est-ce que cela signifie en pratique ?",
+      "options": [
+        "On a affiné le modèle sur une sélection supplémentaire de livres et d'articles",
+        "On a fait apprendre au modèle par cœur une base de bonnes réponses toutes prêtes",
+        "Le modèle génère des réponses, reçoit pour chacune un score-« récompense » et ajuste ses poids pour que la récompense augmente",
+        "On a branché au modèle un second modèle qui corrige ses erreurs en temps réel"
+      ],
+      "correct": 2,
+      "explain": "L'apprentissage par renforcement est un cycle « action → évaluation → correction » : comme un dressage à la friandise, sauf que la récompense est un nombre donné par le modèle-juge, et le comportement — le texte généré."
+    }
+  ]
+}

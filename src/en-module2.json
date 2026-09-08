@@ -1,0 +1,103 @@
+{
+  "title": "The Neuron: Weights on a Scale",
+  "minutes": 12,
+  "intro": "In the last module, the Markov chain simply counted which word tends to follow which — and quickly hit its ceiling. Real neural networks are built from a different building block: a tiny “decider” that knows how to weigh factors. Let’s take it apart down to the last screw and do the math by hand — on that eternal question: go out for a walk, or stay home.",
+  "sections": [
+    {
+      "heading": "A decision is a weighing",
+      "html": "<p>Think about how you decide whether to go out for an evening walk. Several factors are spinning in your head: it’s sunny outside — that’s a point “for.” It’s drizzling — that’s “against.” You’re in a good mood — leaning “for.” You don’t work it out on paper, but something very much like weighing is going on: each factor lands on the scale, and each one carries its own little weight, its own strength of influence.</p><p>And everyone’s weights are different. For one person, rain is a catastrophe that cancels out any amount of sunshine. For another, it’s a charming excuse to wear a raincoat. Same facts, different decisions — because the <strong>weight</strong> of each fact differs.</p><p>An artificial neuron is exactly this kind of weighing machine, only perfectly honest and simple. It takes several numbers as input, multiplies each by its own little weight, adds up the results, and issues a decision based on the total. That’s all. No magic, no “understanding” — four operations of basic arithmetic.</p><p>Sounds too simple for the technology behind ChatGPT and Claude? It is: a single neuron can do very little. But by the end of this module we’ll see how billions of these simple weighings, stacked on top of each other in layers, add up to a system that writes essays and finds cats in photos. For now — let’s build one neuron with our own hands.</p>"
+    },
+    {
+      "heading": "What a neuron is made of",
+      "html": "<p>A neuron has three parts, and you already know all three intuitively.</p><p><strong>Inputs</strong> — numbers describing the situation. A neuron doesn’t understand words like “overcast” or “the blues,” so everything gets translated into numbers. Let’s agree to rate each factor on a scale from 0 to 10: sunshine — 7 (fairly clear), rain — 2 (a light drizzle), mood — 6 (not bad).</p><p><strong>Weights</strong> — those little weights on the scale, one per input. A weight is a number too, and it encodes two things. The sign says whether the factor is “for” or “against”: a positive weight nudges you toward the walk, a negative one keeps you home. The magnitude says how strongly. Take this character: sunshine is pleasant to him, but not critical — weight +0.8; he can’t stand rain — weight −2; a good mood helps a little — weight +0.5. Notice: rain, with its weight of −2, influences the decision two and a half times more strongly than sunshine at +0.8. The weights are our neuron’s personality.</p><p><strong>Bias</strong> — the scale’s starting position, before any inputs arrive. Our character is a homebody: even in neutral weather he can’t be bothered to go out. Here is that laziness as a number: a bias of −3. It simply gets added to the total, shifting the starting point. A go-getter would have a positive bias: just about anything will lure him outside.</p><p>By the way, notice the trick we just pulled: we turned the weather, the mood, and even laziness into numbers. This is the central move of the entire field — a neural network works only with numbers, so everything in the world (words, images, sound) is first turned into numbers. How that’s done with words, we’ll cover in the module on tokens and embeddings.</p><p>In total: three inputs come from outside, while the neuron owns four numbers of its own — three weights and a bias. All that’s left is to multiply and add everything up.</p>"
+    },
+    {
+      "heading": "Doing the math: sum, threshold, decision",
+      "html": "<p>Here is the only formula in this module — and it contains the neuron’s entire job:</p><p><strong>decision = f(x₁·w₁ + x₂·w₂ + x₃·w₃ + b)</strong></p><p>Let’s decode every symbol: x₁, x₂, x₃ are the inputs (our sunshine, rain, and mood); w₁, w₂, w₃ are the weights attached to each input; the dot · is ordinary multiplication; b is the bias, the starting shift; f is the activation function — more on it in a minute. The part in parentheses is called the weighted sum: each input counts not on its own, but multiplied by its weight.</p><div class=\"example\"><p>Let’s compute for our homebody:</p><ul><li>sunshine: 7 · 0.8 = 5.6</li><li>rain: 2 · (−2) = −4</li><li>mood: 6 · 0.5 = 3</li><li>bias: −3</li></ul><p>The sum: 5.6 − 4 + 3 − 3 = <strong>1.6</strong>. Let’s agree the threshold is zero: if the sum is above zero — we go for the walk. 1.6 is above zero, so — we’re going!</p></div><p>Now watch how the decision depends on circumstances. Say the drizzle turns into a downpour: the “rain” input jumps from 2 to 8. Recompute: 5.6 − 16 + 3 − 3 = −10.4. The sum crashes deep below zero — we’re staying home, and no amount of sunshine will save the day. One input with a heavy weight easily outweighs all the others.</p><p>Here it’s worth spotting an important distinction. The inputs change every day: today the sun rates a seven, tomorrow a two. But the weights and the bias stay with the neuron — they are its stable “personality,” its learned experience. The same weather, fed to neurons with different weights, produces different decisions. Remember this split: <em>inputs are about today’s situation, weights are about accumulated experience</em>. The weights are precisely what a network acquires during training.</p><p>One letter remains — f, the activation function. In our example it’s as simple as can be: “sum above zero — output 1 (going), otherwise — 0 (staying).” Such an abrupt switch is called a threshold function. Real networks usually prefer smoother variants. The sigmoid turns any sum into a number between 0 and 1 — something like a degree of confidence: not “go / don’t go,” but “go, with confidence 0.83.” Also popular is the very simple ReLU: it zeroes out a negative sum and passes a positive one through as is. The point is the same in every case: turn the raw sum into a tidy signal that’s convenient to pass onward. Onward to whom? Now that is the most interesting question.</p>"
+    },
+    {
+      "heading": "Layers: from dots to a cat",
+      "html": "<p>One neuron can draw one boundary: “sum above the threshold — yes; below — no.” For the walk decision, that’s enough. But to tell a cat from a dog in a photograph, one boundary is far too little — you need many neurons working together.</p><p>They are assembled like this: <strong>the outputs of some neurons become the inputs of others</strong>. Neurons are arranged into layers: the first layer receives the raw data, the second receives the first layer’s results, the third the second’s, and so on. A network with many layers is called deep — which is where the term “deep learning” comes from.</p><p>The most beautiful part is how the level of abstraction rises with each layer. Take a network that looks for cats in photos. The first layer’s inputs are just pixel brightnesses — hundreds of thousands of numbers. First-layer neurons learn to notice elementary things: a dark dot next to a light one, a short stroke. The second layer combines strokes into lines, corners, arcs. The third assembles lines into shapes: the triangle of an ear, the almond of an eye, the arc of a back. And somewhere deep inside sits a neuron whose weighted sum goes through the roof when “ears,” “whiskers,” and “eyes” all fire at once — in effect, a cat detector. Dots → lines → shapes → “cat”: each floor up thinks in larger categories, even though every individual neuron still does nothing but multiply and add.</p><p>Crucially: nobody programmed the “ear detector.” The engineers specified only the architecture — how many layers, how many neurons in each. What exactly each neuron notices was settled on its own, by the values of the weights, during training.</p><p>The word “neuron” is, of course, borrowed from the biologists, and the idea really is similar: a living neuron gathers signals from its neighbors through branching dendrites, and if the total excitation tips past a threshold, it fires an impulse onward down its axon. But a real nerve cell is a fabulously complex chemical factory, not an adder with a threshold. The analogy is inspiring but loose: the brain we still haven’t fully figured out, whereas neural networks we understand — because we built them ourselves.</p>"
+    },
+    {
+      "heading": "Inside — nothing but numbers",
+      "html": "<p>Now for the main conclusion, the one all this arithmetic was building toward. Our homebody neuron is completely described by four numbers of its own: three weights and a bias. Change them — and the “personality” changes: a rain lover, a spring-loaded optimist, a hopeless recluse. Beyond these numbers, the neuron has nothing.</p><p>With big networks it’s the same story at a different scale. The weights and biases of all the neurons together are called parameters. A small network that reads handwritten digits has tens of thousands of them. Modern language models like the ones behind ChatGPT and Claude have hundreds of billions. To feel the scale: if you printed one number per line, you would fill a library of millions of thick volumes packed solid with fractions like 0.0031 and −1.74. When you download a language model to your computer, that is exactly what you’re downloading — a gigantic file of numbers, and nothing else.</p><div class=\"callout\"><p><strong>All of a neural network’s “knowledge” is the values of its weights. A huge table of numbers — and nothing more.</strong> There is no database of facts inside, no stored texts, no grammar rules. When a model “knows” that Paris is the capital of France, that knowledge doesn’t sit in some dedicated cell — it is smeared across millions of weights, each nudging the network a tiny bit toward the right answer.</p></div><p>Which leads to the unavoidable question. Our four numbers we picked by hand, out of our heads. But no human will ever hand-pick hundreds of billions. How does a network find the right weights on its own? That is what training is — the subject of the next module. For now, let’s lock in today’s material — hands-on.</p>"
+    },
+    {
+      "heading": "Try it yourself",
+      "html": "<p>Below is a live neuron deciding whether to go for a walk. First, play with the inputs — sunshine, rain, mood — and watch how the weighted sum changes and at what moment the decision flips. Then take hold of the weights: turn the homebody into a rain lover by giving rain a positive weight, or find a configuration where one strong factor outweighs the other two. Notice: the decision changes not gradually but with a jump — at exactly the instant the sum crosses the threshold.</p>"
+    },
+    {
+      "heading": "Key takeaways",
+      "html": "<ul><li>An artificial neuron is a simple machine: it multiplies inputs by weights, adds them up, adds the bias, and emits a signal based on the sum.</li><li>A weight is the strength and direction of an input’s influence: the sign says “for” or “against,” the magnitude says how strongly.</li><li>The bias is the neuron’s baseline predisposition — its “laziness” or “enthusiasm” before any inputs are considered.</li><li>The activation function turns the weighted sum into the final signal: abruptly (a threshold) or smoothly (sigmoid, ReLU).</li><li>A network is layers of neurons: outputs of some become inputs of others, and with each layer the features grow more abstract — dots → lines → shapes → “cat.”</li><li>All of a network’s knowledge is just numbers — weights, millions and billions of them. How the network finds them on its own — in the next module.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "What is a weight in an artificial neuron?",
+      "options": [
+        "The amount of information the neuron can memorize",
+        "A number showing how strongly, and in which direction, an input influences the decision",
+        "The speed at which the neuron processes a signal",
+        "The number of inputs connected to the neuron"
+      ],
+      "correct": 1,
+      "explain": "A weight is the little weight attached to an input: its sign says whether the factor pulls “for” or “against,” and its magnitude says how hard it presses on the scale."
+    },
+    {
+      "q": "A neuron has two inputs: “sunshine” = 4 and “rain” = 6. The weights are +1 and −1, the bias is 0. The neuron activates if the sum is above zero. What happens?",
+      "options": [
+        "It activates: the sun is shining, and that’s the main input",
+        "Impossible to say in advance: the neuron has to be trained first",
+        "It does not activate: the sum is 4·1 + 6·(−1) = −2, which is below zero",
+        "It activates: there are two inputs, so the signal comes in doubled"
+      ],
+      "correct": 2,
+      "explain": "Do the honest math: 4·1 + 6·(−1) = −2. The sum is below the threshold, so the neuron stays silent — rain with its negative weight outweighed the sunshine."
+    },
+    {
+      "q": "What does a neuron need a bias for?",
+      "options": [
+        "It sets the neuron’s baseline “predisposition”: how easy it is to activate before any inputs are considered",
+        "It corrects mistakes made by neighboring neurons",
+        "It stores the correct answer in case the inputs let the neuron down",
+        "It speeds up multiplying the inputs by the weights"
+      ],
+      "correct": 0,
+      "explain": "The bias is the scale’s starting position: for the “homebody” it is negative, and the inputs have to push hard to make the neuron fire; for the “go-getter” it is positive."
+    },
+    {
+      "q": "Why do people say that a network’s deeper layers recognize more abstract things than its first layers?",
+      "options": [
+        "Because the deep layers are given the image at a higher resolution",
+        "Because the deep layers have more neurons, and therefore more “intelligence”",
+        "Because the deep layers run longer and have time to “think”",
+        "Because each layer combines the features of the previous one: strokes make lines, lines make shapes, shapes make objects"
+      ],
+      "correct": 3,
+      "explain": "Each layer builds features out of what the previous layer found, so the level of abstraction rises floor by floor: dots → lines → shapes → “cat.” The neurons themselves are equally simple everywhere."
+    },
+    {
+      "q": "A trained network “knows” what a cat looks like. Where is that knowledge physically stored?",
+      "options": [
+        "In a database of cat images the network consults when answering",
+        "In the values of millions of weights and biases — that is, simply in a set of numbers",
+        "In rules like “whiskers plus ears means cat,” written by programmers",
+        "In a separate memory module where the network files away learned facts"
+      ],
+      "correct": 1,
+      "explain": "Inside the network there is no image database, no rules, no fact module — only weights. The knowledge is “smeared” across millions of numbers, each nudging the network a tiny bit toward the right answer."
+    },
+    {
+      "q": "What role does the activation function play?",
+      "options": [
+        "It randomly shuffles the weights so the network doesn’t get stuck in a loop",
+        "It translates the numbers at the network’s output back into words",
+        "It turns the weighted sum into the neuron’s final signal — for example, deciding whether the neuron “fired” or not",
+        "It removes unnecessary neurons that interfere with training"
+      ],
+      "correct": 2,
+      "explain": "The activation function sits at the neuron’s output: given the weighted sum, it produces the final signal — abruptly, like a threshold switch, or smoothly, like a sigmoid with its “degree of confidence.”"
+    }
+  ]
+}

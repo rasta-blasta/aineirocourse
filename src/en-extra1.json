@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "A Markov chain was trained solely on a collection of cooking recipes. You ask it to continue a text starting from the word “puck,” which never once appeared in the recipes. What happens?",
+      "options": [
+        "The model will pick the closest word in meaning from the recipes — say, “pan” — and continue from that",
+        "The model will pick a continuation at random: with no statistics, every word in the vocabulary is equally likely",
+        "The table simply has no row for “puck” — the model literally has nothing to offer",
+        "The model will build a continuation from general grammar rules, just without the culinary vocabulary"
+      ],
+      "correct": 2,
+      "explain": "The transition table contains only the words encountered in the corpus. For an unfamiliar key, not a single transition has been counted — and the chain has nothing besides the table: no semantic similarity, no rules, no backup plan."
+    },
+    {
+      "q": "Imagine we removed the “loaded die” from the generator: at every step it now takes not a random word in proportion to the probabilities, but always the most frequent one. What changes?",
+      "options": [
+        "The texts will become more sensible: the source of random errors disappears",
+        "For the same starting word, the model will always produce the same phrase — variety disappears",
+        "The model will stop working: without randomness, the selection algorithm can’t take a single step",
+        "Nothing changes: the most frequent word comes up on every roll anyway"
+      ],
+      "correct": 1,
+      "explain": "Without randomness the choice becomes predetermined: same start — same chain of “most frequent” words, every single time. That pinch of randomness is exactly what creates variety; in modern LLMs its size is regulated by the “temperature.”"
+    },
+    {
+      "q": "The corpus contains thousands of sentences with the word “automobile” and only two with the word “car.” Will the rich statistics for “automobile” help a Markov chain predict the words that follow “car”?",
+      "options": [
+        "No: to the chain, “automobile” and “car” are two completely unrelated table keys — one word’s statistics don’t transfer to the other",
+        "Yes: the model will notice that both words appear in similar contexts and merge their counts",
+        "Yes, but only if you raise the chain’s order to at least two",
+        "No: “car” occurred too rarely and won’t make it into the table at all"
+      ],
+      "correct": 0,
+      "explain": "Generalizing is something the chain fundamentally cannot do: table keys are just separate rows, and “kinship” between words doesn’t exist for it. The word “car” will make it into the table (it did occur), but it can lean only on its own two cases. The ability to transfer experience from similar words appears only with neural networks."
+    },
+    {
+      "q": "A second-order chain is continuing the phrase “the pie that grandma baked finally …”. What will it rely on when choosing the next word?",
+      "options": [
+        "The entire sentence: the table stores frequencies for phrases of any length",
+        "The subject, “pie” — that’s what the continuation must agree with",
+        "The overall meaning of the phrase: the model will catch on that it’s about food",
+        "Only the last two words — “baked” and “finally”; everything that came before no longer exists for it"
+      ],
+      "correct": 3,
+      "explain": "The key of a second-order table is exactly two preceding words; the rest of the context the model has “forgotten.” It can agree the continuation with “pie” only by accident — that is precisely the short-context wall."
+    },
+    {
+      "q": "A million fresh messages were added to a keyboard’s training corpus, where the word after “good” is most often “luck,” not “morning,” and the table was recalculated. What happens to the suggestions?",
+      "options": [
+        "Nothing: suggestions are determined by the rules of the language, not by which texts landed in the corpus",
+        "“Morning” will stay the top suggestion: once computed, the probabilities are fixed forever",
+        "“Luck” will climb to first place: probabilities are just shares in the corpus, and new texts change them",
+        "The keyboard will get confused between the options and stop suggesting anything after “good”"
+      ],
+      "correct": 2,
+      "explain": "A Markov chain has nothing but corpus frequencies: a probability is the share of the pair “X Y” among all appearances of X. The corpus changed — the shares changed, and the ranking of suggestions changed with them."
+    },
+    {
+      "q": "The phrase “a purple hippo yawns and…” almost certainly never appeared in the training texts. A Markov chain goes mute on it, while an LLM continues without missing a beat. Thanks to what?",
+      "options": [
+        "The LLM’s transition table is so enormous that even this rare phrase turned up in it",
+        "An LLM can generalize: it has absorbed how similar words behave in similar contexts, and transfers that experience to combinations it has never seen",
+        "At answer time, the LLM searches the internet for a similar phrase and leans on what it finds",
+        "An LLM has built-in grammar rules that let it construct a continuation for any phrase"
+      ],
+      "correct": 1,
+      "explain": "That is exactly the difference between the mechanisms: for the chain, an unseen combination is an empty table row and a probability of zero, while a neural network knows that a “hippo” behaves roughly like other animals and continues by analogy. There is no table of phrases and no live search involved."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain in your own words how a Markov chain “learns” from texts and where the probabilities in its table come from.",
+      "ref": "The model walks through the corpus and counts pairs: how many times word Y followed word X. A transition probability is a share: the number of “X Y” pairs divided by the total number of appearances of X (the pair “cat drinks” occurred 2 times, “cat” — 3, so 2/3). The model extracts no rules and no meanings — all of its “knowledge” consists of these counters, and it is entirely determined by which texts landed in the corpus."
+    },
+    {
+      "q": "The corpus consists of two sentences: “mom washed windows” and “mom washed dishes.” Predict: which sentences can a first-order chain generate starting from the word “mom,” and with what probabilities?",
+      "ref": "After “mom” always comes “washed” (100%), and after “washed” — “windows” or “dishes,” 50% each. So exactly two sentences are possible: “mom washed windows” and “mom washed dishes,” each with probability 1/2. The chain won’t assemble anything new here: new phrases are born at forks where transitions from different sentences can be spliced in a new way, and this corpus has no such fork — both paths were already in the texts."
+    },
+    {
+      "q": "Come up with your own example of a meaningless phrase that a first-order Markov chain could quite plausibly generate on a large corpus, and explain why the model “won’t notice” the nonsense.",
+      "ref": "Any phrase will do where each adjacent pair of words is ordinary on its own but the whole is absurd — for example, “good morning sickness”: the pairs “good morning” and “morning sickness” are each common, but the splice is ridiculous. The model picks every word by looking only at the previous one, and each of its steps is statistically justified. It has no way to check whether the phrase makes sense as a whole: the table holds only pair frequencies, and no meaning at all."
+    }
+  ]
+}

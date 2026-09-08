@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "A friend of yours is convinced: 'To train an LLM, they hired thousands of people who wrote correct answers for every text.' What's wrong with this picture of pretraining?",
+      "options": [
+        "People really were hired, but they didn't write answers — they checked the model's guesses for factual errors",
+        "It's all true, except far more people were needed — millions",
+        "No labeling is needed: the 'correct answer' is the next token, and it's already sitting in the text itself",
+        "The answers were written not by a team of people but by a previous version of the same model"
+      ],
+      "correct": 2,
+      "explain": "Pretraining is self-supervised learning: the text is its own workbook and its own answer key — the correct answer always stands right where the next word is. People are busy with something else: collecting and cleaning the corpus. Examples of good answers written by people come later, at the fine-tuning stage."
+    },
+    {
+      "q": "During pretraining, the model sees 'The capital of Australia is ' and outputs: 'Sydney' — 45%, 'Canberra' — 15%. In the training text, 'Canberra' came next. What happens?",
+      "options": [
+        "The model writes the fact 'the capital of Australia is Canberra' into its internal fact base",
+        "The weights involved in that guess shift one tiny step — so that in a similar context 'Canberra' gets a bit more probability",
+        "Nothing: 'Canberra' was among the options with non-zero probability, so the answer counts",
+        "The model sets the example aside and rereads every text about Australia to sort things out"
+      ],
+      "correct": 1,
+      "explain": "A prediction error is a signal to gradient descent: the weights get tweaked a tiny bit. There is no fact base inside; one nudge changes almost nothing, but trillions of such steps are what 'write' knowledge into the weights."
+    },
+    {
+      "q": "Yesterday you corrected the model in a chat: 'The capital of Australia is Canberra, not Sydney.' Today your friend asks it the same question in a new chat. Will your correction help him?",
+      "options": [
+        "Yes: the model learns from every conversation, and your correction has already settled into its weights",
+        "Yes, but only if the model found your argument convincing enough",
+        "No: after training, the weights are frozen and conversations don't change them — your friend will get an answer from the same old weights",
+        "No: the correction was saved in the weights, but it only works inside your account"
+      ],
+      "correct": 2,
+      "explain": "Training is a rare, expensive, separate event, and a conversation is simply the use of ready-made weights. Your messages don't tweak the model's knobs, so a new chat starts from exactly the same weights."
+    },
+    {
+      "q": "A lab trained a model on the very same corpus but with a hundred times fewer parameters. What should we expect from the result?",
+      "options": [
+        "The text will stay grammatical and fluent, but facts and multi-step reasoning will start falling through — not enough 'knobs' for the subtle patterns",
+        "The result will be exactly the same, the model will just answer more slowly",
+        "The small model will memorize the corpus verbatim and answer with exact quotations",
+        "Training won't work at all: gradient descent requires a minimum model size"
+      ],
+      "correct": 0,
+      "explain": "The smaller the model, the coarser the patterns it can manage: a small one masters grammar and stock phrases, a mid-sized one starts to retain facts, and only a large one reasons coherently. As for memorizing the corpus verbatim — that's even more out of reach: there's nowhere near enough capacity."
+    },
+    {
+      "q": "You have access to a base model — no fine-tuning of any kind yet. What is the most reliable way to get a borscht recipe out of it?",
+      "options": [
+        "Ask politely: 'Could you please help me — how do I make borscht?'",
+        "Give it a strict instruction: 'You are a helpful assistant. Answer only to the point'",
+        "Repeat the question several times in a row — on some attempt it will figure out what you want",
+        "Write a setup for which the recipe is the most plausible continuation: 'Question: how do I make borscht? A chef's answer:'"
+      ],
+      "correct": 3,
+      "explain": "A base model has no goal of helping — it just continues text, so requests and instructions work poorly on it. The answer has to be coaxed out by trickery: build a text into which that answer fits as the statistically most plausible continuation."
+    },
+    {
+      "q": "Imagine a lab cut corners and trained a model on the raw internet — spam, duplicates, machine-generated pages and all. What will happen?",
+      "options": [
+        "The model will come out noticeably worse: it absorbs the patterns of everything it reads, and the garbage settles into the weights right alongside the useful stuff",
+        "No harm done: gradient descent tells good texts from bad on its own and learns only from the good ones",
+        "The model will come out smarter: there's more data, and more data is always better",
+        "Training will grind to a halt: gradient descent gets stuck in a loop on repeated texts"
+      ],
+      "correct": 0,
+      "explain": "Pretraining has no built-in 'learn only from the good stuff' filter: prediction error tweaks the weights on any text, spam included. That's why the corpus is cleaned in advance — the cleaner and more diverse the data, the smarter the model, and labs guard their data recipes almost more jealously than the code itself."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain in your own words why pretraining needs no human labelers with 'correct answers' — and what people nevertheless do with the data.",
+      "ref": "The correct answer is hidden in the text itself: it's simply the next token, so the text is both the workbook and the answer key at once — an approach called self-supervised learning. People are left with a different job: assembling the corpus and scrubbing it of duplicates, spam, and low-quality pages. How smart the model turns out depends directly on how clean and diverse the data is."
+    },
+    {
+      "q": "Come up with your own phrase that a model cannot confidently continue on grammar alone — it takes a fact, logic, or arithmetic. Explain how errors on phrases like that gradually make the model 'smart.'",
+      "ref": "Anything like 'Three times three is…' or 'She grabbed the first-aid kit because the child…' will do — continuing them plausibly requires arithmetic or everyday cause-and-effect. Every error on such a phrase is a signal for gradient descent to tweak the weights a little, and over time a pattern that removes the error settles into them. That's how facts and logic accumulate as a byproduct of the 'dumb' task of guessing the next token."
+    },
+    {
+      "q": "Explain in your own words: why does a base model already have the knowledge, yet still offer little use to an ordinary person? And what is done with it next?",
+      "ref": "A base model is an autocomplete: it continues any text in the most plausible way, but it has no goal of helping — so a direct question may get, say, a list of similar questions in reply. The knowledge, though, is already compressed into its weights: you can coax it out by arranging a setup where the desired answer becomes the most plausible continuation. To turn the walking encyclopedia into an assistant, the model is further trained on examples of good dialogue and feedback from people — that's the next module."
+    }
+  ]
+}

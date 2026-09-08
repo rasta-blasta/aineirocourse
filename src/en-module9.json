@@ -1,0 +1,103 @@
+{
+  "title": "Boundaries: What an LLM Can and Cannot Do",
+  "minutes": 12,
+  "intro": "This is the course's final module — and its most honest one. You already know how the model works inside; it's time to figure out where its boundaries run. Why it confidently makes things up, what's going on with its memory, whether it actually thinks — and how to account for all of this in everyday work.",
+  "sections": [
+    {
+      "heading": "Plausible Doesn't Mean True",
+      "html": "<p>Recall module 8: the model doesn't fetch an answer from a database — over and over, it predicts the next token, the one that best fits the current context. \"Fits\" is the key word. The model was trained to make text <em>plausible</em> — resembling the billions of pages it read during pretraining. Plausible — not verified-true. Most of the time the two coincide: the most probable continuation of \"The capital of France is…\" really is \"Paris.\" But sometimes the paths diverge, and a <strong>hallucination</strong> is born — a smooth, confident, entirely invented answer.</p><div class=\"example\"><p>Ask the model: \"What is Chekhov's novel 'The Mystery of the Gray House' about?\" No such novel exists, and the honest answer would be to say so. But in the texts the model learned from, a question about a book is almost always followed by a plot summary, not a refusal. The probabilities line up in favor of the summary: the model will invent a plot, characters, a publication year — say, 1893 — and serve it all up in the style of an encyclopedia entry.</p></div><p>Note that the model isn't \"lying\" — lying presupposes knowing the truth and hiding it. It has no separate store of facts to check against. There are only weights — billions of numbers into which the patterns of texts have been compressed. Frequent facts, repeated thousands of times, got compressed in reliably: it won't stumble on the capital of France. But rare ones — the date of an obscure decree, a figure from a quarterly report, a minor character's middle name — are stored blurrily, and in their place the model fills in the most probable thing. Rather the way you \"remember\" that childhood summers in the countryside meant sunshine and homemade jam, while reconstructing any particular July day on the fly.</p>"
+    },
+    {
+      "heading": "What You Must Double-Check",
+      "html": "<p>An unpleasant conclusion follows from this design: <strong>a confident tone guarantees nothing</strong>. The model learned from encyclopedias, textbooks, and articles — texts people write firmly and without hedging. It reproduces that style equally well for real facts and invented ones. The intonation of an answer signals genre, not truth. What's more, tidy structure, a list of sources, and figures precise to the second decimal place are part of the genre too — and the model imitates them just as effortlessly.</p><div class=\"callout\"><p>Don't check where the model sounds unsure — check where the cost of an error is high. You may never hear the unsureness at all.</p></div><p>When double-checking is mandatory:</p><ul><li><strong>Dates and numbers.</strong> The year of an event, a market size, statistics — hallucination's favorite territory: there are many plausible numbers and only one correct one.</li><li><strong>Quotes.</strong> The model happily \"remembers\" phrases a person never said — but in their unmistakable style.</li><li><strong>References and source titles.</strong> An invented paper with a plausible journal name, volume, and page numbers is a classic of the genre.</li><li><strong>Law, medicine, money.</strong> Here a mistake costs too much, and on top of that, the rules change — the model may be leaning on outdated data.</li></ul><p>A simple rule: the more specific and rare the fact, the higher the risk. A general explanation of how a mortgage works will almost certainly be sound; the exact rate at a specific bank this week is almost certainly made up. The model is a superb draft-writer and explainer — but the final authority on facts is not the model.</p>"
+    },
+    {
+      "heading": "The Context Window: Memory for One Conversation",
+      "html": "<p>The second boundary is memory. The model has no internal notebook where it writes your conversation down. All it \"remembers\" is the text of the current dialogue, which is fed to it <em>in full</em> before every reply. And that input is limited. Its size is called the <strong>context window</strong>, and it's measured in the tokens you know from module 4.</p><div class=\"example\"><p>A window of 200,000 tokens is on the order of 100–150 thousand words — about 400–500 book pages. Sounds boundless, but load in two long contracts, discuss them for a couple of hours — and the limit is close. When the dialogue stops fitting, the oldest messages get cut off: the model replies as if they had never existed. You ask, \"So what did we decide at the very beginning?\" — and for the model, that beginning physically does not exist.</p></div><p>Between chats, there is no memory at all by default. A new dialogue is a blank slate: the same weights, frozen at training time, and an empty window. If ChatGPT or Claude \"remembers\" that you're a vegetarian writing a dissertation, that's not the model itself — it's an add-on built by the service: it keeps notes about you in an ordinary database and quietly slips them into the start of every conversation. Remove the add-on — and the \"memory\" vanishes with it.</p><p>One more nuance: a long context isn't free. The attention from module 5 matches every token against every other, so enormous dialogues are processed more slowly — and the model is worse at finding details in the middle of a long text than at its beginning or end. The practical takeaway: put the important things close to your question, and with a conversation that has dragged on, it's sometimes better to start fresh, briefly recapping the old one's conclusions.</p>"
+    },
+    {
+      "heading": "So Does It Think or Not?",
+      "html": "<p>Now for the question you've probably been carrying in your head through the whole course. After eight modules, it can be answered without mysticism. Not the way a human does — that much is certain. The model has no goals of its own: between your prompts it wants nothing and ponders nothing — it isn't \"there\" at all; it's just a file of weights on a disk. It has no body and no lived experience: the word \"hot\" is, for it, a point in embedding space near \"burn\" and \"kettle,\" not a memory of pain. It has no continuous memory: it doesn't learn from conversations; the weights have been frozen since training.</p><p>But the fashionable label \"stochastic parrot\" — as in, it merely repeats memorized snippets — is inaccurate too. Recall the scale from module 6: there were thousands of times more training texts than can fit into the weights. Rote-memorizing it all is impossible — you can only compress it, and you cannot compress text without learning its regularities. To predict the next move in a chess game transcript, you must, to some real degree, learn chess. To continue code — the logic of programs. And these learned generalizations transfer to tasks that were never in the training data: ask it to rewrite a washing-machine manual in the style of an epic saga — no such text exists in any dataset, but the model will pull it off, because it separately \"grasped\" how manuals work and, separately, how epic sagas do.</p><div class=\"callout\"><p>An LLM is neither a parrot nor a human, but a third, unfamiliar kind of system: deep generalizations learned from text — without goals, experience, or memory of its own. Both extremes — \"just autocomplete\" and \"already sentient\" — get equally in the way of using it with a clear head.</p></div>"
+    },
+    {
+      "heading": "Models That Think Out Loud",
+      "html": "<p>One of the boundaries has shifted noticeably before our very eyes. A classic model answers \"off the cuff\": the first token of the answer is already the final draft. For the capital-of-France question, that's fine. But try solving this one \"in a single touch\": \"Mia has three times as many apples as Ben; together they have 24. How many does each have?\" A human would rough it out on scrap paper: three parts for Mia plus one for Ben makes four parts, 24 divided by 4 is 6 per part, so 18 and 6. A model obliged to write the final draft straight away has nowhere to do that roughing-out.</p><p><strong>Reasoning models</strong> were given permission to use a draft. Before the final answer, they generate a chain of reasoning: they talk through the steps, check themselves, catch a mistake, and try again. The trick is that every written step lands in the context and becomes a foothold for predicting the next one — the model is literally writing itself a cheat sheet. You usually see only the final result, but inside, thousands of tokens of deliberation may have rustled past.</p><p>On hard problems — math, logic, programming — this multiplies accuracy: on olympiad-level problems where ordinary models succeeded a few percent of the time, reasoning models succeed most of the time. The price is time and money: the draft can be dozens of times longer than the answer itself, and computation is billed per token. So switching on deep reasoning for a simple question is like driving a tank to buy bread. Good services let you choose the mode — and now you know exactly what you're choosing.</p>"
+    },
+    {
+      "heading": "The Owner's Manual",
+      "html": "<p>Let's gather the whole course's knowledge into a short field guide — every point follows from how the model is built, not from superstition.</p><ul><li><strong>Provide context.</strong> The model sees only its window. Not \"take a look at my contract\" — it can't see it and won't find it — but the contract's text pasted into the chat. The less it has to guess, the less it makes up.</li><li><strong>Show examples.</strong> One or two samples of the result you want tune the prediction better than a paragraph of description: the model is a pattern-continuation machine — give it a pattern.</li><li><strong>Ask for a format.</strong> \"A table: one column 'risk,' one column 'what to do'\" works better than \"tell me about the risks.\" You're narrowing the space of probable continuations down to the one you need.</li><li><strong>Break complex tasks into steps.</strong> First the plan, then section by section. Every intermediate result lands in the context and works for the next step — the same principle as reasoning models.</li><li><strong>Double-check the facts.</strong> Dates, numbers, quotes, references, regulations — against primary sources. The model is a brilliant editor, explainer, and draft generator — but not a reference desk.</li></ul><p>Notice: there are no magic incantations here. All five points are direct consequences of what you now know: token prediction, the context window, attention, probabilities.</p>"
+    },
+    {
+      "heading": "Key Takeaways",
+      "html": "<p>The bottom line of this module — and the whole course — in a few lines:</p><ul><li>The model predicts plausible text; it doesn't hand out verified facts. Hallucinations aren't a malfunction but the flip side of its very design.</li><li>A confident tone is the style of its training texts, not a guarantee of truth. Double-check dates, numbers, quotes, references, and regulations against primary sources.</li><li>The model's memory is the context window of the current dialogue. Between chats, it remembers nothing by default; the \"memory\" in services is an external add-on.</li><li>It doesn't think like a human — no goals, no experience, no continuous memory — but it's no \"parrot\" either: its learned generalizations carry over to entirely new tasks.</li><li>Reasoning models won the right to a draft before answering — and gained substantially in math, logic, and code.</li><li>The working formula: context + examples + format + steps — and verify the facts.</li></ul><p>You've traveled the road from a Markov chain to the boundaries of modern LLMs. The best part is still ahead: in the final game, you'll assemble and train a small neural network to recognize handwritten digits with your own hands — the little weights, the gradients, and the epochs from this course will come alive right on your screen. And after the game — the final exam. Good luck!</p>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Why does a language model sometimes deliver invented facts with complete confidence?",
+      "options": [
+        "It predicts a plausible continuation of the text rather than checking against a database of verified facts",
+        "Developers deliberately add lies to the training data to protect against copying",
+        "It knows the right answer but deliberately distorts it at high temperature",
+        "When the context window overflows, facts get erased from its weights"
+      ],
+      "correct": 0,
+      "explain": "The model is a text predictor: it fills in the most probable continuation. For frequent facts, the probable coincides with the true; for rare ones, it fills in a plausible invention with the very same confidence."
+    },
+    {
+      "q": "The model gave a detailed, confident answer and even cited a source. What does that tell you?",
+      "options": [
+        "The answer is definitely correct: the confident style only switches on when the probability of being right is high",
+        "The answer is correct if the reference is formatted according to bibliographic rules",
+        "Nothing: the model learned its confident style from encyclopedias and applies it equally to truth and to invention",
+        "The answer is most likely wrong: the model always keeps truthful answers short"
+      ],
+      "correct": 2,
+      "explain": "The model picked up its confident style from encyclopedias and textbooks and reproduces it regardless of truth. A neatly formatted reference can be generated too — the trappings say nothing about the facts."
+    },
+    {
+      "q": "You spent an hour discussing a project with the model, and suddenly it \"forgot\" the agreements from the start of the conversation. What happened?",
+      "options": [
+        "The server rebooted, and the model lost the information about you saved in its weights",
+        "The beginning of the dialogue fell outside the context window and is no longer fed to the model as input",
+        "The model retrained on the new messages, and the old weights got overwritten",
+        "A safety filter kicked in and deleted part of the conversation"
+      ],
+      "correct": 1,
+      "explain": "The model's memory is the context window: the dialogue text fed to it in full. When the conversation stops fitting, the oldest messages are cut off — and for the model, they no longer exist."
+    },
+    {
+      "q": "What's wrong with the claim \"an LLM is just a parrot repeating memorized phrases\"?",
+      "options": [
+        "Nothing — the model can only produce verbatim quotes from its training texts",
+        "\"Parrot\" is the wrong word because the model has consciousness and goals, like a human",
+        "The model never memorized anything: it copies answers from the internet in real time",
+        "To predict text well, the model learned deep generalizations — and handles tasks that were never in its training data"
+      ],
+      "correct": 3,
+      "explain": "There were thousands of times more training texts than fit into the weights, so rote memorization was impossible — only compression, which means learning the regularities. Those generalizations are what let it solve entirely new tasks."
+    },
+    {
+      "q": "What makes reasoning models better at solving hard problems?",
+      "options": [
+        "They simply have many times more parameters; the answer-generation principle is the same",
+        "Before the final answer, they generate a draft of reasoning, and every step becomes a foothold for the next",
+        "They don't predict tokens — they plug into a calculator and databases",
+        "They were trained exclusively on math and logic problem sets"
+      ],
+      "correct": 1,
+      "explain": "A reasoning model first \"thinks out loud\": every generated step lands in the context and supports the next prediction. On hard problems this multiplies accuracy, though it costs time and tokens."
+    },
+    {
+      "q": "You need a summary of a long contract, with exact amounts and dates. What's the most sensible way to go about it?",
+      "options": [
+        "Just ask it to \"summarize the contract\" — the model will find it on the internet by its title",
+        "Don't paste in the contract's text, so as not to take up room in the context window",
+        "Paste the contract's text into the dialogue, ask for the format you need, and verify the amounts and dates against the original",
+        "Ask the question several times and pick the answer where the model sounds most confident"
+      ],
+      "correct": 2,
+      "explain": "The model sees only what's inside its context window, so the contract has to be pasted into the chat. Asking for a format narrows the space of continuations, while exact amounts and dates are hallucination territory — check them against the original."
+    }
+  ]
+}

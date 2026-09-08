@@ -1,0 +1,103 @@
+{
+  "title": "Les limites : ce qu'un LLM sait faire et ce qu'il ne peut pas",
+  "minutes": 12,
+  "intro": "Voici le dernier module du cours — et le plus honnête. Vous savez déjà comment le modèle est construit à l'intérieur ; il est temps de comprendre où passent ses limites. Pourquoi il invente avec aplomb, ce qu'il en est de sa mémoire, s'il pense réellement — et comment tenir compte de tout cela dans le travail de tous les jours.",
+  "sections": [
+    {
+      "heading": "Plausible ne veut pas dire vrai",
+      "html": "<p>Souvenez-vous du module 8 : le modèle ne va pas chercher la réponse dans une base de données, il prédit encore et encore le token suivant — le plus approprié dans le contexte courant. Le mot « approprié » est ici la clé. On a entraîné le modèle à rendre le texte <em>plausible</em> — semblable aux milliards de pages lues pendant le pré-entraînement. Plausible, et non vérifié et véridique. Le plus souvent, c'est la même chose : la suite la plus probable de « La capitale de la France est… » est bel et bien « Paris ». Mais parfois les chemins divergent, et naît une <strong>hallucination</strong> — une réponse fluide, assurée, entièrement inventée.</p><div class=\"example\"><p>Demandez au modèle : « De quoi parle le roman de Tchekhov “Le Mystère de la maison grise” ? » Ce roman n'existe pas, et la réponse honnête serait de le dire. Mais dans les textes sur lesquels le modèle a appris, une question sur un livre est presque toujours suivie d'un résumé de l'intrigue, pas d'un refus. Les probabilités penchent en faveur du résumé : le modèle inventera l'intrigue, les personnages, l'année de publication — disons 1893 — et servira le tout dans le style d'un article d'encyclopédie.</p></div><p>Notez : le modèle ne « ment » pas — mentir suppose de connaître la vérité et de la cacher. Il n'a pas de réserve de faits à part, qu'il pourrait consulter. Il n'a que des poids — des milliards de nombres où sont comprimées les régularités des textes. Les faits fréquents, répétés des milliers de fois, se sont comprimés solidement : pas de raté sur la capitale de la France. Mais les faits rares — la date d'un décret obscur, un chiffre d'un rapport trimestriel, le deuxième prénom d'un personnage secondaire — sont stockés dans le flou, et à leur place le modèle reconstruit le plus vraisemblable. Un peu comme vous « savez » qu'enfant, à la campagne, il y avait l'été et la confiture, mais reconstituez à la volée telle journée précise de juillet.</p>"
+    },
+    {
+      "heading": "Ce qu'il faut absolument revérifier",
+      "html": "<p>De ce mécanisme découle une conclusion désagréable : <strong>un ton assuré ne garantit rien</strong>. Le modèle a appris sur des encyclopédies, des manuels et des articles — des textes que les humains écrivent d'une plume ferme, sans états d'âme. Ce style, il le reproduit aussi bien pour les faits réels que pour les faits inventés. L'intonation d'une réponse renseigne sur le genre, pas sur la vérité. Mieux : la structure soignée, la liste de sources et les chiffres à deux décimales font aussi partie du genre, et le modèle les imite avec la même aisance.</p><div class=\"callout\"><p>Vérifiez non pas là où le modèle semble hésiter, mais là où l'erreur coûte cher. L'hésitation, vous pourriez ne jamais l'entendre.</p></div><p>Quand la revérification est obligatoire :</p><ul><li><strong>Dates et chiffres.</strong> Année d'un événement, taille d'un marché, statistiques — la zone favorite des hallucinations : les nombres plausibles sont légion, le bon est unique.</li><li><strong>Citations.</strong> Le modèle « se souvient » volontiers de phrases que la personne n'a jamais prononcées — mais dans son style reconnaissable.</li><li><strong>Références et noms de sources.</strong> L'article inventé, avec un nom de revue plausible, un numéro de tome et des pages — un classique du genre.</li><li><strong>Droit, médecine, argent.</strong> Ici, l'erreur coûte trop cher, et de surcroît les normes changent — le modèle peut s'appuyer sur des données périmées.</li></ul><p>Règle simple : plus le fait est précis et rare, plus le risque est grand. Une explication générale du fonctionnement d'un prêt immobilier sera presque à coup sûr raisonnable ; le taux exact d'une banque donnée cette semaine — presque à coup sûr une invention. Le modèle est un magnifique brouillon et un excellent vulgarisateur, mais l'instance de dernier recours pour les faits, ce n'est pas lui.</p>"
+    },
+    {
+      "heading": "La fenêtre de contexte : une mémoire pour une seule conversation",
+      "html": "<p>Deuxième limite : la mémoire. Le modèle n'a pas de carnet interne où il noterait votre conversation. Tout ce qu'il « retient », c'est le texte du dialogue en cours, qu'on lui fournit <em>en entier</em> en entrée avant chaque réponse. Et cette entrée est limitée. Sa taille s'appelle la <strong>fenêtre de contexte (context window)</strong> et se mesure en tokens, que vous connaissez depuis le module 4.</p><div class=\"example\"><p>Une fenêtre de 200 000 tokens, c'est de l'ordre de 100 000 à 150 000 mots français, soit 400 à 500 pages de livre. Cela paraît immense, mais chargez deux gros contrats, discutez-en deux heures — et la limite approche. Quand le dialogue ne tient plus, les répliques anciennes sont coupées : le modèle répond comme si elles n'avaient jamais existé. Vous demandez : « Alors, qu'avions-nous décidé au tout début ? » — mais ce début, pour lui, n'existe physiquement pas.</p></div><p>Entre les chats, par défaut, il n'y a aucune mémoire du tout. Un nouveau dialogue est une page blanche : les mêmes poids gelés à l'entraînement et une fenêtre vide. Si ChatGPT ou Claude « se souvient » que vous êtes végétarien et que vous écrivez une thèse, ce n'est pas le modèle lui-même, mais une surcouche du service : il conserve des notes sur vous dans une banale base de données et les glisse discrètement au début de chaque conversation. Retirez la surcouche — la « mémoire » disparaît.</p><p>Encore une nuance : un long contexte n'est pas gratuit. L'attention du module 5 confronte chaque token à chaque autre, si bien que les dialogues énormes se traitent plus lentement, et que le modèle retrouve moins bien les détails du milieu d'un long texte que ceux du début et de la fin. Conclusion pratique : placez l'important près de la question, et une conversation qui s'éternise gagne parfois à être recommencée à zéro, avec un bref résumé des acquis de l'ancienne.</p>"
+    },
+    {
+      "heading": "Alors, pense-t-il ou non ?",
+      "html": "<p>Venons-en à la question que vous avez sans doute gardée en tête tout au long du cours. Après huit modules, on peut y répondre sans mystique. Pas comme un humain — ça, c'est certain. Le modèle n'a pas de buts propres : entre vos requêtes, il ne veut rien et ne médite sur rien — il n'« existe » même pas, ce n'est qu'un fichier de poids sur un disque. Pas de corps ni d'expérience vécue : le mot « brûlant » est pour lui un point de l'espace des embeddings, voisin de « se brûler » et de « bouilloire », pas le souvenir d'une douleur. Pas de mémoire continue : il n'apprend rien de vos conversations, ses poids sont gelés depuis l'entraînement.</p><p>Mais l'étiquette à la mode de « perroquet stochastique (stochastic parrot) » — comprenez : il ne ferait que répéter des morceaux appris par cœur — est tout aussi inexacte. Rappelez-vous l'échelle du module 6 : il y avait dans l'entraînement des milliers de fois plus de textes qu'il n'en tient dans les poids. Impossible de tout apprendre par cœur — on ne peut que comprimer, et on ne peut pas comprimer un texte sans en apprendre les régularités. Pour prédire le coup suivant dans la notation d'une partie d'échecs, il faut, dans une certaine mesure, apprendre les échecs. Pour poursuivre du code — la logique des programmes. Et ces généralisations apprises se transfèrent à des tâches absentes de l'entraînement : demandez de réécrire la notice d'une machine à laver dans le style d'une chanson de geste — un tel texte n'existe dans aucun jeu de données, mais le modèle s'en sortira, parce qu'il a « compris » séparément comment sont faites les notices, et séparément comment sont faites les chansons de geste.</p><div class=\"callout\"><p>Un LLM n'est ni un perroquet ni un humain, mais un troisième type de système, inédit : des généralisations profondes, apprises du texte — sans buts, sans expérience, sans mémoire propre. Les deux extrêmes — « simple autocomplétion » et « déjà conscient » — empêchent pareillement de s'en servir lucidement.</p></div>"
+    },
+    {
+      "heading": "Les modèles qui pensent à voix haute",
+      "html": "<p>L'une de ces limites a nettement bougé sous nos yeux. Un modèle classique répond « du premier jet » : le tout premier token de la réponse est déjà la copie au propre. Pour la capitale de la France, c'est très bien. Mais essayez de résoudre « d'une seule touche » ce problème : « Marie a trois fois plus de pommes que Pierre, ensemble ils en ont 24. Combien chacun en a-t-il ? » Un humain gribouille au brouillon : trois parts pour Marie plus une pour Pierre — quatre parts, 24 divisé par 4 — 6 par part, donc 18 et 6. Un modèle contraint d'écrire directement au propre n'a nulle part où faire ce calcul.</p><p>Aux <strong>modèles de raisonnement (reasoning models)</strong>, on a accordé le brouillon. Avant la réponse finale, ils génèrent une chaîne de raisonnement : ils énoncent les étapes, se vérifient, trouvent l'erreur et réessaient. L'astuce, c'est que chaque étape écrite entre dans le contexte et devient un appui pour prédire la suivante — le modèle s'écrit littéralement une antisèche. Vous ne voyez le plus souvent que le résultat, mais à l'intérieur ont pu « bruisser » des milliers de tokens de réflexion.</p><p>Sur les tâches difficiles — mathématiques, logique, programmation — la précision s'en trouve démultipliée : sur des problèmes de niveau olympiade, où les modèles ordinaires ne réussissaient que dans quelques pour cent des cas, les modèles de raisonnement réussissent la plupart du temps. Le prix : du temps et de l'argent. Le brouillon est parfois des dizaines de fois plus long que la réponse elle-même, et le calcul se paie au token. Activer la réflexion profonde pour une question simple, c'est donc prendre un char d'assaut pour aller chercher le pain. Les bons services laissent choisir le mode — vous savez désormais ce que vous choisissez.</p>"
+    },
+    {
+      "heading": "Mode d'emploi",
+      "html": "<p>Rassemblons le savoir de tout le cours en un court mémento — chaque point découle du fonctionnement du modèle, pas de superstitions.</p><ul><li><strong>Donnez du contexte.</strong> Le modèle ne voit que sa fenêtre. Pas « regarde mon contrat » — il ne le voit pas et ne le trouvera pas —, mais le texte du contrat collé dans le chat. Moins il doit deviner, moins il invente.</li><li><strong>Montrez des exemples.</strong> Un ou deux échantillons du résultat voulu calibrent la prédiction mieux qu'un paragraphe de descriptions : le modèle est une machine à prolonger les régularités — donnez-lui une régularité.</li><li><strong>Demandez un format.</strong> « Un tableau : colonne “risque”, colonne “que faire” » marche mieux que « parle-moi des risques ». Vous resserrez l'espace des suites probables vers ce qu'il vous faut.</li><li><strong>Découpez le complexe en étapes.</strong> D'abord le plan, puis section par section. Chaque résultat intermédiaire entre dans le contexte et travaille pour l'étape suivante — le principe même des modèles de raisonnement.</li><li><strong>Revérifiez les faits.</strong> Dates, chiffres, citations, références, normes — aux sources primaires. Le modèle est un brillant relecteur, vulgarisateur et générateur de brouillons, mais pas un service de renseignements.</li></ul><p>Notez : il n'y a là aucune formule magique. Les cinq points sont les conséquences directes de ce que vous savez désormais : prédiction de tokens, fenêtre de contexte, attention, probabilités.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<p>Le bilan du module — et de tout le cours — en quelques lignes :</p><ul><li>Le modèle prédit du texte plausible, il ne délivre pas des faits vérifiés ; les hallucinations ne sont pas une panne, mais le revers de son fonctionnement même.</li><li>Le ton assuré est le style des textes d'entraînement, pas une garantie de vérité. Dates, chiffres, citations, références et textes de loi — à revérifier aux sources primaires.</li><li>La mémoire du modèle, c'est la fenêtre de contexte du dialogue en cours. Entre les chats, par défaut, il ne retient rien ; la « mémoire » des services est une surcouche externe.</li><li>Il ne pense pas comme un humain — sans buts, sans expérience, sans mémoire continue —, mais ce n'est pas non plus un « perroquet » : ses généralisations apprises se transfèrent à des tâches entièrement nouvelles.</li><li>Les modèles de raisonnement ont reçu droit au brouillon avant la réponse — et ont nettement progressé en mathématiques, en logique et en code.</li><li>La formule de travail : contexte + exemples + format + étapes, et les faits — à vérifier.</li></ul><p>Vous avez parcouru le chemin de la chaîne de Markov jusqu'aux limites des LLM modernes. Le meilleur reste à venir : dans le jeu final, vous assemblerez et entraînerez de vos propres mains un petit réseau de neurones pour reconnaître des chiffres manuscrits — les petits poids, les gradients et les époques du cours prendront vie sous vos yeux. Et après le jeu — l'examen final. Bonne chance !</p>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Pourquoi un modèle de langue livre-t-il parfois des faits inventés avec une assurance totale ?",
+      "options": [
+        "Il prédit une suite de texte plausible, il ne se réfère pas à une base de faits vérifiés",
+        "Les développeurs ajoutent exprès des mensonges aux données d'entraînement pour se protéger de la copie",
+        "Il connaît la bonne réponse, mais la déforme délibérément à haute température",
+        "À cause du débordement de la fenêtre de contexte, les faits s'effacent de ses poids"
+      ],
+      "correct": 0,
+      "explain": "Le modèle est un prédicteur de texte : il reconstruit la suite la plus probable. Pour les faits fréquents, le probable coïncide avec le vrai ; pour les rares, il reconstruit avec le même aplomb une invention plausible."
+    },
+    {
+      "q": "Le modèle a répondu longuement, avec assurance, et a même cité une source. Qu'est-ce que cela prouve ?",
+      "options": [
+        "La réponse est forcément juste : le style assuré ne s'active qu'à haute probabilité de réponse correcte",
+        "La réponse est juste si la référence respecte les règles bibliographiques",
+        "Rien du tout : le style assuré, le modèle l'a appris des encyclopédies et l'applique pareillement au vrai et à l'inventé",
+        "La réponse est probablement fausse : les réponses vraies, le modèle les donne toujours brièvement"
+      ],
+      "correct": 2,
+      "explain": "Le style assuré, le modèle l'a emprunté aux encyclopédies et aux manuels, et il le reproduit indépendamment de la vérité. Une référence bien mise en forme peut, elle aussi, être générée — le décor ne dit rien de la vérité."
+    },
+    {
+      "q": "Vous discutiez d'un projet avec le modèle depuis une heure, et soudain il a « oublié » les accords du début de la conversation. Que s'est-il passé ?",
+      "options": [
+        "Le serveur a redémarré, et le modèle a perdu les informations sur vous stockées dans ses poids",
+        "Le début du dialogue est sorti de la fenêtre de contexte et n'est plus fourni au modèle en entrée",
+        "Le modèle s'est réentraîné sur les nouveaux messages, et les anciens poids ont été écrasés",
+        "Un filtre de sécurité s'est déclenché et a supprimé une partie de l'échange"
+      ],
+      "correct": 1,
+      "explain": "La mémoire du modèle, c'est la fenêtre de contexte : le texte du dialogue, fourni en entier en entrée. Quand la conversation ne tient plus, les répliques anciennes sont coupées, et pour le modèle elles n'existent plus."
+    },
+    {
+      "q": "Qu'est-ce qui cloche dans la formule « un LLM n'est qu'un perroquet qui répète des phrases apprises par cœur » ?",
+      "options": [
+        "Rien ne cloche : le modèle n'est capable de produire que des citations mot à mot des textes d'entraînement",
+        "« Perroquet » est un mot inexact, parce que le modèle possède une conscience et des buts, comme un humain",
+        "Le modèle n'a rien appris par cœur : il copie ses réponses d'Internet en temps réel",
+        "Pour bien prédire le texte, le modèle a appris des généralisations profondes — et il vient à bout de tâches absentes de son entraînement"
+      ],
+      "correct": 3,
+      "explain": "Il y avait dans l'entraînement des milliers de fois plus de textes qu'il n'en tient dans les poids : impossible de les apprendre par cœur — seulement de les comprimer, en apprenant leurs régularités. Ce sont ces généralisations qui permettent de résoudre des tâches entièrement nouvelles."
+    },
+    {
+      "q": "Grâce à quoi les modèles de raisonnement (reasoning) résolvent-ils mieux les tâches complexes ?",
+      "options": [
+        "Ils ont simplement bien plus de paramètres, le principe de génération restant le même",
+        "Avant la réponse finale, ils génèrent un brouillon de raisonnement, et chaque étape devient un appui pour la suivante",
+        "Ils ne prédisent pas des tokens, mais se branchent sur une calculatrice et des bases de données",
+        "On les a entraînés uniquement sur des recueils d'exercices de mathématiques et de logique"
+      ],
+      "correct": 1,
+      "explain": "Un modèle de raisonnement commence par « penser à voix haute » : chaque étape générée entre dans le contexte et sert d'appui à la prédiction suivante. Sur les tâches complexes, la précision s'en trouve démultipliée, au prix de temps et de tokens."
+    },
+    {
+      "q": "Il vous faut le résumé d'un long contrat, avec les montants et les dates exacts. Quelle est la démarche la plus raisonnable ?",
+      "options": [
+        "Demander simplement « résume le contrat » — le modèle le trouvera lui-même sur Internet d'après son intitulé",
+        "Ne pas coller le texte du contrat, pour ne pas prendre de place dans la fenêtre de contexte",
+        "Coller le texte du contrat dans le dialogue, demander le format voulu, puis confronter montants et dates à l'original",
+        "Poser la question plusieurs fois et retenir la réponse où le modèle semble le plus sûr de lui"
+      ],
+      "correct": 2,
+      "explain": "Le modèle ne voit que ce qui se trouve dans sa fenêtre de contexte : il faut donc coller le contrat dans le chat. La demande de format resserre l'espace des suites, et les montants et dates exacts sont la zone à risque d'hallucinations — on les confronte à l'original."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Which of these prompts is most likely to trigger a hallucination?",
+      "options": [
+        "\"Draft a five-section outline for a real estate market report\"",
+        "\"Explain in simple terms how a mortgage works\"",
+        "\"Give the exact date and decree number of the ministry's little-known 2011 reform\"",
+        "\"Rewrite this letter in a friendlier tone\""
+      ],
+      "correct": 2,
+      "explain": "The more specific and rare the fact, the more blurrily it's stored in the weights — and the model will confidently reconstruct a plausible invention. General explanations, outlines, and reworking text pasted into the chat all rest on reliably compressed patterns."
+    },
+    {
+      "q": "A friend insists: \"ChatGPT remembered I'm a vegetarian — so the model must be learning from our conversations.\" What's actually going on?",
+      "options": [
+        "The service stores notes about the user in an ordinary database and slips them into the start of every dialogue — the model's weights themselves are frozen",
+        "The model retrains on users' conversations every night, and its weights gradually change",
+        "Inside the neural network there's a dedicated long-term memory module where facts about the person are recorded",
+        "The model recognizes the user by their writing style and reconstructs facts about them from general patterns"
+      ],
+      "correct": 0,
+      "explain": "The model doesn't learn from conversations: the weights have been fixed since training. The \"memory\" is a service add-on: the notes live in an external database and are quietly inserted into the context window of each new chat."
+    },
+    {
+      "q": "You write to the model: \"Look over my lease agreement and find the risky clauses\" — but you never pasted the agreement's text into the chat. What's the most likely unpleasant outcome?",
+      "options": [
+        "The model will find the agreement on the internet through indirect clues and analyze it",
+        "The model will hang: without the file it physically has nothing to process",
+        "No harm done: models always honestly report that they can't see the document",
+        "The model may confidently produce a plausible \"analysis\" of an agreement it has never seen"
+      ],
+      "correct": 3,
+      "explain": "The model sees only what made it into the context window, and it was trained to continue text plausibly — in its training data, a request for an analysis is usually followed by an analysis. Sometimes it will honestly ask for the text, but you can't count on that: paste the document into the chat yourself."
+    },
+    {
+      "q": "You pasted a 400-page report into the chat (it still fits in the context window) and are asking questions about the details. Which details is the model most likely to miss?",
+      "options": [
+        "From the beginning of the report — it gets cut from the context window first",
+        "From the middle — attention is worse at finding details in the middle of a long text than at its beginning and end",
+        "None: as long as the text fits in the window, all its parts are processed equally accurately",
+        "From the end — toward the end of a long text the model \"tires\" and reads less attentively"
+      ],
+      "correct": 1,
+      "explain": "A long context isn't free: the attention mechanism is worse at fishing details out of the middle of a large text, which is why important passages should sit close to the question. Trimming the beginning happens only when the dialogue stops fitting in the window."
+    },
+    {
+      "q": "For which task is it reasonable to switch on deep reasoning mode, despite the cost in time and tokens?",
+      "options": [
+        "Asking what year Saint Petersburg was founded",
+        "Rewriting a paragraph of a letter in a formal tone",
+        "Building a duty roster for six employees with a dozen overlapping constraints",
+        "Asking for a list of synonyms for the word \"important\""
+      ],
+      "correct": 2,
+      "explain": "A reasoning draft helps where the answer takes many steps and self-checking: each written step becomes a foothold for the next. For simple questions it's \"taking a tank to buy bread\" — overpaying in time and tokens with no gain in quality."
+    },
+    {
+      "q": "Why does the advice \"break a complex task into steps: first an outline, then section by section\" genuinely improve the result?",
+      "options": [
+        "Every intermediate result lands in the context and serves as a foothold for the next predictions — the same principle as reasoning models",
+        "Between your messages, the model gets extra time to mull the task over",
+        "Short prompts burn fewer tokens, and in economy mode the model answers more accurately",
+        "With every new message the model retrains a little on your task"
+      ],
+      "correct": 0,
+      "explain": "The model predicts a continuation of whatever sits in the context: the finished outline and written sections become the footing for the next step. Between requests it ponders nothing and learns nothing — only the text in the window does the work."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain in your own words why it's wrong to say \"the model lied\" about a hallucination — and why it's not a glitch that can simply be fixed.",
+      "ref": "Lying presupposes knowing the truth and hiding it, but the model has no store of facts to check against — only weights holding the patterns of texts. It always does one and the same thing: reconstructs the most plausible continuation. For frequent facts, the plausible coincides with the true; in place of a rare, blurrily stored fact, it just as confidently reconstructs an invention. That's the flip side of the very principle of text prediction, not a separate malfunction."
+    },
+    {
+      "q": "Predict what happens: yesterday you spent two hours discussing a book outline with the model, and today you opened a new chat and wrote \"Let's continue with chapter three.\" The service's \"memory\" feature is switched off. How will the model behave, and what should you have done instead?",
+      "ref": "A new chat is a blank slate: the same frozen weights and an empty context window — yesterday's conversation doesn't exist for the model. It will either ask which book you mean, or — more insidiously — confidently press on with some plausible \"chapter three\" you never discussed. The right move is to start the new chat with a brief recap of yesterday's conclusions: the model receives context only through the window."
+    },
+    {
+      "q": "Come up with your own example of two prompts: one where the answer can be trusted almost without checking, and another where verification against a primary source is mandatory. Explain the difference through how the model works.",
+      "ref": "For example: \"explain the difference between leasing and renting\" — versus \"what's the government fee for registering a lease in 2026.\" General explanations rest on patterns repeated thousands of times in the training texts and reliably compressed into the weights. A specific rare fact — a figure, a date, a number, a quote — is stored blurrily, and the model will confidently reconstruct a plausible value. The rule: the more specific and rare the fact, and the higher the cost of an error, the more mandatory the check."
+    }
+  ]
+}

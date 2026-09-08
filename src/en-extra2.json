@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "The day before yesterday, the “homebody” neuron decided to go for a walk; today it decided to stay in. Nobody retrained it. What changed?",
+      "options": [
+        "The weights: they automatically adjust after every decision made",
+        "The activation function: it switched from a threshold to a sigmoid",
+        "The inputs: today’s weather and mood are different, while the weights and bias stayed the same",
+        "The bias: it builds up day after day, like fatigue"
+      ],
+      "correct": 2,
+      "explain": "The weights and bias are the neuron’s stable “personality”; they change only during training. What changes from day to day are the inputs: the same formula with different x’s gives a different sum and a different decision."
+    },
+    {
+      "q": "You want to turn the homebody neuron into a “go-getter” without changing its attitude toward sunshine, rain, and mood. What needs fixing?",
+      "options": [
+        "The bias: make it positive instead of negative",
+        "The threshold: raise it higher so the neuron fires more often",
+        "The inputs: feed the neuron only good weather",
+        "All the weights at once: multiply each one several times over"
+      ],
+      "correct": 0,
+      "explain": "The attitude toward each factor is baked into the weights, while the baseline readiness to act lives in the bias. A positive bias shifts the starting point upward: now even modest arguments “for” are enough to push the sum past the threshold."
+    },
+    {
+      "q": "A neuron’s weights: sunshine +0.8, rain −2, mood +0.5. Each input changed by exactly one unit. Which change shifts the weighted sum the most?",
+      "options": [
+        "All three equally: the inputs changed by the same amount, after all",
+        "Sunshine: it has a positive weight, and positive influence is always stronger",
+        "Mood: internal factors matter more than external ones",
+        "Rain: its weight has the largest magnitude, and the sign plays no role here"
+      ],
+      "correct": 3,
+      "explain": "An input’s contribution is the input times the weight, so one unit of change “costs” exactly as much as the weight attached to it. Rain’s weight is −2: in absolute value it beats 0.8 and 0.5, so the sum shifts the most — just downward."
+    },
+    {
+      "q": "Predict: how will a neuron behave if all its weights are zero and its bias is −3?",
+      "options": [
+        "It will break: without weights, the neuron can’t compute the sum",
+        "It will ignore all inputs: the sum is always −3, and the decision is always the same",
+        "It will produce random decisions until it gets trained",
+        "It will respond only to the strongest of its inputs"
+      ],
+      "correct": 1,
+      "explain": "Any input multiplied by zero gives zero — nothing of the inputs survives in the sum; only the bias lives there. In any weather whatsoever, such a neuron gives one and the same answer."
+    },
+    {
+      "q": "In a network that hunts for cats in photos, a neuron was discovered that fires at the triangle of an ear. Who assigned it that specialization?",
+      "options": [
+        "The programmers: they wrote the rule “a triangle above the head means an ear”",
+        "The network’s first layer: it hands out assignments to all the other layers",
+        "The data labelers: they traced the ears by hand in the training photographs",
+        "Nobody: the specialization emerged on its own when training settled the neuron’s weights into particular values"
+      ],
+      "correct": 3,
+      "explain": "Engineers specify only the architecture: how many layers and how many neurons in each. What exactly each neuron notices is determined by the values of its weights — and those settle on their own during training, which is what the next module is about."
+    },
+    {
+      "q": "You copied all the parameters of a trained network — billions of weights and biases — into a new network with exactly the same architecture. What did you get?",
+      "options": [
+        "An exact copy: it will answer the same way, since apart from the architecture and these numbers there is nothing in a network",
+        "An empty network: the knowledge stays behind in the original model when you copy",
+        "A copy of the “personality” but not the knowledge: learned facts are stored separately from the weights",
+        "A blank: it will only start behaving the same after being retrained on the same data"
+      ],
+      "correct": 0,
+      "explain": "A network is fully described by its architecture and parameters: all of its “knowledge” is the values of the weights and biases. Copy the numbers — copy the model; that is exactly why downloading a model means downloading a giant file of numbers."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain in your own words how a neuron’s inputs differ from its weights — and why the same weather can lead two neurons with different “personalities” to opposite decisions.",
+      "ref": "Inputs describe today’s situation and change from one occasion to the next: sunshine, rain, mood. Weights are the neuron’s stable “personality,” its accumulated experience: they set how strongly, and in which direction, each factor pushes on the decision. The same inputs multiplied by different weights give different sums — which is why the same weather will lure one person outside and keep another at home. It is the weights, not the inputs, that a network tunes during training."
+    },
+    {
+      "q": "Invent your own real-life “neuron” — any yes/no decision except the walk. Name two or three inputs, give each a signed weight, add a bias, and explain why you chose those particular numbers.",
+      "ref": "For example, a “grab coffee on the way” neuron: inputs — tiredness (weight +1.5: the more tired, the more the coffee is needed), the length of the line (weight −1: it pushes away), and minutes until the meeting starts (weight −0.5: being rushed gets in the way). Bias +2: I’m a coffee fiend and inclined to buy by default. Any example works where each factor has a sign (“for” or “against”) and a magnitude (strength of influence), and the bias reflects a baseline inclination before circumstances are even considered."
+    },
+    {
+      "q": "A friend is convinced: “A language model contains all the texts it was trained on — it just searches them for the answer.” Explain to him what is actually stored inside the model and where its knowledge “lives.”",
+      "ref": "Inside the model there are no texts, no database of facts, no rules — only parameters: hundreds of billions of weights and biases, essentially a gigantic table of numbers. Knowledge doesn’t sit in any single cell: it is “smeared” across millions of weights, each nudging the network slightly toward the right answer. That is why downloading a model means downloading a file of numbers, not an archive of texts."
+    }
+  ]
+}

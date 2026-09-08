@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Vous avez réglé la température (temperature) à zéro dans les paramètres et envoyé trois fois de suite exactement la même requête. Qu'allez-vous très probablement voir ?",
+      "options": [
+        "Trois réponses nettement différentes : le hasard est intégré au réseau lui-même et ne dépend pas de la température",
+        "Trois réponses (presque) identiques : la roulette se transforme en choix glouton, et à chaque étape c'est le token en tête qui l'emporte",
+        "Le modèle refusera de répondre : à température nulle, les probabilités ne peuvent pas être calculées",
+        "Les réponses deviendront plus longues et détaillées : une température basse pousse le modèle à se donner du mal"
+      ],
+      "correct": 1,
+      "explain": "À température proche de zéro, la distribution s'aiguise à l'extrême : le favori rafle pratiquement tout, et l'échantillonnage (sampling) se réduit à un choix glouton. Tout le hasard vivait dans la roulette, pas à l'intérieur du réseau — sans elle, les réponses coïncident."
+    },
+    {
+      "q": "À quel endroit de la chaîne — de votre requête à la réponse finie — le hasard entre-t-il en jeu ?",
+      "options": [
+        "Dans le mécanisme d'attention (attention) : les couches du réseau réagissent chaque fois un peu différemment",
+        "Au découpage du texte en tokens : il donne chaque fois un résultat différent",
+        "Dans le softmax : il répartit les pourcentages entre les tokens de façon aléatoire",
+        "Seulement à la toute dernière étape, quand la roulette tire un token à partir des probabilités déjà calculées"
+      ],
+      "correct": 3,
+      "explain": "Tout le réseau, jusqu'à la sortie, calcule de façon déterministe : même entrée — mêmes logits et mêmes pourcentages après le softmax. Le hasard n'apparaît qu'à l'étape de l'échantillonnage, quand la roulette tire un token de la distribution."
+    },
+    {
+      "q": "Le modèle tourne à haute température, mais le top-p = 0,9 est activé. Le token « démocratie », dans l'exemple du module, avait une probabilité microscopique. Que va-t-il lui arriver à cette étape ?",
+      "options": [
+        "Il n'entrera pas du tout dans la roulette : le haut de la liste atteint ses 90 % sans lui, et la queue est écartée",
+        "Ses chances vont augmenter : la haute température dope précisément les tokens rares",
+        "Il participera à la loterie avec sa chance minuscule — le top-p n'exclut personne",
+        "Le top-p le choisira d'office, pour que le texte soit plus varié"
+      ],
+      "correct": 0,
+      "explain": "Le top-p trie les tokens par probabilité décroissante et ne garde que le haut du panier, dont la somme atteint 90 % ; la longue queue ne participe pas à la loterie. C'est exactement ainsi qu'il protège des tokens farfelus dont les chances ont grimpé à cause de la haute température."
+    },
+    {
+      "q": "Le chatbot a affiché la moitié d'une phrase et continue d'écrire. Que peut-on dire, à cet instant, de la fin de la phrase ?",
+      "options": [
+        "Elle est déjà calculée en entier et s'affiche simplement à l'écran avec un délai, pour faire joli",
+        "Elle existe sous forme de brouillon que le modèle peaufine au fil de l'écriture",
+        "Elle n'existe pas encore : chaque token suivant sera choisi de zéro, en tenant compte de tout ce qui est déjà écrit",
+        "Elle a été choisie au moment où le modèle a lu votre question"
+      ],
+      "correct": 2,
+      "explain": "L'autorégression (autoregression) signifie qu'il n'existe aucun plan tout prêt de la phrase : le token choisi est ajouté au texte, et les probabilités du suivant sont recalculées à neuf. L'affichage mot à mot n'est pas une animation, c'est le rythme réel auquel la réponse vient au monde."
+    },
+    {
+      "q": "Pourquoi la consigne « raisonne étape par étape » aide-t-elle vraiment le modèle, si l'on se souvient du mécanisme de l'autorégression ?",
+      "options": [
+        "Les raisonnements intermédiaires viennent s'ajouter au contexte et influencent les probabilités de tous les tokens suivants",
+        "Cette phrase abaisse automatiquement la température à un niveau sûr",
+        "Le modèle bascule sur un bloc « logique » séparé, qui ne fonctionne pas autrement",
+        "Le modèle obtient la possibilité de vérifier et de réécrire le texte déjà affiché"
+      ],
+      "correct": 0,
+      "explain": "Le modèle ne peut pas « réfléchir jusqu'au bout d'abord, écrire ensuite » : ce qui est choisi est déjà dans le texte. Mais les étapes intermédiaires, une fois entrées dans le contexte, déplacent les probabilités des tokens à venir — raisonner à voix haute fraye littéralement le chemin vers la réponse."
+    },
+    {
+      "q": "En quoi la boucle de génération d'un LLM moderne diffère-t-elle de la chaîne de Markov (Markov chain) du début du cours ?",
+      "options": [
+        "Le LLM choisit ses mots sans aucun hasard, la chaîne de Markov au petit bonheur",
+        "La chaîne de Markov travaille avec des lettres, le LLM directement avec des phrases entières",
+        "Le cycle lui-même — « prédis, ajoute, recommence » — est le même ; ce qui change, c'est le prédicteur : à la place d'une petite table de paires de mots, un immense réseau doté d'attention",
+        "En tout, fondamentalement : le LLM construit d'abord le plan complet de la réponse, puis le couche par écrit"
+      ],
+      "correct": 2,
+      "explain": "Le principe n'a pas changé d'un iota : on choisit un token, on l'ajoute, on prédit la suite. La différence, c'est qui fournit les probabilités — pour la chaîne de Markov, une table de paires de mots ; pour le LLM, un réseau à des dizaines de couches d'attention, entraîné sur d'immenses volumes de texte."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots ce qu'on veut dire par : « un modèle de langage ne produit pas le mot suivant — il produit une prévision ». Qu'est-ce qui sort exactement du réseau, et comment en tire-t-on ensuite un mot ?",
+      "ref": "Ce qui sort du réseau, ce n'est pas un mot, mais une note pour chaque token du vocabulaire : des scores bruts, les logits, que le softmax transforme en probabilités — une sorte de bulletin météo (« tapis » — 54 %, « rebord de fenêtre » — 24 %). Le mot lui-même naît dans une étape à part : la roulette tire un token au hasard, proportionnellement à ces pourcentages. Quant à la température et au top-p, ce sont des réglages de cette roulette, pas du réseau lui-même."
+    },
+    {
+      "q": "Prédisez la suite : vous demandez au modèle une courte lettre officielle au fisc, mais la température est réglée par accident sur 1,8. À quoi ressemblera le texte, et quel réglage allez-vous changer ?",
+      "ref": "À 1,8, la distribution s'aplatit : les secteurs de la roulette s'égalisent, et des mots outsiders inattendus se glissent de plus en plus souvent dans le texte. La lettre officielle sortira sans doute étrange — avec des tournures incongrues, voire, par endroits, du pur charabia. Le remède : baisser la température (disons à 0,2–0,3) — pour les textes formels et factuels, il faut de la prévisibilité, pas de l'audace."
+    },
+    {
+      "q": "Donnez votre propre exemple d'un processus de la vie courante construit comme une autorégression : le pas suivant se choisit au vu de tout ce qui a déjà été fait, sans plan d'ensemble préétabli. Précisez ce qui, dans votre exemple, joue le rôle du « token ajouté ».",
+      "ref": "Un récit improvisé à l'oral convient très bien : pas de texte préparé, chaque phrase suivante naît en s'appuyant sur ce qui a déjà été dit, et une seule réplique inattendue emmène tout le récit sur un autre chemin. Le rôle du « token ajouté » revient à la phrase qui vient d'être prononcée : elle rejoint le contexte et pèse sur ce que vous direz ensuite. L'essentiel, dans tout exemple de ce genre : le résultat d'un pas devient l'entrée du suivant, et le plan complet n'existe jamais d'avance."
+    }
+  ]
+}

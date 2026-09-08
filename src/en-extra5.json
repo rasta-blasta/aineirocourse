@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "In the sentence 'The cat wouldn't eat the fish because it was spoiled,' the last word is replaced: '…because it was full.' What happens to the model's attention when it processes the word 'it'?",
+      "options": [
+        "Nothing: the structure of the sentence hasn't changed, so the attention weights stay the same",
+        "The model gets stuck between the two readings and cannot process the sentence",
+        "The weights are recomputed from scratch: now 'cat' gets the larger weight, since it's the cat that can be full, not the fish",
+        "Only the weight of the word 'full' itself changes; the rest of the layout is preserved"
+      ],
+      "correct": 2,
+      "explain": "The attention layout is computed anew for every sentence and depends on the meaning of the whole. One word at the end changes what the pronoun 'reaches for': it's the fish that can be spoiled, and the cat that can be full."
+    },
+    {
+      "q": "While processing the word 'it,' the model gave the word 'fish' an attention weight of 0.58. What follows from that for all the other words in the sentence?",
+      "options": [
+        "They have 0.42 left between them: the weights are shares that sum to one",
+        "Each of them can also get up to 0.58 — weights are assigned independently of one another",
+        "All the rest get exactly zero: the model looks only at the single most important word",
+        "Their weights can be anything, as long as none exceeds 0.58"
+      ],
+      "correct": 0,
+      "explain": "Attention weights work like percentages: across all the words they sum to one. If more than half the 'gaze' went to the fish, the rest share the remaining 0.42 — the more one word gets, the less is left for the others."
+    },
+    {
+      "q": "You pasted an entire novella into the chat and asked about a detail from the first chapter. Why will a transformer cope, while a recurrent network circa 2015 most likely won't?",
+      "options": [
+        "The transformer has a bigger vocabulary, so it understands more rare words",
+        "A recurrent network drags a compressed 'running summary' of what it has read down the chain, and by the end of the novella the detail from the beginning has blurred out of it; attention reaches the right spot directly",
+        "Recurrent networks fundamentally could not handle works of fiction",
+        "A transformer memorizes every book by heart during training, so the novella is already familiar to it"
+      ],
+      "correct": 1,
+      "explain": "A recurrent network read text one word at a time, retelling what it had read to itself — the beginning of a long text inevitably got lost. Attention needs no retelling: it sees all the words at once and can give a large weight to a token even from the first chapter."
+    },
+    {
+      "q": "In a text, the clue word sits two hundred words before the one being processed, while right next door stands the function word 'that.' How will the attention mechanism distribute the weights between them?",
+      "options": [
+        "The adjacent word always gets more: attention weight decays with distance",
+        "Both get roughly equal shares — attention smears itself evenly across the context",
+        "The model simply won't see the distant word: it's beyond the two-to-three-word window",
+        "The distant clue can get a large weight while the neighboring 'that' gets almost none: importance is determined by meaning, not proximity"
+      ],
+      "correct": 3,
+      "explain": "This is the key difference between attention and a Markov chain: distance by itself is not a verdict. The weight is set by how well a word's 'query' matches the other words' 'name tags,' so a clue from far back in the text easily outweighs an empty neighbor."
+    },
+    {
+      "q": "Researchers found an attention head in a finished model that tracks open quotation marks. Where did its specialization come from?",
+      "options": [
+        "It emerged on its own during training: all heads are built identically, and nobody assigned them roles",
+        "The developers programmed a dedicated quotation-mark rule for it",
+        "Each head's specialty is assigned by hand before training starts",
+        "That head is built differently from the rest — purpose-made for punctuation"
+      ],
+      "correct": 0,
+      "explain": "The heads differ only in their learned weights, and the roles form spontaneously — by the same gradient descent. Tracking quotation marks turned out to be useful for predicting the next token, so the specialization took hold."
+    },
+    {
+      "q": "On which 'floor' of the transformer are we most likely to find the specialist who understands that a whole paragraph is written with irony?",
+      "options": [
+        "In the lower layers: irony is read off individual words, and that's their level",
+        "In the very first layer — otherwise the remaining layers couldn't understand the text correctly",
+        "In the upper layers: they build on the work of the lower ones and deal in the meaning of the whole, while the lower ones catch what's local — adjacent words and grammar",
+        "In any random one: transformer layers don't differ in the level of tasks they solve"
+      ],
+      "correct": 2,
+      "explain": "The layers work like an assembly line of increasing sophistication: the lower ones catch chunks of grammar, the middle ones relationships within a sentence, the upper ones something close to meaning — the paragraph's topic, irony, conclusions. Irony takes a view of the whole — that's a job for the upper floors."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain in your own words how the attention mechanism solves the problem of chameleon words — words like 'key' or 'it,' whose meaning depends on context.",
+      "ref": "While processing a word, the model assigns importance weights to all the words in the context and blends information from the 'weightiest' neighbors into its vector. That's why the same 'key' on the input gives different vectors on the output: next to 'lock' it shifts toward the piece of metal, next to 'melody' — toward music. A word's meaning is not stored ready-made in a dictionary; it is assembled afresh for every sentence out of the word's surroundings."
+    },
+    {
+      "q": "Make a prediction: in the sentence 'The trophy wouldn't fit in the suitcase because it was too big,' the model is processing the word 'it.' Where will the bulk of the attention weight go? And what if the ending is changed to '…because it was too small'? Explain why the two layouts come out different.",
+      "ref": "In the first version, the main weight goes to 'trophy': the thing that won't fit is the one that can be too big. In the second, the weight flows to 'suitcase' — being too small is a container's problem, not the trophy's. The layouts differ because the weights are computed anew for each sentence from the meaning of the whole: one word at the end changes what the pronoun 'reaches for' — exactly like 'spoiled' and 'full' in the cat example."
+    },
+    {
+      "q": "Come up with your own sentence containing a word with several meanings — built so that the correct sense is revealed by a word that does not stand right next to it. Say which words attention should weight most heavily when processing your chameleon word.",
+      "ref": "Any sentence where an ambiguous word 'picks' its meaning from a distant clue will do. For example: 'The bow had warped so badly over the summer that the archery tournament had to be cancelled' — while processing 'bow,' the greatest weight should go to 'archery' and 'tournament,' even though they come at the very end. A good answer names both the chameleon word itself and the specific distant clue words attention has to 'reach' past the neighbors."
+    }
+  ]
+}

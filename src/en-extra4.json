@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "You type the made-up word 'catosaurus' — it appears in no dictionary anywhere. What happens at the tokenization stage?",
+      "options": [
+        "The tokenizer throws an 'unknown word' error, and the model asks you to rephrase",
+        "The model quietly swaps it for the nearest familiar word — most likely 'cat'",
+        "The tokenizer assembles the word out of familiar chunks like 'cat,' 'o,' and 'saurus,' and the model carries on without a hitch",
+        "The word enters the model's vocabulary as a new token, and it remembers it forever"
+      ],
+      "correct": 2,
+      "explain": "The token vocabulary is built so that any text is guaranteed to be sliced up with nothing left over: frequent words stay whole, while rare and invented ones are assembled from pieces, like parts from a construction kit. A 'word not found' dead end simply cannot happen to the model — and it never needs to grow its vocabulary on the fly."
+    },
+    {
+      "q": "An engineer proposes simplifying the system: slice text into individual letters — a vocabulary of 26 letters is guaranteed to cover any text. What's wrong with this plan?",
+      "options": [
+        "There are too few letters, and the model wouldn't be able to tell rare words from frequent ones",
+        "The sequences would get several times longer, and each piece would be meaningless: the network would burn its capacity just reassembling words out of letters",
+        "Letters, unlike tokens, cannot be turned into numbers",
+        "The model would start making spelling mistakes, because it would no longer see words as wholes"
+      ],
+      "correct": 1,
+      "explain": "The tiny vocabulary is a genuine advantage of letter-by-letter slicing, but the price is steep: the text stretches out five- or six-fold, and the letter 'c' by itself means nothing. Tokens are the compromise: a finite vocabulary, with frequent words kept as whole, meaningful chunks."
+    },
+    {
+      "q": "'Cat' and 'car' differ by just one letter. Where will they end up in embedding space?",
+      "options": [
+        "Far apart: the closeness of points is determined by similarity of usage and meaning, not by spelling",
+        "Close together: nearly identical spelling gives nearly identical coordinates",
+        "Close together: both words are short and frequent, and the model stores such words in the same neighborhood",
+        "At neighboring points, because their ids in the token vocabulary are consecutive"
+      ],
+      "correct": 0,
+      "explain": "Embeddings are learned from the company a word keeps: 'cat' hangs out among milk and sofas, 'car' among roads and engines. So one lives in the animal quarter and the other in the traffic quarter, even though they are spelled almost identically."
+    },
+    {
+      "q": "The arrow that leads from the point 'actor' to the point 'actress' is applied to the point 'tiger.' Where will we most likely land?",
+      "options": [
+        "Right back at 'tiger': animal words have no 'masculine — feminine' direction",
+        "At the word 'lion': the arrow shifts a word toward other predators",
+        "Somewhere random: arrows like that only work within a single topic, such as professions",
+        "Roughly at the word 'tigress': the 'masculine to feminine' direction in the space is about the same across different word pairs"
+      ],
+      "correct": 3,
+      "explain": "This is exactly the effect of vector arithmetic: a semantic relation — say, 'masculine → feminine' — turns out to be roughly the same direction for king and queen, actor and actress, bull and cow. We won't land exactly on the dot, but the nearest neighbor will be 'tigress.'"
+    },
+    {
+      "q": "Picture the model at the very first moment of training, before the first step of gradient descent. How are the points 'actor' and 'actress' arranged?",
+      "options": [
+        "Already close: the tokenizer deliberately gives similar words neighboring coordinates",
+        "Anywhere at all, possibly at opposite ends of the space: embeddings start out as random numbers, and the map of meanings only takes shape during training",
+        "Their points don't exist yet: embeddings appear only after training is finished",
+        "Already close: similar spelling automatically gives similar numbers"
+      ],
+      "correct": 1,
+      "explain": "Embeddings are tunable weights of the network like any other — the same knobs as in the third module: at the start they are random numbers. Only millions of gradient-descent steps, each slightly improving next-token prediction, gradually pull words with similar usage toward one another."
+    },
+    {
+      "q": "The word 'bow' has two meanings — a ribbon on a gift and a weapon — but only one token. How does the model handle the phrase 'a bow and arrows'?",
+      "options": [
+        "The base point of 'bow' hangs between the meanings, and pulling them apart by context is the job of the attention mechanism — already inside the model",
+        "The token 'bow' has two embeddings, and the model picks the right one back at the tokenization stage",
+        "The tokenizer slices the word differently: ribbon-'bow' and weapon-'bow' get different tokens",
+        "The model treats both meanings as one and the same and fundamentally cannot tell the ribbon from the weapon"
+      ],
+      "correct": 0,
+      "explain": "The token has a single point, and for an ambiguous word it hangs 'somewhere between the gift box and the archery range.' Telling the senses apart by the neighboring words is the job of attention, the transformer's superpower from the next module; by the output, the model understands perfectly well that next to arrows, a bow is a weapon."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain in your own words why the second step — embeddings — is needed at all. After tokenization, every chunk of text already has an id, which is a number — why isn't that enough for the network?",
+      "ref": "A token id is a random name tag: 'cat' and 'carburetor' may end up with adjacent ids, and closeness of the numbers says nothing about closeness of meaning. The network lives by multiplying numbers, so it needs numbers with the meaning encoded inside. An embedding gives each token hundreds of coordinates, and words close in meaning become close points — on a map like that, the network can lean on geometry: what it has learned about 'cat' works for 'kitten' too."
+    },
+    {
+      "q": "Predict what will happen if you ask an LLM to write the word 'electrification' backwards. Will it manage easily, and why?",
+      "ref": "Most likely it will struggle or make mistakes. The model never sees letters — the word reaches it as two or three indivisible tokens, and inside a token, individual letters do not exist for it. It has to reverse the word 'from memory' of how the word is usually spelled, rather than by looking at a chain of letters — the same reason it slips up counting the r's in 'strawberry.'"
+    },
+    {
+      "q": "Invent your own semantic 'arrow' — a relation between words not mentioned in the module — and show on two different word pairs that the direction is the same.",
+      "ref": "Any stable relation will do. For example, 'baby animal → adult animal': the arrow from 'kitten' to 'cat' is roughly the same as the one from 'puppy' to 'dog.' Or 'singular → plural': from 'table' to 'tables' and from 'house' to 'houses.' What matters in the answer is the idea itself: a relation between meanings is a single direction in the space, and applying the same arrow to another pair lands you roughly at the right point."
+    }
+  ]
+}

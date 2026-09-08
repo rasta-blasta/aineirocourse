@@ -1,0 +1,103 @@
+{
+  "title": "Attention: The Transformer's Superpower",
+  "minutes": 12,
+  "intro": "Read this sentence: 'The cat wouldn't eat the fish because it was spoiled.' You instantly understood that the fish was spoiled, not the cat — and you didn't even notice yourself doing it. Yet for machines, this task remained all but unsolvable for decades. This module is about the attention mechanism: the idea that taught neural networks to 'look back' at context — and in 2017 became the foundation of the transformer, the architecture that made possible everything you see today in ChatGPT and Claude.",
+  "sections": [
+    {
+      "heading": "Chameleon Words and a Missing Cat",
+      "html": "<p>In the previous module, words became embeddings — lists of numbers in which words with similar meanings end up close together. But there's a catch: the word 'key' has one entry in the model's vocabulary and at least three meanings. 'I lost the key to my apartment' — a piece of metal for a lock. 'The song slips into a minor key' — music. 'They found the key to the cipher' — a solution. On its own, the word means almost nothing: its meaning is assembled anew each time from its neighbors.</p><p>Pronouns are even worse. 'It' is an empty shell: all the filling comes from context. Back to our cat: 'The cat wouldn't eat the fish because it was spoiled.' To understand 'it,' you have to weigh two candidates — the cat at the start of the sentence and the fish — and the word that settles the contest, 'spoiled,' sits at the very end. Replace 'spoiled' with 'full' — and that very same 'it' suddenly turns out to be the cat. One word at the end of the sentence flips the meaning of a word in the middle: that's what the model is up against.</p><p>Now recall the Markov chain from the first module. It looks at the two or three previous words, no further. From 'because it was…' there is no telling what 'it' points to: 'because' carries zero useful information, and the words that decide the matter — 'cat' and 'spoiled' — are outside its field of view. And in real texts the clue can sit three paragraphs up: 'The contract we discussed on Monday… — please sign it.' No window of three, five, or ten words fixes this: you need a mechanism that can peek <em>anywhere</em> in the text.</p>"
+    },
+    {
+      "heading": "Looking Back at the Whole Sentence",
+      "html": "<p>That mechanism is called <strong>attention</strong>. The idea is this: while processing a given word, the model scans <em>all</em> the words in the context and assigns each one an importance weight — a number showing how hard to 'look' at that word right now.</p><p>You do this all the time. You're reading a detective novel, you hit the line 'so that's whose handkerchief it was!' — and you mentally flip back to a scene from chapter three, skipping hundreds of pages in between. Or you're standing at a noisy party: a dozen conversations around you, but you 'turn up the volume' on one voice and mute the rest. Attention in a neural network is that same volume knob, only for words — and it gets re-tuned from scratch for every word being processed.</p><p>Note the crucial difference from a Markov chain. There, distance decided everything: two words back — visible, four — gone. With attention, distance by itself is not a verdict: a word at the beginning of a book can get a large weight while the word right next door gets almost none. Importance is determined by meaning, not proximity.</p><div class=\"example\"><p>Attention weights are shares that sum to one, like percentages. Processing the word 'it' in our sentence, the model might spread its attention like this: 'fish' — 0.58, 'spoiled' — 0.20, 'cat' — 0.09, 'eat' — 0.06, with crumbs left for the other words. More than half the 'gaze' went to the fish — and 'it' takes on the meaning 'that fish from earlier in the sentence.'</p></div><p>Crucially, nobody writes these weights in by hand. The network computes them on the fly, using the same little knobs we took apart in the second module — the ones tuned during training. For every new sentence, the attention layout is different.</p><div class=\"callout\"><p><strong>Key idea:</strong> to understand a word, you don't need to hold the entire text in mind with equal force. You need to be able to instantly find the few words that matter right now — and look mostly at them.</p></div>"
+    },
+    {
+      "heading": "Every Word Sends Out a Query",
+      "html": "<p>How does the network decide where to look? Without formulas, picture it like this: every word sends out a query to all the others — 'who here is about me?' The word 'it' announces, in effect: 'I'm a pronoun; I'm looking for a thing that was mentioned recently.' And every word in the sentence wears a kind of name tag with its description: 'I'm a noun, recently mentioned, from the world of food.' The better the tag answers the query, the higher the attention weight between that pair of words. 'Fish' is an excellent match; 'cat' — weaker (a fine candidate grammatically, but with 'spoiled' in the sentence it was clearly not about her); 'because' — nearly zero. The strength of the match becomes the attention weight: 0.58, 0.09, almost nothing.</p><p>Then comes the main event: the word doesn't just 'look at' its important neighbors — it <strong>absorbs</strong> information from them. Bits of meaning from 'fish' and 'spoiled' get blended into the embedding of 'it,' in proportion to the weights. On the way out, 'it' is no longer an abstract pronoun but very nearly 'the spoiled fish from this sentence.' Same story with 'key': if 'door' and 'lock' are nearby, its vector shifts toward the piece of metal; if 'melody' and 'minor' — toward music. The same word coming in, different vectors coming out, depending on the company it keeps. That is exactly how the chameleon-word problem gets solved.</p><p>Queries and name tags are themselves just numbers, produced from the embeddings by multiplication with trainable weights. Nobody programmed a rule saying 'a pronoun looks for a noun.' The model learned it on its own, by the gradient descent from the third module — simply because knowing what 'it' refers to helps predict the next word more accurately.</p>"
+    },
+    {
+      "heading": "Dozens of Layers, Hundreds of Specialists",
+      "html": "<p>One pass of attention captures one 'slice' of relationships. But real models stack attention layers by the dozen, and inside each layer several <strong>attention heads</strong> run in parallel — independent mechanisms, each with its own learned weights. And each head develops its own specialty: one tracks how adjectives agree with nouns, another what the pronouns refer to, a third links a verb to its object, a fourth gathers words on the same topic.</p><p>The layers work like an assembly line of increasing sophistication. The lower ones catch what's simple and local: adjacent words, chunks of grammar. The middle ones assemble phrases and links within a sentence. The upper ones deal in something close to meaning: what the paragraph is about, where the irony is, what follows from what. Picture a publishing house where a manuscript passes down a chain of editors: the proofreader fixes typos, the style editor smooths clunky phrasing, the fact-checker verifies dates, the managing editor reads the text as a whole. Each makes their pass building on the work of those before — and the text comes out 'understood' at every level at once.</p><div class=\"example\"><p>The scale: GPT-3 has 96 layers, with 96 attention heads in each. That's more than nine thousand little 'relationship specialists,' each looking at the text in its own way.</p></div><p>The most interesting part: nobody assigned the specializations. All the heads are built identically and differ only in their learned weights — the roles emerged on their own during training. Researchers later poke around inside a finished model with great curiosity and discover: this head, it turns out, tracks open quotation marks, and that one over there follows characters' names.</p>"
+    },
+    {
+      "heading": "The Transformer: 'Attention Is All You Need'",
+      "html": "<p>In 2017, engineers at Google published a paper titled 'Attention Is All You Need.' It described an architecture called the <strong>transformer</strong>: a stack of attention layers alternating with the ordinary layers of neurons from the second module. The title proved prophetic — today virtually every large language model runs on transformers.</p><p>Before 2017, text was mostly handled by recurrent neural networks. They read text strictly one word at a time, dragging along a compressed 'running summary' of everything so far. By the end of a long paragraph the summary inevitably blurred — the beginning was forgotten. The transformer has two decisive advantages over them.</p><ul><li><strong>The whole context at once.</strong> Attention looks at all the words simultaneously, without retelling anything to itself down a chain. The first transformers kept hundreds of tokens in view; today's models, hundreds of thousands — a thick book the model sees 'in a single glance.' When you paste a long contract into the chat and ask about a clause in the middle, this is exactly what's at work: attention reaches the right spot directly, with no chain of retellings.</li><li><strong>Parallelism.</strong> A recurrent network can't start on word #500 until it has finished with #499 — everything strictly in order. In a transformer, all the words are processed at once, and that is a perfect job for graphics cards (GPUs) with their thousands of cores. Training sped up by orders of magnitude — and for the first time it became feasible to push the texts of the whole internet through a model. That's the next module.</li></ul><p>Now we can decode a familiar acronym. <strong>GPT — Generative Pretrained Transformer</strong>: <em>generative</em> — because it generates text by predicting the next token; <em>pretrained</em> — because it first read a gigantic corpus of text (more on that soon); <em>transformer</em> — that very architecture built of attention layers. Two-thirds of the name you now understand from the inside.</p><div class=\"callout\"><p><strong>The transformer didn't win because it's built 'smarter.'</strong> It sees the whole context at once and parallelizes beautifully — which means you can keep feeding it data and compute almost without limit. From there, scale took over.</p></div>"
+    },
+    {
+      "heading": "Try It Yourself",
+      "html": "<p>Below is an interactive demo built on the familiar sentence about the cat and the fish. Click on words: the ones the selected word 'looks at' will light up, and the brighter the highlight, the greater the attention weight. Be sure to click on 'it' and see who wins the tug-of-war — the cat or the fish. Then compare the layouts for the verb and the adjective: every word has its own pattern of attention.</p>"
+    },
+    {
+      "heading": "Key Takeaways",
+      "html": "<ul><li>A word's meaning depends on context (a 'key' on a keyring or in a melody), and the clue word can be far away. A Markov chain with its two-to-three-word window is helpless here.</li><li><strong>Attention</strong> is a mechanism by which each word assigns importance weights to all the words in the context and absorbs information from the most important ones. The weights are shares that sum to one.</li><li>The no-formulas intuition: every word sends out a query — 'who here is about me?' — and how well that query matches the other words' 'name tags' sets the strength of attention. The model learns these rules on its own.</li><li>After a pass of attention, a word's embedding is updated by context: 'it' turns into 'that very fish,' and 'key' into a piece of metal or a melody.</li><li>There are dozens of layers and hundreds of attention heads, each with its own spontaneously formed specialty: grammar, pronouns, topics.</li><li>The <strong>transformer</strong> (the 2017 paper 'Attention Is All You Need') sees the whole context at once — today that's hundreds of thousands of tokens — and parallelizes beautifully on GPUs.</li><li><strong>GPT</strong> stands for Generative Pretrained Transformer.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Why can't a Markov chain figure out what 'it' refers to in 'The cat wouldn't eat the fish because it was spoiled'?",
+      "options": [
+        "It can't tell the grammatical gender of nouns, so it mixes up the cat and the fish",
+        "Its frequency table contains no pronouns",
+        "It sees only the couple of words right before, and the clues — 'cat' and 'spoiled' — sit outside that window",
+        "It was trained on too small a text"
+      ],
+      "correct": 2,
+      "explain": "A Markov chain leans on just the last two or three words. 'Because' carries no clue at all, and the words that settle the question sit farther away, outside its field of view."
+    },
+    {
+      "q": "What does the attention mechanism do when the model processes a word?",
+      "options": [
+        "Assigns every word in the context an importance weight and leans harder on the words with large weights",
+        "Finds the single most important word and throws away all the rest",
+        "Memorizes the whole text verbatim so nothing gets lost",
+        "Replaces the word with its dictionary definition"
+      ],
+      "correct": 0,
+      "explain": "Attention spreads weights across all the words of the context at once: the important ones get large shares, the unimportant ones small — but nothing is thrown away entirely, and nothing is memorized verbatim."
+    },
+    {
+      "q": "The model is processing the word 'key' in the phrase 'the melody drifted into a sad minor key.' What will happen thanks to attention?",
+      "options": [
+        "The model will pick the right meaning from a built-in dictionary of definitions",
+        "The embedding of 'key' will shift toward the musical sense under the influence of 'melody,' 'minor,' and 'drifted'",
+        "The word 'key' will get a brand-new separate token meaning 'musical key'",
+        "The model will ask the user which meaning was intended"
+      ],
+      "correct": 1,
+      "explain": "Attention blends contextual information into the word's vector, and the vector of 'key' shifts toward the musical sense. There is no dictionary of meanings inside the model, and the token stays exactly the same."
+    },
+    {
+      "q": "Why does a transformer have dozens of layers and attention heads rather than a single layer?",
+      "options": [
+        "The spare layers switch on when the main one makes a mistake",
+        "A single layer is physically unable to see the whole context",
+        "The more layers, the more words fit into the model's vocabulary",
+        "Different layers and heads catch different kinds of relationships: grammar, meaning, pronoun references"
+      ],
+      "correct": 3,
+      "explain": "Even a single layer sees the whole context, but it captures only one 'slice' of relationships. Many heads and layers let the model track grammar, pronoun references, and topics all at once — and build an ever more abstract understanding layer by layer."
+    },
+    {
+      "q": "Which two advantages won the transformer its victory over recurrent networks?",
+      "options": [
+        "It needs no training and works straight out of the box",
+        "It sees the whole context at once and parallelizes beautifully on GPUs",
+        "It takes less memory and never makes mistakes",
+        "Its developers built the grammar rules of every language into it in advance"
+      ],
+      "correct": 1,
+      "explain": "Recurrent networks read text one word at a time and 'forgot' the beginning. A transformer looks at all the words simultaneously, and since no strict ordering is needed, the computation maps perfectly onto thousands of GPU cores — which is what made it possible to train models on gigantic volumes of text."
+    },
+    {
+      "q": "What does the acronym GPT stand for?",
+      "options": [
+        "General Purpose Technology",
+        "Global Prediction Tool",
+        "Generative Pretrained Transformer",
+        "Gradient Processing Unit"
+      ],
+      "correct": 2,
+      "explain": "GPT is Generative Pretrained Transformer: the model generates text by predicting the next token, was pretrained on an enormous corpus of text, and is built on the transformer architecture."
+    }
+  ]
+}

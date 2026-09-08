@@ -1,0 +1,107 @@
+{
+  "title": "Words into Numbers: Tokens and Embeddings",
+  "minutes": 12,
+  "intro": "The neuron from module two multiplies its inputs by weights — which means it needs numbers coming in. Images are easy: pixel brightness already is a number. But what do you do with the phrase “the cat is lying on the couch”? This module covers the two steps that turn language into numbers: tokens and embeddings. Along the way, you'll see why ChatGPT is bad at counting letters in words — and how meaning turns into arithmetic.",
+  "sections": [
+    {
+      "heading": "Computers don't understand words",
+      "html": "<p>Think back to the neuron from module two: it takes input numbers, multiplies them by weights, and adds everything up. The whole network is a giant conveyor belt of multiplication and addition. Numbers at the input are non-negotiable: you can't multiply the letter “k” by a weight of 0.3.</p><p>With images, the trick works effortlessly: a picture is made of pixels anyway, and every pixel is a brightness value — a number from 0 to 255. Same with sound: the loudness of the wave at each moment in time. But language? The word “cat” is not a number, and it doesn't turn into one on its own.</p><p>The first idea that comes to mind is to number the dictionary: “a” is 1, “aardvark” is 2, and so on — “cat” is 7,215, “dog” is 41,892. Technically it works, but the numbers are arbitrary: “cat” and “carburetor” might land on neighboring numbers, while “cat” and “kitten” sit at opposite ends of the list. For a network that lives by multiplying numbers, that's a disaster: closeness of the numbers says nothing about closeness of meaning, and learning from numbers like that is nearly impossible.</p><p>So language gets converted into numbers in two steps. First, the text is cut into standard chunks — <strong>tokens</strong>. Then each token is assigned not a single number but a whole set of numbers with meaning encoded in it — an <strong>embedding</strong>. Let's take both steps in order.</p>"
+    },
+    {
+      "heading": "Tokens: cutting text into chunks",
+      "html": "<p>A token is the unit in which the model sees text. Sometimes a token is a whole word, more often a piece of a word, sometimes a punctuation mark or a space glued to the front of a word. A dedicated program — the tokenizer — slices any text into such chunks using a pre-built vocabulary.</p><div class=\"example\"><p>The sentence “The dog jumped onto the windowsill” might come out roughly like this: <em>“The”, “ dog”, “ jumped”, “ onto”, “ the”, “ wind”, “ow”, “sill”</em> — eight tokens. The common little word “the” is a single token, while the rarer “windowsill” gets assembled from three chunks. Every token has a number in the vocabulary: say, “ dog” is 21,407 and “ the” is 512.</p></div><p>You'd think it would be simpler to cut along whole words. But a vocabulary of whole words can never be finished:</p><ul><li><strong>Word forms.</strong> “Walk, walks, walked, walking, walker” — for such a vocabulary these are five separate entries, and the same goes for every noun and verb. A language with rich morphology — Finnish, Turkish, Russian — would balloon the vocabulary into the millions.</li><li><strong>New words and names.</strong> “Rizz”, “doomscrolling”, your coworker's last name — none of them were in the vocabulary, and the model would grind to a halt at an “unknown word”.</li><li><strong>Typos.</strong> “Helo” is in no dictionary, yet a human reads it without missing a beat. The model has to as well.</li></ul><p>Then why not cut into individual letters? There are only twenty-six of them plus punctuation — the vocabulary is tiny, and any text is guaranteed to slice cleanly. But then the sequence becomes five or six times longer, and every chunk becomes meaningless: the letter “k” means nothing by itself. The network would burn all its capacity just reassembling words out of letters.</p><p>Tokens are the compromise between these extremes: the vocabulary is finite (usually 50,000–150,000 chunks), frequent words stay whole, and rare or unfamiliar ones get assembled from parts, like Lego bricks. Any text — typos, freshly coined words and all — is guaranteed to slice up with nothing left over.</p><div class=\"callout\"><p>The model never sees letters — only token numbers. That's why an LLM can slip up counting the letter “r” in “strawberry”: to the model, it isn't a chain of ten letters but two or three tokens — indivisible chunks.</p></div>"
+    },
+    {
+      "heading": "Embeddings: the coordinates of meaning",
+      "html": "<p>So the text has become a chain of token numbers. But a number is still an arbitrary tag. Step two: each token is assigned an <strong>embedding</strong> — a vector, which is simply a list of hundreds or thousands of numbers. In small models, 300–700 numbers per token; in modern LLMs, several thousand.</p><p>Imagine describing a word with a questionnaire of hundreds of sliding scales: “living — nonliving”, “big — small”, “pleasant — unpleasant”, “domestic — wild”… Each number in the embedding is a position on one such scale.</p><div class=\"example\"><p>A toy example. “Cat” — [0.82, −0.15, 0.90, …]: high on the “living” scale, well up the “domestic” scale. “Tractor” — [−0.74, 0.88, −0.05, …]: nonliving, big. In reality there aren't three such numbers but, say, five hundred — and together they pin down a point: where exactly this word “lives” in a space of five hundred dimensions.</p></div><p>An important catch: in real models, nobody ever labeled the scales. There is no “fluffiness” column — there's scale No. 217, whose meaning nobody knows, the model's creators included. Researchers do occasionally find directions that resemble human-interpretable features, but by and large these are coordinates in a space that isn't organized the way ours is.</p><p>What coordinates buy you, though, is all of familiar geometry. We can't picture a space with thousands of dimensions — and we don't need to: the rules there are the same as on a flat sheet, there are just more coordinate numbers. What matters is that you can measure distances between points. And that's where things get interesting.</p>"
+    },
+    {
+      "heading": "Close meanings, close points",
+      "html": "<p>The defining property of well-trained embeddings: <strong>words with similar meanings are nearby points</strong>. “Cat” lands next to “kitten” and “dog”; “mouse” and “veterinarian” are not far off; “accounting” sits at the other end of the space.</p><p>And the closeness is closeness of meaning, not of spelling. “Cat” and “car” differ by one letter but live far apart: one among the animals, the other among engines and highways.</p><p>Words gather into neighborhoods: the animal quarter, the food quarter, the country quarter, the emotion quarter. And since there are hundreds of dimensions, one word can be close to several neighborhoods at once: “doctor” borders both the professions (“teacher”, “engineer”) and medicine (“hospital”, “treat”). On a flat map that's impossible; in hundreds of dimensions, it's easy.</p><p>One question remains: what to do with ambiguous words? A “bow” is both a weapon and a ribbon on a gift, but the token gets a single point — it ends up hovering somewhere between the archery range and the gift shop. Pulling the meanings apart by context is the job of the attention mechanism — that transformer superpower is the next module.</p>"
+    },
+    {
+      "heading": "Arithmetic with meanings",
+      "html": "<p>Since words are points with coordinates, you can do arithmetic with them: add and subtract vectors, number by number. In 2013, working with the word2vec model, researchers discovered a famous effect:</p><p><strong>vector(“king”) − vector(“man”) + vector(“woman”) ≈ vector(“queen”)</strong></p><p>Let's unpack that: take the coordinates of “king”, subtract the coordinates of “man” (each number from its counterpart), add the coordinates of “woman” — and the resulting point turns out to be closest of all to the word “queen”. The ≈ sign means “approximately equal”: you don't land on the exact point, just near it.</p><p>Why does this work? The difference “king minus man” is an arrow holding what's left of royalty once you strip out the male part: power, throne, crown. Add “woman” — you get “power plus female”. The surprising part is something else: the direction “from male to female” is roughly the same across different word pairs. One and the same arrow leads from “king” to “queen”, from “actor” to “actress”, from “bull” to “cow”.</p><div class=\"example\"><p>Other arrows: take “Paris”, subtract “France”, add “Japan” — you land near “Tokyo”: that's the “country → capital” direction. And the arrow from “walk” to “walked” is the past-tense direction: lay it onto “swim” — you arrive at “swam”. Semantic relationships have turned into geometry.</p></div><p>An honest caveat: this works approximately, and not for every pair — with rare words, the arrows miss. But the fact itself is striking: gender, capitals, verb tense — all of it became directions in space that you can handle like arrows on a map.</p>"
+    },
+    {
+      "heading": "Who put the words in their places?",
+      "html": "<p>Time to ask: who filled in all these numbers? Hundreds of coordinates for each of a hundred thousand tokens — tens of millions of numbers at the model's input alone. The answer: nobody. No linguist ever annotated that a “cat” is domestic and a “tractor” is big.</p><p>Embeddings are trainable network weights, just like the little dials from module three. At the start of training, they're random numbers: “cat” and “accounting” stand wherever they happened to fall. Then comes the cycle you already know: the network tries to predict the next token, gets it wrong, and gradient descent nudges all the weights a tiny bit — including every word's coordinates.</p><p>Why do the words gradually drift into a meaningful map? Because it makes predicting easier. “Cat” and “kitten” appear in nearly identical surroundings: “… laps up the milk”, “… purrs on the couch”. If their points sit side by side, everything the network has learned about continuing sentences with “cat” automatically works for “kitten” too — predictions get sharper, the error shrinks. And millions of times over, the gradient nudges words used in similar ways toward each other and drags dissimilar ones apart. The map of meanings assembles itself.</p><div class=\"callout\"><p>The semantic map is not an engineer's design but a byproduct of one monotonous task: predicting the next token slightly better. It turned out that the most profitable way to do that is to arrange words by meaning.</p></div><p>Linguists call this the distributional hypothesis — “you shall know a word by the company it keeps”. Meaning is learned from surroundings, with no dictionaries and no teachers. Which is exactly why, in module six, when the model reads “the whole internet”, plain text will be enough — a giant pile of raw text.</p>"
+    },
+    {
+      "heading": "Try it yourself",
+      "html": "<p>Below is a map of words: hundreds of dimensions projected onto a flat plane so we can actually see them. Click around on different words and watch who the map considers their nearest neighbors: animals huddle with animals, food with food. Then press the “king − man + woman” button and follow the arrows — that's vector arithmetic in action. Notice: the “from male to female” arrow lands in the right place, even though nobody ever explained to the model what gender is.</p>"
+    },
+    {
+      "heading": "Key takeaways",
+      "html": "<ul><li>A neural network can only work with numbers, so text is converted into numbers in two steps: first tokens, then embeddings.</li><li>A token is a standard chunk of text, most often part of a word. Whole words won't do: the vocabulary could never be finished, thanks to word forms, new coinages and typos. Individual letters won't do either: the text gets long, and the chunks become meaningless.</li><li>The model sees token numbers, not letters — hence its famous failures at counting letters.</li><li>An embedding is a vector of hundreds of numbers — a token's “coordinates of meaning” in a high-dimensional space. Each number is a scale for some feature, but nobody ever labeled those scales.</li><li>Words with similar meanings are nearby points: “cat” is close to “kitten” and “dog”, far from “accounting”. And relationships between meanings are directions: one and the same “male to female” arrow leads from “king” to “queen” and from “actor” to “actress”.</li><li>Nobody sets the coordinates by hand: the network learns them itself through gradient descent, because a meaningful map of words helps it predict the next token more accurately.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Why do modern models cut text into pieces of words instead of using a vocabulary of whole words?",
+      "options": [
+        "Whole words take up too much disk space",
+        "A vocabulary of whole words can never be finished: word forms, new coinages and typos won't fit into it, while chunks can assemble anything at all",
+        "Word pieces look nicer in a chatbot interface",
+        "It makes the text shorter, so the model answers faster"
+      ],
+      "correct": 1,
+      "explain": "A finite vocabulary of chunks (usually 50,000–150,000) is guaranteed to slice any text: frequent words stay whole, while rare, new and misspelled ones get assembled from parts. With a whole-word vocabulary, the model would hit a dead end at every unfamiliar word."
+    },
+    {
+      "q": "What is a token's embedding?",
+      "options": [
+        "The token's ordinal number in the model's vocabulary",
+        "A compressed copy of the token, kept to save memory",
+        "A vector of hundreds of numbers — the token's coordinates in a “space of meanings”",
+        "The rule by which a token is split into individual letters"
+      ],
+      "correct": 2,
+      "explain": "An embedding is a list of hundreds or thousands of numbers defining a point in a high-dimensional space. Each number is a position on some semantic scale, and it's the mutual arrangement of the points that encodes meaning — unlike an arbitrary ordinal number."
+    },
+    {
+      "q": "The words “cat” and “kitten” end up close together in embedding space. Why?",
+      "options": [
+        "They occur in similar surroundings, and placing such words side by side pays off for the network — the next token gets predicted better",
+        "They look alike on the page, and the model arranges words alphabetically",
+        "Linguists manually tagged them as related when the model was built",
+        "Their numbers in the token vocabulary are close together"
+      ],
+      "correct": 0,
+      "explain": "“Cat” and “kitten” show up in nearly identical contexts, and if their points sit side by side, experience learned for one word automatically works for the other — prediction error drops. Gradient descent pulls such words together on its own, with no manual annotation whatsoever."
+    },
+    {
+      "q": "What does the example “king − man + woman ≈ queen” actually demonstrate?",
+      "options": [
+        "That the model solves equations better than a human",
+        "That words are stored in the model in pairs: a male and a female version",
+        "That embeddings are random, and hitting “queen” was sheer luck",
+        "That relationships between meanings became directions in space: the “male to female” arrow is one and the same across different word pairs"
+      ],
+      "correct": 3,
+      "explain": "Subtracting vectors isolates a semantic relationship — say, “male → female” — and that direction is roughly identical for king/queen, actor/actress, bull/cow. That's why arithmetic with meanings works at all: relationships turned into geometry."
+    },
+    {
+      "q": "Where do the hundreds of numbers in each word's embedding come from?",
+      "options": [
+        "The network tunes them itself during training, like all its other weights — to predict the next token more accurately",
+        "Linguists compile them from explanatory dictionaries",
+        "They're computed from the word's letters by a fixed formula",
+        "Developers set them by hand before training begins"
+      ],
+      "correct": 0,
+      "explain": "Embeddings are ordinary network weights: they start out as random numbers, and then gradient descent tweaks them millions of times, because a meaningful arrangement of words lowers prediction error. There's no manual labeling of meanings anywhere."
+    },
+    {
+      "q": "Why might an LLM slip up counting the letters in the word “strawberry”?",
+      "options": [
+        "The model saves compute and answers at random",
+        "Nobody in the training texts ever counted letters out loud",
+        "The model sees tokens, not letters: to it, the word is two or three indivisible chunks, not a chain of ten letters",
+        "Some letters take two bytes to store, and the model loses count"
+      ],
+      "correct": 2,
+      "explain": "Text reaches the model already sliced into tokens, and inside a token, individual letters simply don't exist for it. It has to count letters “from memory” of how the word is usually spelled, not by looking at the word itself — hence the mistakes."
+    }
+  ]
+}

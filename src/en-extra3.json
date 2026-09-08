@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Recall the “loss map” — the landscape of hills and valleys. The network took one step of gradient descent. What happened in terms of that map?",
+      "options": [
+        "The “fog” around it thinned a little: with every step the network sees a larger patch of the landscape",
+        "The network slightly changed its weights — that is, it moved to a neighboring point on the map, a bit lower down the slope",
+        "The network moved on to the next training example — that is, to a different point on the map",
+        "The landscape itself changed: the valley of the loss got deeper"
+      ],
+      "correct": 1,
+      "explain": "Every point on the map is one specific combination of all the weights, and the height is the loss for that combination. A descent step nudges the weights slightly — which means the network shifts to a neighboring point. The fog does not lift: the network still knows only the slope right underfoot."
+    },
+    {
+      "q": "A weight equals 0.40; the slope at the current point is −3 (meaning the loss falls as this weight increases); the learning rate is 0.1. What happens to the weight after one step?",
+      "options": [
+        "It grows to 0.70: the minus in the formula and the minus of the slope combine into a step toward increasing",
+        "It shrinks to 0.10: weights always decrease on a descent step",
+        "It doesn’t change: a negative slope means the weight is already optimal",
+        "It turns negative, because the slope is negative"
+      ],
+      "correct": 0,
+      "explain": "By the formula: new weight = 0.40 − 0.1 × (−3) = 0.70. Minus times minus gives plus — and that makes sense: since the loss falls as the weight increases, a step “downhill” here means increasing the weight."
+    },
+    {
+      "q": "A colleague suggests skipping backpropagation: “Nudge the first weight, run all the examples, check the loss, put the weight back. Then the second weight, the third… Once we’ve gone through them all — take the step.” What’s wrong with this plan?",
+      "options": [
+        "It will give wrong slopes: without a backward pass, the loss can’t be computed at all",
+        "It only works for networks with a single layer of neurons",
+        "Nothing’s wrong: that’s exactly what backpropagation does, just automatically",
+        "It will estimate the slopes, but at the cost of billions of full passes for a single step; backpropagation gets the same thing in one backward pass"
+      ],
+      "correct": 3,
+      "explain": "The plan does work in principle — that really is a way to learn whether nudging each dial helps. The trouble is the price: with billions of weights, you’d need a billion passes for one single step downhill. Backpropagation hands out the “share of blame” to all weights at once, in one backward pass — costing roughly as much as running the example through the network one more time."
+    },
+    {
+      "q": "You’re training a digit recognizer with very cautious, tiny steps. The loss fell for a while, then froze at a mediocre level — and further steps change nothing, even though better weight combinations certainly exist. Which explanation from the module is the most plausible?",
+      "options": [
+        "The network has reached its limit: if the loss isn’t falling, no better weights exist for it",
+        "The descent got stuck in a local minimum — a shallow dip in the slope that tiny steps can’t climb out of, even though the real valley lies farther and lower",
+        "It ran out of epochs: you can’t show the network the same examples twice",
+        "The loss stopped being computed: the loss function only works at the start of training"
+      ],
+      "correct": 1,
+      "explain": "Steps that are too small easily get stuck in the first little dent they meet: any step out of it leads slightly uphill, and a cautious descent can’t make it over the rim. That’s why in practice the steps are bolder at the start of training and more careful near the valley."
+    },
+    {
+      "q": "What will most likely happen if you train a digit recognizer not on tens of thousands of images, but on just a couple dozen?",
+      "options": [
+        "Slopes estimated from a handful of examples will be noisy: the network will latch onto random features — decide that “a seven is something with a slanted stroke” — and start confusing it with a one",
+        "Nothing changes: backpropagation will compute the same slopes as on the big dataset",
+        "Training won’t start: gradient descent requires at least a thousand examples",
+        "The network will train faster and better: fewer examples means fewer contradictions between them"
+      ],
+      "correct": 0,
+      "explain": "A slope is an estimate of “which way to step,” averaged over the training examples. From a couple dozen images it comes out jittery, and the steps lead the wrong way: the network learns random coincidences instead of real features. Hence the first appetite of neural networks — big data."
+    },
+    {
+      "q": "A digit recognizer is shown the same 60,000 images dozens of times over — dozens of epochs. Why repeat, if the network has already “seen” these images?",
+      "options": [
+        "So the network memorizes the images by heart — that’s the goal of training",
+        "The repeats are only for checking: the weights change only in the first epoch",
+        "Each cycle shifts the weights only a tiny step down the slope, and the descent into the valley is made up of thousands of such steps",
+        "Because after every epoch the weights reset to random, and everything starts over"
+      ],
+      "correct": 2,
+      "explain": "One cycle of “show — compute the loss — adjust the weights” makes the network only slightly better. Reaching the bottom of the valley takes thousands and millions of small steps, which is why the same examples are run through the network again and again."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain in your own words: why does training need a loss function, and why does it fundamentally matter that it is a single number rather than a general feeling that “the network answers badly”?",
+      "ref": "The loss function boils all of the “wrongness” of the network’s answers down to one number: the worse the answers, the bigger it is. A number is something you can decrease mechanically: the vague task “make the network smarter” turns into the precise one “find the weights at which this number is minimal.” On top of that, the number shows whether training is working: creeping down — the network is getting smarter; frozen or rising — something has gone wrong."
+    },
+    {
+      "q": "Predict what happens: you’re training a network and see that the loss isn’t decreasing but bouncing chaotically up and down, at times even growing. What most likely happened, and what would you change?",
+      "ref": "Most likely the learning rate is too high: the steps are so large that the network vaults clear across the valley and lands first on one slope, then on the other — hence the bouncing loss. The cure is to reduce the step size, after which the descent becomes smooth and the loss starts falling. If training then crawls too slowly, the rate is tuned experimentally: bold steps at the start, cautious ones nearer the valley."
+    },
+    {
+      "q": "Give your own real-life example (not from the module) where something gets tuned by the principle of “try — measure — adjust a little — try again.” Point out what plays the role of the weights, the loss function, and the step size in your example.",
+      "ref": "Any gradual feedback-driven adjustment will do. Say you’re salting a soup: the “weight” is the amount of salt, the “loss function” is how far the taste is from what you want, the “step size” is how much salt you add at a time — a pinch of grains and you’ll be tasting until midnight, a tablespoon and it’s easy to “overshoot” and oversalt. Other options: tuning a guitar string by ear, dialing in your aim at darts, adjusting the shower temperature — in every case there’s something to turn, a measurable “how bad is it,” and a price for steps that are too small or too large."
+    }
+  ]
+}

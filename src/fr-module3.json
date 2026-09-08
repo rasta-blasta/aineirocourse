@@ -1,0 +1,107 @@
+{
+  "title": "L'apprentissage : comment le réseau trouve les bons poids",
+  "minutes": 12,
+  "intro": "Au deuxième module, vous avez fait connaissance avec le neurone et ses poids-« contrepoids ». Mais d'où viennent les bonnes valeurs de ces poids ? Personne ne les règle à la main — les grands modèles en comptent des centaines de milliards. Dans ce module, le plus beau tour de l'apprentissage automatique (machine learning) : comment le réseau trouve les bons poids tout seul, à tâtons, comme on descend d'une montagne dans un brouillard épais.",
+  "sections": [
+    {
+      "heading": "Au début : des âneries pleines d'assurance",
+      "html": "<p>Imaginez un réseau de neurones nouveau-né — par exemple celui-là même que vous entraînerez, dans la finale du cours, à reconnaître des chiffres manuscrits. Il a déjà tout ce qu'a montré le module précédent : des neurones, des connexions entre eux et des poids — ces fameux « contrepoids » qui décident quel signal d'entrée compte et lequel ne compte pas. Un seul problème : à la naissance, tous les contrepoids sont posés <em>au hasard</em>.</p><p>Que produit un tel réseau ? Des âneries pleines d'assurance. Vous lui montrez un sept soigneusement tracé — il répond « deux ». Vous montrez un zéro — « six ». C'est comme un piano dont on aurait tendu les cordes au petit bonheur : les touches s'enfoncent, le son sort, mais au lieu de musique — du vacarme.</p><p>Il faut saisir ici le principal basculement de pensée. Personne ne va s'asseoir pour écrire des règles du genre « un sept, c'est une barre horizontale en haut et une ligne oblique qui descend ». C'est ce qu'on tentait aux débuts de l'intelligence artificielle — et l'on se noyait dans les exceptions : chez l'un le sept est barré, chez l'autre il traîne un petit crochet, chez le troisième il penche de côté. À la place, le réseau va <strong>se régler lui-même</strong> — par une méthode ridiculement proche du jeu « tu brûles — tu refroidis » : il essaie, se trompe, tourne un peu les contrepoids, essaie de nouveau. Des millions de fois.</p><p>Pour que cela marche, il faut répondre à deux questions. La première : comment mesurer « il s'est trompé » — pour en faire non pas une vague impression, mais un nombre concret ? La seconde : comment savoir <em>quels</em> contrepoids tourner au juste, et dans quel sens, quand il y en a des milliers ou des milliards ? Tout ce module répond à ces deux questions.</p>"
+    },
+    {
+      "heading": "Un thermomètre de la fausseté",
+      "html": "<p>Pour améliorer quelque chose, il faut d'abord apprendre à le mesurer. C'est le rôle de la <strong>fonction d'erreur</strong> (loss function, ou simplement loss) — une façon de ramener toute la « fausseté » du réseau à un seul nombre. Plus le réseau répond mal, plus le nombre est grand. Réponses parfaites — zéro.</p><div class=\"example\"><p>Le réseau regarde l'image d'un sept et donne sa confiance pour chaque chiffre : « un — 60 %, sept — 10 %, quatre — 8 %… » La bonne réponse est sept, et le réseau ne lui a accordé que 10 % misérables. La fonction d'erreur compare cela à l'idéal (« sept — 100 %, le reste — 0 % ») et rend son verdict : disons, 2,3. Après l'apprentissage, sur la même image, le réseau dira « sept — 95 % », et l'erreur tombera à 0,05.</p></div><p>On ne calcule pas l'erreur sur une seule image : on la moyenne sur des milliers d'exemples d'entraînement pour obtenir un unique nombre final — la moyenne générale du bulletin, en quelque sorte. Voilà le « thermomètre de la fausseté » du réseau tout entier. Pendant l'apprentissage, on le surveille en permanence : il glisse vers le bas — le réseau progresse ; il se fige ou monte — quelque chose cloche.</p><p>Pourquoi ces complications ? Parce qu'un nombre, cela peut se <em>réduire</em>. La consigne « rends le réseau plus intelligent » n'offre aucune prise. La consigne « trouve les valeurs des poids pour lesquelles ce nombre est minimal » est déjà nette, mécanique, soluble.</p><div class=\"callout\"><p><strong>Entraîner un réseau de neurones, ce n'est ni de la magie ni « expliquer la leçon ». C'est chercher le jeu de poids pour lequel la fonction d'erreur atteint son minimum.</strong> Tout le reste du module raconte comment cette recherche est menée.</p></div>"
+    },
+    {
+      "heading": "Descendre la montagne dans un brouillard épais",
+      "html": "<p>Imaginez une minute que le réseau n'ait que deux poids. On pourrait alors dessiner une carte : de gauche à droite, le premier poids ; d'avant en arrière, le second ; et la hauteur en chaque point — la valeur de l'erreur pour cette combinaison de poids. On obtiendrait un paysage : des collines (mauvaises combinaisons), des vallées (bonnes) et, quelque part, le point le plus profond — les fameux poids idéaux.</p><p>Pourquoi ne pas simplement examiner toute la carte et trouver le minimum ? Parce que même le minuscule réseau du jeu final compte environ dix mille poids, et la carte n'est plus en deux dimensions mais en dix mille. Essayer toutes les combinaisons, aucun ordinateur n'y parviendrait d'ici la fin de l'Univers. Toute la carte nous échappe donc. Nous nous tenons en un seul de ses points — les poids actuels, encore aléatoires — et autour, un brouillard épais.</p><p>Mais une chose reste possible : tâter la pente sous nos pieds. Pour chaque poids, on peut déterminer : si on l'augmente un tout petit peu, l'erreur montera-t-elle ou baissera-t-elle ? Et avec quelle raideur ? C'est la pente locale au point courant. La suite est une stratégie simple, comme une vraie descente de montagne dans le brouillard : vous sentez de quel côté la pente descend — vous faites un petit pas par là. Vous tâtez de nouveau la pente, nouveau pas. Et ainsi des milliers de fois, jusqu'à vous retrouver au fond de la vallée, là où il n'y a plus de bas où aller.</p><p>Cette méthode s'appelle la <strong>descente de gradient</strong> (gradient descent). Le « gradient » est simplement le mot mathématique pour la direction de la pente la plus raide. Pratiquement tout l'apprentissage automatique moderne — du lecteur de chiffres à ChatGPT et Claude — descend la montagne, au fond, exactement ainsi.</p>"
+    },
+    {
+      "heading": "La taille du pas décide de tout",
+      "html": "<p>Dans la descente, il y a un paramètre réglable, et il est étonnamment capricieux : la longueur du pas. En apprentissage automatique, on l'appelle le <strong>taux d'apprentissage</strong> (learning rate). C'est l'unique formule du module, la voici :</p><p><em>nouveau poids = ancien poids − taux d'apprentissage × pente</em></p><p>Déchiffrons chaque mot. <strong>L'ancien poids</strong> — la valeur actuelle du contrepoids. <strong>La pente</strong> — un nombre qui dit dans quel sens et avec quelle raideur l'erreur change si l'on décale un peu ce contrepoids. <strong>Le taux d'apprentissage</strong> — le multiplicateur, la taille du pas. Et le moins est là parce que nous allons contre la pente : pas vers le sommet, mais vers le bas.</p><div class=\"example\"><p>Soit un poids de 0,50, une pente de 2 en ce point (l'erreur monte si l'on augmente le poids) et un taux d'apprentissage de 0,1. Nouveau poids : 0,50 − 0,1 × 2 = 0,30. Un pas est fait — le poids a bougé de 0,2 vers une erreur plus faible.</p></div><p>Voyons maintenant pourquoi c'est capricieux. Un pas trop petit — disons 0,0001 — et la descente devient une éternité : des milliers de pas pour dévaler un simple monticule. En prime, on se coince facilement dans le premier creux venu — un <strong>minimum local</strong> (local minimum). C'est une petite dépression à flanc de pente : à petits pas, on n'en sort pas, alors que la vraie vallée est plus loin et plus bas. Un pas trop grand — malheur inverse : vous sautez par-dessus la vallée et atterrissez sur le versant d'en face, puis retour, et encore, et encore. L'erreur ne décroît pas, elle sautille, voire grimpe. En pratique, on ajuste le taux expérimentalement et on le change souvent en cours de route : au début de l'apprentissage — des pas audacieux, près de la vallée — des pas prudents.</p>"
+    },
+    {
+      "heading": "À qui la faute : la rétropropagation",
+      "html": "<p>Reste la question à un milliard. Pour chaque poids, il faut connaître la pente : « si l'on tourne ce contrepoids, l'erreur montera ou baissera ? » Or, dans les grands modèles de langage, les poids se comptent en milliards. La méthode naïve — décaler un poids, repasser tous les exemples, regarder l'erreur, remettre le poids en place, passer au suivant — exigerait des milliards de passes complètes pour un seul et unique pas vers le bas. On ne descendrait jamais.</p><p>Le salut s'appelle la <strong>rétropropagation</strong> (backpropagation). L'idée, sans la moindre formule, est celle-ci : quand le réseau a rendu sa réponse et que l'erreur est calculée, on peut faire remonter cette erreur à travers le réseau à rebours — de la sortie vers l'entrée. En traversant les couches en arrière, elle distribue à chaque poids sa part de responsabilité : « toi, tu as gonflé le signal, c'est à cause de toi que la réponse a dévié — à baisser » ; « et toi, tu as étouffé un signal utile — à monter ».</p><p>Une analogie : un restaurant reçoit une critique assassine. Un gérant sot remplacerait les employés un par un et, après chaque remplacement, attendrait un mois de nouveaux avis. Un gérant avisé remonte la chaîne des événements à l'envers : le client est déçu du dessert → le dessert, c'est le pâtissier → la crème a tranché parce que la crème liquide était tiède → la crème, c'est le stagiaire qui ne l'a pas remise au réfrigérateur. Une seule analyse — et chacun dans la chaîne sait exactement quoi changer, et de combien.</p><p>La beauté de la rétropropagation, c'est que toute cette « distribution des responsabilités » se fait en un seul passage arrière — dont le coût équivaut à peu près à faire passer l'exemple une fois de plus dans le réseau. L'astuce a été inventée dès les années 1980, et elle reste aujourd'hui le cœur de l'apprentissage de tout réseau de neurones, y compris des plus grands modèles de langage.</p>"
+    },
+    {
+      "heading": "Des milliards de multiplications : pourquoi les cartes graphiques",
+      "html": "<p>Assemblons le cycle complet : on montre au réseau une fournée d'exemples → on calcule l'erreur → le passage arrière établit la responsabilité de chaque poids → on décale tous les poids d'un petit pas vers le bas. Un cycle n'améliore le réseau que d'un cheveu, il en faut donc des milliers et des millions. Un passage complet sur tous les exemples d'entraînement s'appelle une <strong>époque</strong> (epoch) ; même les petits réseaux enchaînent des dizaines d'époques, en revoyant encore et encore les mêmes exemples.</p><p>De là viennent les deux fameux appétits des réseaux de neurones. Le premier — les données. Une pente estimée sur une poignée d'exemples est bruitée et instable : un réseau qui a vu trois sept décidera qu'un sept, c'est « un truc avec une barre oblique », et le confondra avec le un. Pour que les pas mènent dans la bonne direction, un lecteur de chiffres a besoin de dizaines de milliers d'images, et un modèle de langage — de milliers de milliards de mots. Le second appétit — le calcul. Chaque passage brasse des multiplications « signal × poids », et avec des milliards de poids, on compte les opérations en milliards par pas.</p><p>Et là, une découverte amusante. Le processeur ordinaire (CPU) est comme un coursier génial : il accomplira n'importe quelle mission, mais ne transporte qu'un colis à la fois. La <strong>carte graphique</strong> (GPU, graphics processing unit), elle, a été créée pour les jeux vidéo — recalculer des millions de pixels en même temps. C'est en somme quelques milliers de petites calculatrices travaillant en parallèle. Or l'entraînement d'un réseau, ce sont justement des milliards de multiplications identiques et indépendantes — le travail rêvé pour un GPU : ce que le processeur moudrait pendant des mois, la carte graphique l'expédie en quelques heures. Voilà pourquoi entraîner les grands modèles coûte des millions de dollars et exige des salles entières de cartes graphiques — nous reviendrons à ces échelles dans le module sur le pré-entraînement.</p><p>Mais avant qu'un réseau puisse apprendre sur des textes, il faut convertir les textes en nombres. Ce sera l'affaire du prochain module.</p>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Ci-dessous, une courbe d'erreur et une bille qui la descend par descente de gradient. Cliquez sur « pas », lancez la descente automatique et, surtout, jouez avec le curseur du taux d'apprentissage. Observez les deux pannes classiques : à taux trop faible, la bille se traîne à peine et se coince dans un petit creux — un minimum local ; à taux trop fort, elle se met à sauter par-dessus la vallée et à rebondir de versant en versant sans jamais atteindre le fond. Essayez de trouver le taux qui rend la descente à la fois rapide et précise.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Un réseau nouveau-né reçoit des poids aléatoires et raconte n'importe quoi. Personne n'y inscrit de règles — il se règle lui-même sur des exemples.</li><li>La <strong>fonction d'erreur (loss)</strong> est le « thermomètre de la fausseté » : un seul nombre qui dit à quel point les réponses du réseau s'écartent des bonnes. Apprendre, c'est chercher les poids qui le rendent minimal.</li><li>La <strong>descente de gradient (gradient descent)</strong>, c'est descendre la montagne dans le brouillard : le réseau ne voit pas tout le paysage de l'erreur, mais sait tâter la pente au point courant et faire un pas vers le bas.</li><li>Le <strong>taux d'apprentissage (learning rate)</strong> est la taille du pas : trop petit — marcher une éternité et rester coincé dans un creux local, trop grand — sauter par-dessus la vallée dans un sens puis dans l'autre.</li><li>La <strong>rétropropagation (backpropagation)</strong> calcule en un seul passage arrière la « part de responsabilité » de chaque poids et indique dans quel sens le tourner.</li><li>L'apprentissage, ce sont des millions de répétitions (les époques) sur d'énormes données : des milliards de multiplications identiques que le <strong>GPU</strong> exécute par milliers en parallèle. Voilà pourquoi on entraîne les réseaux de neurones sur des cartes graphiques.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Qu'est-ce que la fonction d'erreur (loss) ?",
+      "options": [
+        "La liste de tous les poids que le réseau a mal réglés",
+        "Un seul nombre qui indique à quel point les réponses du réseau s'écartent des bonnes",
+        "Le pourcentage de neurones qui se sont déclenchés pendant la réponse",
+        "Le temps restant avant la fin de l'entraînement"
+      ],
+      "correct": 1,
+      "explain": "Le loss ramène toute la « fausseté » du réseau à un seul nombre : plus les réponses sont mauvaises, plus il est grand. C'est ce nombre que l'apprentissage fait baisser — sur tel poids ou tel neurone « fautif », il ne dit directement rien."
+    },
+    {
+      "q": "En quoi consiste, au fond, l'apprentissage d'un réseau de neurones ?",
+      "options": [
+        "Les programmeurs y inscrivent peu à peu des règles : à quoi ressemble un sept, à quoi un deux",
+        "Le réseau apprend par cœur tous les exemples d'entraînement, puis y cherche le plus ressemblant",
+        "C'est la recherche des valeurs de poids pour lesquelles la fonction d'erreur est minimale",
+        "On ajoute au réseau de nouveaux neurones jusqu'à ce qu'il réponde juste"
+      ],
+      "correct": 2,
+      "explain": "La structure du réseau ne change pas pendant l'apprentissage, et personne n'y inscrit de règles. Seuls les poids bougent — l'apprentissage cherche, pas à pas, leur combinaison qui rend l'erreur minimale sur les exemples."
+    },
+    {
+      "q": "Pourquoi compare-t-on la descente de gradient à une descente de montagne dans un brouillard épais ?",
+      "options": [
+        "Le réseau ne « voit » pas le paysage d'erreur en entier — il peut seulement estimer la pente au point courant et faire un pas vers le bas",
+        "Parce que le résultat de l'apprentissage est aléatoire et impossible à prédire",
+        "Parce que les données d'entraînement sont toujours bruitées, comme une image dans le brouillard",
+        "Parce que le réseau réduit progressivement tous ses poids, des grandes valeurs vers les petites"
+      ],
+      "correct": 0,
+      "explain": "Calculer l'erreur pour toutes les combinaisons de poids est impossible — leur nombre est astronomique. Seule l'information « locale » est disponible : dans quel sens penche la surface d'erreur juste sous les pieds. La descente avance donc à l'aveugle, à petits pas, comme dans le brouillard."
+    },
+    {
+      "q": "Que se passe-t-il si l'on règle un taux d'apprentissage trop grand ?",
+      "options": [
+        "L'apprentissage sera trop lent et prendra des années",
+        "Le réseau apprendra les exemples par cœur et échouera sur les nouveaux",
+        "La mémoire de la carte graphique ne suffira plus au réseau",
+        "Les pas se mettront à sauter par-dessus la vallée : l'erreur bondira dans tous les sens au lieu de décroître"
+      ],
+      "correct": 3,
+      "explain": "Un pas trop grand saute par-dessus le minimum : le réseau atterrit tantôt sur un versant de la vallée, tantôt sur l'autre. L'erreur sautille et peut même grimper — une telle descente n'atteint jamais le fond."
+    },
+    {
+      "q": "Quel problème la rétropropagation (backpropagation) résout-elle ?",
+      "options": [
+        "Elle fait passer l'exemple dans le réseau de nombreuses fois de suite, jusqu'à ce que la réponse devienne juste",
+        "En un seul passage arrière, elle calcule à quel point chaque poids est « responsable » de l'erreur et dans quel sens le décaler",
+        "Elle renvoie les mauvaises réponses dans les données d'entraînement pour que le réseau ne s'en serve plus",
+        "Elle repère et éteint les neurones qui se sont le plus trompés"
+      ],
+      "correct": 1,
+      "explain": "La rétropropagation est un moyen rapide de distribuer la « part de responsabilité » à tous les poids d'un coup : l'erreur traverse le réseau de la sortie vers l'entrée, et chaque poids apprend dans quel sens se tourner. Sans elle, il faudrait tester des milliards de poids un par un."
+    },
+    {
+      "q": "Pourquoi entraîne-t-on les réseaux de neurones sur des cartes graphiques (GPU) plutôt que sur des processeurs ordinaires ?",
+      "options": [
+        "L'entraînement est fait de milliards de multiplications identiques, et le GPU exécute des milliers de ces opérations en parallèle",
+        "Le GPU est « plus intelligent » que le processeur et décide lui-même quels poids changer",
+        "Les processeurs ordinaires ne savent pas manier les nombres à virgule",
+        "Seule la mémoire d'une carte graphique peut contenir toutes les données d'entraînement"
+      ],
+      "correct": 0,
+      "explain": "Les GPU ont été créés pour recalculer des millions de pixels en même temps — ce sont des milliers de petits calculateurs travaillant en parallèle. L'entraînement d'un réseau est fait des mêmes multiplications massives et identiques, et le GPU s'en acquitte des dizaines de fois plus vite qu'un CPU."
+    }
+  ]
+}

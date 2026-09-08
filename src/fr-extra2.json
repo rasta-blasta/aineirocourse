@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Avant-hier, le neurone « casanier » a décidé d'aller se promener, et aujourd'hui — de rester à la maison. Personne ne l'a réentraîné. Qu'est-ce qui a changé ?",
+      "options": [
+        "Les poids : ils s'ajustent automatiquement après chaque décision prise",
+        "La fonction d'activation : elle est passée du seuil à la sigmoïde",
+        "Les entrées : la météo et l'humeur sont différentes aujourd'hui, tandis que les poids et le biais sont restés les mêmes",
+        "Le biais : il s'accumule de jour en jour, comme la fatigue"
+      ],
+      "correct": 2,
+      "explain": "Les poids et le biais sont le « caractère » stable du neurone : ils ne changent qu'à l'apprentissage. Ce qui change de jour en jour, ce sont les entrées : la même formule avec d'autres x donne une autre somme et une autre décision."
+    },
+    {
+      "q": "Vous voulez transformer le neurone casanier en « toujours partant », sans changer son rapport au soleil, à la pluie et à l'humeur. Que faut-il corriger ?",
+      "options": [
+        "Le biais : le rendre positif au lieu de négatif",
+        "Le seuil : le relever pour que le neurone se déclenche plus souvent",
+        "Les entrées : ne servir au neurone que du beau temps",
+        "Tous les poids à la fois : multiplier chacun par plusieurs"
+      ],
+      "correct": 0,
+      "explain": "Le rapport aux facteurs est inscrit dans les poids, et la disposition de base à agir — dans le biais. Un biais positif remonte le point de départ : désormais, de modestes arguments « pour » suffisent à faire franchir le seuil à la somme."
+    },
+    {
+      "q": "Un neurone a pour poids : soleil +0,8, pluie −2, humeur +0,5. Chaque entrée a changé d'exactement une unité. Lequel de ces changements déplacera le plus la somme pondérée ?",
+      "options": [
+        "Les trois pareillement : les entrées ont pourtant changé de la même quantité",
+        "Le soleil : son poids est positif, et une influence positive est toujours plus forte",
+        "L'humeur : les facteurs internes comptent plus que les externes",
+        "La pluie : son poids a la plus grande valeur, et le signe n'y joue aucun rôle"
+      ],
+      "correct": 3,
+      "explain": "La contribution d'une entrée, c'est l'entrée multipliée par le poids : une unité de changement « coûte » donc exactement ce que pèse le contrepoids. Celui de la pluie vaut −2 : en valeur absolue, c'est plus que 0,8 et 0,5, la somme bougera donc le plus fort — vers le bas, simplement."
+    },
+    {
+      "q": "Prédisez : comment se comportera un neurone dont tous les poids valent zéro et dont le biais vaut −3 ?",
+      "options": [
+        "Il tombera en panne : sans poids, le neurone ne peut pas calculer la somme",
+        "Il ignorera toutes les entrées : la somme vaut toujours −3, et la décision est toujours la même",
+        "Il rendra des décisions aléatoires tant qu'on ne l'aura pas entraîné",
+        "Il ne réagira qu'à la plus forte des entrées"
+      ],
+      "correct": 1,
+      "explain": "Toute entrée multipliée par zéro donne zéro — des entrées, il ne reste rien dans la somme, seul le biais y survit. Un tel neurone donne la même réponse par tous les temps."
+    },
+    {
+      "q": "Dans un réseau qui cherche des chats sur les photos, on a découvert un neurone qui se déclenche sur le triangle d'une oreille. Qui lui a assigné cette spécialité ?",
+      "options": [
+        "Les programmeurs : ils ont écrit la règle « un triangle au-dessus de la tête, c'est une oreille »",
+        "La première couche du réseau : c'est elle qui distribue les tâches à toutes les autres couches",
+        "Les annotateurs de données : ils ont entouré à la main les oreilles sur les photos d'entraînement",
+        "Personne : la spécialité s'est formée d'elle-même quand, à l'apprentissage, certains poids se sont installés chez ce neurone"
+      ],
+      "correct": 3,
+      "explain": "Les ingénieurs ne fixent que la construction : combien de couches et combien de neurones dedans. Ce que remarque au juste chaque neurone est déterminé par les valeurs de ses poids — et elles se mettent en place d'elles-mêmes au fil de l'apprentissage, dont parle le module suivant."
+    },
+    {
+      "q": "Vous avez copié tous les paramètres d'un réseau entraîné — des milliards de poids et de biais — dans un réseau neuf de construction rigoureusement identique. Qu'avez-vous obtenu ?",
+      "options": [
+        "Une copie exacte : elle répondra pareil, car en dehors de la construction et de ces nombres, le réseau ne contient rien",
+        "Un réseau vide : à la copie, le savoir reste dans le modèle d'origine",
+        "Une copie du « caractère » mais pas du savoir : les faits appris sont stockés à part des poids",
+        "Une ébauche : elle ne se comportera pareil qu'après un nouvel entraînement sur les mêmes données"
+      ],
+      "correct": 0,
+      "explain": "Un réseau est entièrement décrit par sa construction et ses paramètres : tout son « savoir », ce sont les valeurs des poids et des biais. Copier les nombres, c'est copier le modèle ; c'est bien pourquoi télécharger un modèle revient à télécharger un gigantesque fichier de nombres."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots ce qui distingue les entrées d'un neurone de ses poids — et pourquoi la même météo peut mener deux neurones au « caractère » différent à des décisions opposées.",
+      "ref": "Les entrées décrivent la situation du jour et changent d'une fois à l'autre : soleil, pluie, humeur. Les poids sont le « caractère » stable du neurone, son expérience accumulée : ils fixent avec quelle force et dans quel sens chaque facteur pèse sur la décision. Les mêmes entrées, multipliées par des poids différents, donnent des sommes différentes — c'est pourquoi la même météo fera sortir l'un et gardera l'autre à la maison. Ce sont justement les poids, et non les entrées, que le réseau ajuste à l'apprentissage."
+    },
+    {
+      "q": "Inventez votre propre exemple de « neurone » de la vie courante — n'importe quelle décision oui/non, sauf la promenade. Nommez deux ou trois entrées, donnez à chacune un poids avec son signe, ajoutez un biais et expliquez pourquoi vous avez choisi ces nombres-là.",
+      "ref": "Par exemple, le neurone « acheter un café en chemin » : entrées — la fatigue (poids +1,5 : plus elle est forte, plus le café s'impose), la longueur de la file (poids −1 : elle dissuade) et les minutes avant le début de la réunion (poids −0,5 : la hâte gêne). Biais +2 : je suis accro au café et par défaut enclin à en acheter. Tout exemple convient dès lors que chaque facteur a un signe (« pour » ou « contre ») et une grandeur (la force d'influence), et que le biais reflète la propension de base avant même de considérer les circonstances."
+    },
+    {
+      "q": "Une connaissance en est convaincue : « À l'intérieur d'un modèle de langage sont stockés tous les textes sur lesquels on l'a entraîné — il ne fait qu'y chercher la réponse ». Expliquez-lui ce qui est réellement stocké dans le modèle et où « habite » son savoir.",
+      "ref": "À l'intérieur du modèle, il n'y a ni textes, ni base de faits, ni règles — seulement des paramètres : des centaines de milliards de poids et de biais, au fond une gigantesque table de nombres. Le savoir ne loge pas dans une case précise : il est « étalé » sur des millions de poids, dont chacun pousse un tout petit peu le réseau vers la bonne réponse. Télécharger un modèle, c'est donc télécharger un fichier de nombres, pas une archive de textes."
+    }
+  ]
+}

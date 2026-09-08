@@ -1,0 +1,103 @@
+{
+  "title": "Là où tout a commencé : la chaîne de Markov",
+  "minutes": 12,
+  "intro": "Tapez « je vais au » sur votre téléphone — et le clavier vous souffle obligeamment : « bureau », « cinéma », « marché ». Ce tour de magie a plus de cent ans, et c'est un mathématicien russe qui l'a inventé bien avant les premiers ordinateurs. Toute l'histoire des modèles de langage — jusqu'à ChatGPT — commence par cette astuce sans prétention : deviner le mot suivant.",
+  "sections": [
+    {
+      "heading": "Le problème par lequel tout a commencé",
+      "html": "<p>En 1913, le mathématicien de Saint-Pétersbourg Andreï Markov s'est attelé à un travail étrange à première vue : il a pris « Eugène Onéguine », en a relevé les vingt mille premières lettres et a compté à la main combien de fois une consonne vient après une voyelle, et une voyelle après une consonne. Résultat : un texte n'est pas une suite de caractères au hasard — il possède une statistique mesurable. En connaissant la lettre courante, on peut deviner la suivante avec une précision très honorable : Markov a par exemple trouvé qu'après une consonne, une voyelle apparaît environ deux fois sur trois, alors qu'après une voyelle, une autre voyelle ne suit qu'une fois sur huit. Ainsi est née la <strong>chaîne de Markov</strong> (Markov chain) — le tout premier modèle mathématique du langage.</p><p>L'idée se transpose sans effort des lettres aux mots. La question devient : <em>si je connais le mot courant, quel mot a le plus de chances de venir ensuite ?</em> Pour y répondre, nul besoin de dictionnaire, de règles de grammaire ni de compréhension du sens. Il suffit de prendre beaucoup de texte et de compter les fréquences : après « bonne » vient le plus souvent « journée », après « joyeux » — « anniversaire », après « intelligence » — « artificielle ».</p><p>C'est exactement ainsi qu'ont fonctionné pendant des années les suggestions de mot suivant des claviers de smartphone — beaucoup les appellent encore « le T9 », alors que le vrai T9 des téléphones à touches faisait tout autre chose : il devinait le mot en train d'être tapé à partir des touches pressées. Le téléphone ne comprend pas ce que vous voulez dire. Il garde simplement une table « après le mot X, les gens tapent le plus souvent Y » et vous en montre les premières lignes. Parfois il tombe juste, parfois il accouche de ces fameuses perles du texte prédictif — et nous verrons plus loin pourquoi l'un et l'autre sont inévitables.</p><div class=\"callout\">Retenez la formulation du problème : <strong>prédire le mot suivant à partir des mots précédents</strong>. C'est la colonne vertébrale de tout ce cours. La chaîne de Markov le résout en comptant des fréquences, ChatGPT s'y prend tout autrement — mais le problème, lui, est rigoureusement le même.</div>"
+    },
+    {
+      "heading": "Construisons la table de transitions",
+      "html": "<p>Décortiquons tout cela sur un exemple jouet. Les vrais modèles s'entraînent sur des milliards de mots, mais la mécanique est exactement la même ; prenons donc un « corpus » (corpus) — c'est-à-dire une collection de textes d'entraînement — de quatre phrases courtes, écrites en style télégraphique, sans articles, pour garder les comptes lisibles.</p><div class=\"example\"><p><strong>Le corpus</strong> — tout notre « Internet » en quatre phrases : « chat boit lait », « chat boit eau », « chat aime poisson », « chien aime os ».</p><p>On parcourt les textes et on compte quel mot vient après quel autre :</p><ul><li>après « chat » (rencontré 3 fois) : « boit » — 2 fois sur 3, soit 67 % ; « aime » — 1 fois, 33 %</li><li>après « boit » (2 fois) : « lait » — 50 %, « eau » — 50 %</li><li>après « aime » (2 fois) : « poisson » — 50 %, « os » — 50 %</li><li>après « chien » (1 fois) : « aime » — 100 %</li></ul></div><p>La recette de la probabilité est on ne peut plus simple : le nombre de fois où la paire « X Y » apparaît dans le corpus, divisé par le nombre d'apparitions du mot X lui-même. La paire « chat boit » apparaît deux fois, le mot « chat » trois fois : la probabilité d'entendre « boit » après « chat » vaut donc deux tiers. Voilà tout — il n'y a aucune autre mathématique dans une chaîne de Markov.</p><p>Remarquez ce que cette table ne contient <em>pas</em>. Pas de parties du discours, pas de sujets ni de verbes, aucune idée qu'un chat est un animal et que le lait est un liquide. Rien que des paires de mots et des fréquences. Toute la « linguistique » du modèle tient en quelques lignes munies de compteurs — et, aussi étonnant que cela paraisse, cela suffit déjà pour engendrer du texte. Sur un vrai corpus, la table compterait des millions de lignes, mais chaque ligne serait bâtie exactement pareil : un mot, des suites possibles, des fréquences.</p>"
+    },
+    {
+      "heading": "Générons du texte : on lance le dé",
+      "html": "<p>La table est prête — faisons-la écrire, maintenant. L'algorithme : on prend un mot de départ, on regarde sa ligne dans la table et on tire le mot suivant au hasard — mais pas n'importe comment : <strong>proportionnellement aux probabilités</strong>. Imaginez un dé aux faces de tailles inégales : l'option à 67 % sort deux fois plus souvent que celle à 33 %. Le mot tiré devient le mot courant, et tout recommence.</p><div class=\"example\"><p>Étape 1. On part du mot « chat ». Dans la table : « boit » — 67 %, « aime » — 33 %. On lance le dé — c'est « aime » qui sort.</p><p>Étape 2. Le mot courant est « aime ». Dans la table : « poisson » — 50 %, « os » — 50 %. C'est « os » qui sort.</p><p>Étape 3. Après « os », le corpus arrivait toujours en fin de phrase — on met un point.</p><p>Résultat : <strong>« chat aime os »</strong>. Cette phrase ne figurait pas dans le corpus — le modèle l'a assemblée tout seul à partir de morceaux connus.</p></div><p>On voit ici à la fois la force et la faiblesse de l'approche. La force : le modèle n'est pas un perroquet — il combine des transitions et engendre des phrases nouvelles ; « chien aime poisson » peut très bien sortir aussi. La faiblesse : chaque collage se fait à l'aveugle, et à côté des phrases sensées naissent des absurdités proférées avec aplomb.</p><p>Et encore un détail qui nous servira beaucoup en fin de cours : pourquoi ne pas prendre à chaque fois, tout simplement, le mot le plus fréquent ? Parce qu'alors le modèle répondrait toujours la même phrase au même départ. C'est la pincée de hasard qui rend les textes variés. Chez les LLM modernes, cette pincée s'appelle la « température » — un module entier lui sera consacré.</p>"
+    },
+    {
+      "heading": "L'ordre de la chaîne : plus de mémoire, plus de cohérence",
+      "html": "<p>Notre chaîne souffre d'une amnésie sévère : elle retient exactement un mot. Arrivée à « boit », elle a déjà oublié qui boit — le chat, le chien ou votre voisin. Sur les textes longs, cela tourne à la dérive décousue : chaque paire de mots voisins a l'air correcte, mais la phrase entière part on ne sait où, comme une conversation où chacun ne répond qu'à la dernière réplique.</p><p>Le remède saute aux yeux : que la clé de la table soit non pas un mot, mais deux mots consécutifs. Cela s'appelle augmenter l'<strong>ordre de la chaîne</strong> (order). Les lignes de la table ressemblent maintenant à ceci : après la paire « chat boit » — « lait » ou « eau » ; après la paire « chien aime » — « os », avec une probabilité de cent pour cent. Une suite de n mots s'appelle un <strong>n-gramme</strong> (n-gram), et ces modèles, des modèles n-grammes.</p><div class=\"example\"><p>La table d'ordre deux pour notre corpus : après la paire « chat boit » — « lait » (50 %) ou « eau » (50 %) ; après « chat aime » — « poisson » (100 %) ; après « chien aime » — « os » (100 %). Remarquez : la chaîne d'ordre un pouvait produire « chien aime poisson » ; celle d'ordre deux ne le peut plus — la paire « chien aime » mène tout droit à « os ». Le texte est devenu plus correct, mais aussi plus prévisible : le modèle se colle de plus en plus au corpus d'origine.</p></div><p>La qualité monte, c'est vrai. Une chaîne d'ordre deux ne confond plus qui boit quoi ; une d'ordre trois produit, sur un grand corpus, des phrases localement tout à fait fluides. Et ce ne sont pas des jouets : jusque dans les années 2010, les modèles n-grammes travaillaient pour de bon dans les traducteurs automatiques et les systèmes de reconnaissance vocale. Plus de contexte — des statistiques plus fines — un texte plus sensé.</p><p>La recette semble trouvée : on pousse l'ordre à dix, à cinquante mots — et on obtient ChatGPT ? Hélas. C'est précisément sur ce chemin que se dresse le mur qui a forcé les chaînes de Markov à céder la place à une construction toute différente.</p>"
+    },
+    {
+      "heading": "Pourquoi c'est une impasse",
+      "html": "<p><strong>Premier mur : l'explosion combinatoire (combinatorial explosion).</strong> Prenons un vocabulaire modeste de 50 000 mots. Paires possibles : 50 000 × 50 000, soit 2,5 milliards — c'est déjà beaucoup, mais encore gérable. Triplets : 125 000 milliards. Quadruplets : environ six milliards de milliards, un nombre à dix-neuf chiffres. Aucun corpus n'y suffira : même en rassemblant tous les textes d'Internet — des milliers de milliards de mots —, l'immense majorité des quadruplets sensés n'y figurera pas <em>une seule fois</em>. Leur case dans la table contient zéro, et le modèle reste muet. Quant aux rares suites longues qui s'y trouvent bel et bien, elles n'apparaissent qu'une ou deux fois — et la chaîne d'ordre élevé dégénère en recueil de citations, recrachant mot pour mot des morceaux du corpus.</p><p><strong>Deuxième mur : zéro compréhension.</strong> La table ne contient pas de sens — seulement des fréquences. Le modèle ignore que « chien » et « toutou » désignent presque la même chose : pour lui, ce sont deux clés sans le moindre lien, et la statistique de l'une n'aide en rien l'autre. La phrase « un hippopotame violet bâille » est grammaticale et sensée ; mais si elle est absente du corpus, sa probabilité pour la chaîne de Markov vaut zéro. Généraliser, le modèle ne le sait tout simplement pas, par principe.</p><p><strong>Troisième mur : un contexte de deux ou trois mots.</strong> Pour continuer correctement la phrase « le médecin chez qui j'avais pris rendez-vous en mai m'a enfin... », il faut se souvenir du mot « médecin », dix mots en arrière. Une chaîne d'ordre trois ne voit que « mai m'a enfin » — tout le reste n'existe pas pour elle. Et rappelez-vous maintenant que ChatGPT discute tranquillement avec vous d'un document de vingt pages et se souvient de ce que vous disiez il y a une heure : aucune table de fréquences n'en rêvera jamais, quel que soit son ordre.</p><div class=\"callout\">Les grands modèles de langage modernes (Large Language Models, LLM) résolvent <strong>exactement le même problème</strong> — prédire le mot suivant. Mais à la place d'une table de fréquences, ils ont un réseau de neurones aux milliards de nombres ajustables, qui sait généraliser (« chien » ressemble à « toutou ») et garde sous les yeux des milliers de mots de contexte. Comment ce mécanisme est construit — c'est le sujet de tout ce cours, à commencer par le prochain module, où nous démonterons sa brique élémentaire : le neurone.</div>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Ci-dessous, une chaîne de Markov vivante : un petit corpus, la table de transitions construite dessus et un bouton de génération. Cliquez plusieurs fois sur « générer » et observez comment, à partir du même corpus, il sort chaque fois un texte différent — et avec quel aplomb le modèle recolle des absurdités. Puis passez l'ordre de la chaîne de 1 à 2 : les phrases deviennent nettement plus cohérentes, mais regardez de près — de plus en plus souvent, le modèle se contente de répéter mot pour mot des morceaux du corpus. Ce sont les deux faces de l'impasse dont nous venons de parler.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Le problème autour duquel tout le cours est bâti : <strong>prédire le mot suivant à partir des mots précédents</strong>. Il a plus de cent ans — Andreï Markov l'a inauguré en comptant les lettres d'« Eugène Onéguine ».</li><li>Une chaîne de Markov est une table de fréquences : combien de fois, dans le corpus, le mot Y suit le mot X. La probabilité de transition est la part de ces paires parmi toutes les apparitions de X.</li><li>Générer, c'est lancer un « dé pipé » : le mot suivant est tiré au hasard, mais proportionnellement aux probabilités. Le modèle engendre ainsi des phrases nouvelles — et des absurdités pleines d'aplomb.</li><li>Augmenter l'ordre de la chaîne (tenir compte de 2 ou 3 mots précédents) rend le texte plus cohérent, mais bute sur l'explosion combinatoire : les triplets et quadruplets possibles sont astronomiquement plus nombreux que ce qu'un corpus peut couvrir.</li><li>La chaîne n'a ni compréhension ni généralisation : « chien » et « toutou » sont pour elle deux clés de table étrangères l'une à l'autre, et son contexte se limite à deux ou trois mots.</li><li>Les LLM résolvent le même problème de prédiction du mot suivant, mais par un tout autre mécanisme — un réseau de neurones. Nous commencerons le prochain module par sa première brique : le neurone.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Que contient réellement une chaîne de Markov entraînée sur une grande quantité de textes ?",
+      "options": [
+        "Des règles de grammaire extraites automatiquement des textes",
+        "Une table de fréquences : combien de fois tel mot (ou telle paire de mots) est suivi de tel autre",
+        "Le sens des mots et les liens sémantiques entre les notions",
+        "Toutes les phrases du corpus, gardées entières pour citer la bonne au bon moment"
+      ],
+      "correct": 1,
+      "explain": "À l'intérieur d'une chaîne de Markov, il n'y a ni grammaire ni sens — rien que des compteurs de transitions « après X vient Y », convertis en probabilités. Tout son comportement découle de cette table."
+    },
+    {
+      "q": "Dans le corpus, le mot « soleil » apparaît 4 fois : 3 fois suivi de « brille » et 1 fois de « se couche ». Quelle probabilité une chaîne d'ordre un attribuera-t-elle à « brille » après « soleil » ?",
+      "options": [
+        "25 %",
+        "50 %",
+        "75 %",
+        "100 % — puisque « brille » était le plus fréquent"
+      ],
+      "correct": 2,
+      "explain": "La probabilité de transition est une proportion : 3 cas de « soleil brille » sur 4 apparitions du mot « soleil », soit 3/4 = 75 %. L'option la plus fréquente reçoit la probabilité la plus grande, mais pas toute la probabilité."
+    },
+    {
+      "q": "Nous faisons passer l'ordre de la chaîne de 1 à 3 — elle regarde désormais les trois mots précédents. Qu'arrive-t-il à la génération ?",
+      "options": [
+        "Le texte devient plus cohérent, mais la table grossit astronomiquement et le modèle se met à citer le corpus mot pour mot de plus en plus souvent",
+        "Le modèle commence à comprendre le sens des mots — le contexte est plus long, après tout",
+        "Rien ne change : les probabilités de transition restent les mêmes",
+        "Le texte empire : les mots supplémentaires ne font que brouiller les statistiques"
+      ],
+      "correct": 0,
+      "explain": "Une clé plus longue rend les suites plus précises et le texte plus fluide, mais le nombre de triplets possibles est énorme : la plupart n'apparaissent qu'une fois ou jamais dans le corpus, si bien que le modèle soit se tait, soit récite des morceaux appris par cœur."
+    },
+    {
+      "q": "Pourquoi ne peut-on pas simplement construire une chaîne de Markov d'ordre 50 et obtenir un équivalent de ChatGPT ?",
+      "options": [
+        "La puissance de calcul manquerait, mais c'est temporaire — les ordinateurs deviennent vite plus puissants",
+        "Les chaînes d'ordre élevé génèrent un texte trop aléatoire et chaotique",
+        "Garder 50 mots de contexte ne sert à rien — deux ou trois suffisent pour un texte cohérent",
+        "Le nombre de suites possibles de 50 mots est astronomique : presque n'importe quelle séquence concrète n'apparaît jamais dans aucun corpus"
+      ],
+      "correct": 3,
+      "explain": "C'est l'explosion combinatoire : le problème n'est pas la vitesse des ordinateurs, mais le fait que pour l'immense majorité des longues combinaisons de mots, il n'existe par principe aucune statistique — elles ne sont jamais apparues, et leur case dans la table est vide."
+    },
+    {
+      "q": "Une chaîne de Markov entraînée sur des histoires pour enfants a produit la phrase « le chat croque du lait ». Quelle en est la cause ?",
+      "options": [
+        "Le corpus contenait la phrase « le chat croque du lait », et le modèle l'a citée",
+        "Le modèle ne voit que les fréquences de mots voisins : chaque paire, prise à part, existait dans les textes, et il n'a aucun moyen de vérifier le sens de la phrase entière",
+        "Le modèle a compris le sens, mais a ajouté du hasard pour rendre le texte plus varié",
+        "Une erreur s'est glissée dans la table de probabilités — avec des comptes justes, c'est impossible"
+      ],
+      "correct": 1,
+      "explain": "La chaîne recolle le texte à partir de transitions isolées : « chat → croque » et « croque → lait » ont pu apparaître séparément dans des phrases différentes. Le sens de la phrase entière n'existe pas pour le modèle — il n'opère que sur des paires."
+    },
+    {
+      "q": "Qu'ont en commun la chaîne de Markov centenaire et les LLM modernes comme ChatGPT ?",
+      "options": [
+        "Les deux stockent une table de fréquences de transitions, celle des LLM est juste beaucoup plus grande",
+        "Rien du tout : les LLM résolvent un problème fondamentalement différent",
+        "Les deux résolvent le même problème — prédire le mot suivant à partir des précédents —, mais par des mécanismes complètement différents",
+        "Les deux comprennent le sens du texte, la chaîne de Markov le comprend juste moins bien"
+      ],
+      "correct": 2,
+      "explain": "Le problème n'a pas changé en cent ans : prédire le mot suivant. C'est le mécanisme qui a changé : à la place d'une table de fréquences, un réseau de neurones capable de généraliser et de tenir compte d'un long contexte. C'est à ce mécanisme qu'est consacré le reste du cours."
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "title": "L'attention : le superpouvoir du transformeur",
+  "minutes": 12,
+  "intro": "Lisez cette phrase : « Le chat n'a pas mangé le poisson, parce qu'il n'était pas frais ». Vous avez compris instantanément que c'est le poisson qui n'était pas frais, et non le chat — sans même remarquer comment vous l'avez fait. Pour les machines, en revanche, cette tâche est restée pendant des décennies presque insoluble. Ce module est consacré au mécanisme d'attention : l'idée qui a appris aux réseaux de neurones à « se retourner » sur le contexte et qui, en 2017, est devenue le socle du transformeur — l'architecture qui a rendu possible tout ce que vous voyez aujourd'hui dans ChatGPT et Claude.",
+  "sections": [
+    {
+      "heading": "Les mots-caméléons et le chat égaré",
+      "html": "<p>Dans le module précédent, les mots sont devenus des embeddings — des listes de nombres où les mots proches par le sens se retrouvent côte à côte. Mais il y a un hic : le mot « glace » n'a qu'une seule entrée dans le vocabulaire du modèle, alors qu'il a au moins trois sens. « Le lac est pris par la glace » — l'eau gelée. « Les enfants réclament une glace à la vanille » — le dessert. « Elle s'est regardée dans la glace » — le miroir. À lui seul, le mot ne veut presque rien dire : son sens se reconstruit à chaque fois à partir de ses voisins.</p><p>Avec les pronoms, c'est encore pire. « Il » est une coquille entièrement vide : tout le contenu vient du contexte. Revenons à notre chat : « Le chat n'a pas mangé le poisson, parce qu'il n'était pas frais ». Pour comprendre ce « il », il faut remonter jusqu'au mot « poisson » — qui se trouve cinq mots plus tôt. Remplacez « n'était pas frais » par « était rassasié » — et le même « il » désignera soudain le chat. Un seul mot à la fin de la phrase a retourné le sens d'un mot au milieu : voilà à quoi le modèle doit faire face.</p><p>Souvenez-vous maintenant de la chaîne de Markov du premier module. Elle regarde les deux ou trois mots précédents, pas plus loin. Juste avant « il » se trouvent « parce » et « que » — zéro information utile. Les indices nécessaires — « poisson », « chat », « frais » — sont hors de son champ de vision. Et dans les textes réels, le mot-indice peut se trouver trois paragraphes plus haut : « Le contrat dont nous avons discuté lundi… — signez-le ». Aucune fenêtre de trois, cinq ou dix mots ne résout le problème : il faut un mécanisme capable d'aller regarder <em>n'importe où</em> dans le texte.</p>"
+    },
+    {
+      "heading": "Se retourner sur toute la phrase",
+      "html": "<p>Ce mécanisme s'appelle <strong>l'attention (attention)</strong>. L'idée est la suivante : en traitant un mot, le modèle passe en revue <em>tous</em> les mots du contexte et attribue à chacun un poids d'importance — un nombre qui indique avec quelle intensité il faut « regarder » ce mot en ce moment précis.</p><p>Vous le faites en permanence. Vous lisez un polar, vous tombez sur la phrase « c'est donc à elle, ce mouchoir ! » — et vous feuilletez mentalement en arrière, vers cette scène du chapitre trois, en sautant les centaines de pages qui les séparent. Ou bien vous êtes à une fête bruyante : une dizaine de conversations autour de vous, mais vous « montez le volume » d'une seule voix et mettez les autres en sourdine. L'attention dans un réseau de neurones, c'est ce même réglage de volume, mais pour les mots — et il se refait à neuf pour chaque mot traité.</p><p>Notez la différence de principe avec la chaîne de Markov. Là-bas, la distance décidait de tout : deux mots en arrière — visible, quatre — déjà plus. Dans l'attention, la distance en soi n'est pas une condamnation : un mot du début du livre peut recevoir un gros poids, et le mot voisin — un poids presque nul. L'importance est déterminée par le sens, pas par la proximité.</p><div class=\"example\"><p>Les poids d'attention sont des parts dont la somme fait un, comme des pourcentages. En traitant le mot « il » dans notre phrase, le modèle peut répartir son attention ainsi : « poisson » — 0.58, « frais » — 0.20, « chat » — 0.09, « mangé » — 0.06, et des miettes pour les autres mots. Plus de la moitié du « regard » est allée au poisson — et « il » prend le sens de « ce fameux poisson du début de la phrase ».</p></div><p>Important : personne n'inscrit ces poids à la main. C'est le réseau lui-même qui les calcule à la volée — avec ces mêmes « petits poids » que nous avons décortiqués dans le deuxième module et qui se règlent pendant l'entraînement. Pour chaque nouvelle phrase, la répartition de l'attention est différente.</p><div class=\"callout\"><p><strong>Idée clé :</strong> pour comprendre un mot, pas besoin de garder tout le texte en mémoire avec la même intensité. Il faut savoir trouver instantanément les quelques mots qui comptent maintenant — et regarder surtout ceux-là.</p></div>"
+    },
+    {
+      "heading": "Chaque mot envoie sa requête",
+      "html": "<p>Comment le réseau décide-t-il où regarder ? Sans formules, on peut se le représenter ainsi : chaque mot envoie à tous les autres une requête — « qui parle de moi ici ? ». Le mot « il » annonce en quelque sorte : « Je suis un pronom masculin singulier, je cherche un nom dont on vient de parler ». Et chaque mot de la phrase porte une sorte de badge descriptif : « je suis un nom, masculin, du monde de la nourriture ». Mieux le badge répond à la requête, plus le poids d'attention entre cette paire de mots est élevé. Pour « poisson », la correspondance est excellente ; pour « chat », un peu moins bonne (le genre convient, mais vu le sens de la phrase, ce n'est clairement pas lui qui n'était « pas frais ») ; pour « parce », elle est presque nulle. La force de la correspondance devient le poids d'attention : 0.58, 0.09, presque zéro.</p><p>Puis vient l'essentiel : le mot ne fait pas que « regarder » ses voisins importants — il <strong>absorbe</strong> leur information. Dans l'embedding du mot « il » viennent se mélanger des fragments de sens de « poisson » et de « frais », proportionnellement aux poids. En sortie, « il » n'est plus un pronom abstrait, mais presque « le poisson pas frais de cette phrase ». Même chose pour la « glace » : si « lac » et « hiver » sont à proximité, son vecteur glisse vers l'eau gelée ; si « vanille » et « cornet » — vers le dessert. Un même mot en entrée — des vecteurs différents en sortie, selon l'entourage. C'est exactement ainsi que se résout le problème des mots-caméléons.</p><p>Les requêtes comme les badges ne sont, eux aussi, que des nombres, obtenus à partir des embeddings par multiplication avec des poids entraînables. Personne n'a programmé la règle « le pronom cherche un nom ». Le modèle l'a apprise tout seul, par la descente de gradient du troisième module — simplement parce que savoir retrouver à quoi renvoie « il » aide à prédire plus précisément le mot suivant.</p>"
+    },
+    {
+      "heading": "Des dizaines de couches, des centaines de spécialistes",
+      "html": "<p>Une seule passe d'attention ne capte qu'une seule « strate » de liens. Mais dans les vrais modèles, les couches d'attention s'empilent par dizaines, et à l'intérieur de chaque couche travaillent en parallèle plusieurs <strong>têtes d'attention (attention heads)</strong> — des mécanismes indépendants, chacun avec ses propres poids appris. Et chaque tête se forge sa spécialité : l'une surveille l'accord des adjectifs avec les noms, une autre — ce à quoi renvoient les pronoms, une troisième relie le verbe à son complément, une quatrième rassemble les mots d'un même thème.</p><p>Les couches fonctionnent comme une chaîne de montage à complexité croissante. Les couches basses captent le simple et le local : mots voisins, morceaux de grammaire. Les couches moyennes assemblent les groupes de mots et les liens à l'intérieur de la phrase. Les couches hautes manipulent déjà presque du sens : de quoi parle le paragraphe, où se cache l'ironie, qu'est-ce qui découle de quoi. Imaginez une maison d'édition où le manuscrit passe par une chaîne de relecteurs : le correcteur traque les coquilles, le styliste — les tournures, le vérificateur contrôle les dates, le secrétaire de rédaction regarde le texte dans son ensemble. Chacun apporte sa retouche en s'appuyant sur le travail des précédents — et à la sortie, le texte est « compris » à tous les niveaux à la fois.</p><div class=\"example\"><p>Ordre de grandeur : GPT-3 compte 96 couches, avec 96 têtes d'attention chacune. Au total, plus de neuf mille petits « spécialistes des liens », et chacun regarde le texte à sa façon.</p></div><p>Le plus intéressant : personne n'a distribué les spécialités. Toutes les têtes sont construites à l'identique et ne diffèrent que par leurs poids appris — les rôles se sont formés d'eux-mêmes au fil de l'entraînement. Les chercheurs examinent ensuite le modèle fini avec curiosité et découvrent : tiens, cette tête-là suit les guillemets ouverts, et celle-là — les noms des personnages.</p>"
+    },
+    {
+      "heading": "Le transformeur : « l'attention est tout ce qu'il vous faut »",
+      "html": "<p>En 2017, des ingénieurs de Google ont publié l'article « Attention Is All You Need » — « L'attention est tout ce qu'il vous faut ». Il décrit l'architecture du <strong>transformeur (transformer)</strong> : une pile de couches d'attention alternant avec des couches ordinaires de neurones, celles du deuxième module. Le titre de l'article s'est révélé prophétique — aujourd'hui, pratiquement tous les grands modèles de langue tournent sur des transformeurs.</p><p>Avant 2017, le texte était surtout l'affaire des réseaux récurrents (recurrent neural networks). Ils lisaient le texte strictement mot à mot, en traînant derrière eux un « résumé » compressé de leur lecture. À la fin d'un long paragraphe, le résumé finissait inévitablement par se brouiller — le début s'oubliait. Le transformeur a sur eux deux avantages décisifs.</p><ul><li><strong>Tout le contexte d'un coup.</strong> L'attention regarde tous les mots simultanément, sans rien se raconter de proche en proche. Les premiers transformeurs gardaient sous les yeux des centaines de tokens, les modèles actuels — des centaines de milliers : c'est un gros livre que le modèle voit « d'un seul regard ». Quand vous collez un long contrat dans le chat et posez une question sur une clause du milieu, c'est exactement cela qui opère : l'attention va chercher directement le bon passage, sans jeu du téléphone.</li><li><strong>Le parallélisme.</strong> Un réseau récurrent ne peut pas s'attaquer au mot n° 500 avant d'en avoir fini avec le n° 499 — tout se fait à la queue leu leu. Dans le transformeur, tous les mots sont traités en même temps, et c'est une tâche idéale pour les cartes graphiques (GPU) et leurs milliers de cœurs. L'entraînement s'est accéléré de plusieurs ordres de grandeur — et pour la première fois, il est devenu réaliste de faire passer par le modèle les textes de tout Internet. C'est l'objet du module suivant.</li></ul><p>On peut maintenant décoder un sigle familier. <strong>GPT — Generative Pretrained Transformer</strong>, « transformeur génératif pré-entraîné » : <em>génératif</em> — parce qu'il génère du texte en prédisant le token suivant ; <em>pré-entraîné</em> — parce qu'il a d'abord lu un gigantesque corpus de textes (on y vient) ; <em>transformeur</em> — cette fameuse architecture en couches d'attention. Les deux tiers du nom, vous les comprenez déjà de l'intérieur.</p><div class=\"callout\"><p><strong>Le transformeur n'a pas gagné parce qu'il serait « plus intelligent » dans sa conception.</strong> Il voit tout le contexte d'un coup et se parallélise à merveille — on peut donc le gaver de données et de calcul presque sans limite. Ensuite, c'est l'échelle qui est entrée en jeu.</p></div>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Ci-dessous, une démonstration interactive sur la phrase familière du chat et du poisson. Cliquez sur les mots : ceux que le mot choisi « regarde » s'illumineront, et plus la surbrillance est vive, plus le poids d'attention est grand. Cliquez absolument sur « il » et vérifiez qui attire le regard — le chat ou le poisson. Comparez ensuite les répartitions pour le verbe et pour l'adjectif : chaque mot a son propre motif d'attention.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Le sens d'un mot dépend du contexte (la « glace » sur le lac ou dans le cornet), et le mot-indice peut se trouver loin. La chaîne de Markov, avec sa fenêtre de deux ou trois mots, est ici impuissante.</li><li><strong>L'attention (attention)</strong> est le mécanisme par lequel chaque mot reçoit des poids d'importance pour tous les mots du contexte et absorbe l'information des plus importants. Les poids sont des parts dont la somme fait un.</li><li>L'intuition sans formules : chaque mot envoie la requête « qui parle de moi ici ? », et la correspondance entre la requête et les « badges » des autres mots fixe la force de l'attention. Ces règles, le modèle les apprend tout seul.</li><li>Après la passe d'attention, l'embedding du mot est mis à jour par le contexte : « il » devient « ce fameux poisson », la « glace » — eau gelée ou dessert.</li><li>Les couches et les têtes d'attention se comptent en dizaines et en centaines, chacune avec une spécialisation apparue spontanément : grammaire, pronoms, thèmes.</li><li>Le <strong>transformeur</strong> (article « Attention Is All You Need », 2017) voit tout le contexte d'un coup — aujourd'hui des centaines de milliers de tokens — et se parallélise à merveille sur GPU.</li><li><strong>GPT</strong> — Generative Pretrained Transformer, « transformeur génératif pré-entraîné ».</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Pourquoi la chaîne de Markov ne peut-elle pas comprendre à qui renvoie « il » dans la phrase « Le chat n'a pas mangé le poisson, parce qu'il n'était pas frais » ?",
+      "options": [
+        "Elle ne distingue pas le genre des noms et confond donc le chat et le poisson",
+        "Sa table de fréquences ne contient pas de pronoms",
+        "Elle ne voit que les deux ou trois mots précédents, et les indices « poisson » et « frais » sont hors de cette fenêtre",
+        "Elle a été entraînée sur un texte trop petit"
+      ],
+      "correct": 2,
+      "explain": "La chaîne de Markov ne s'appuie que sur les deux ou trois derniers mots. Juste avant « il » se trouvent « parce que » — aucun indice là-dedans, et les mots utiles sont plus loin, hors de son champ de vision."
+    },
+    {
+      "q": "Que fait le mécanisme d'attention quand le modèle traite un mot ?",
+      "options": [
+        "Il attribue à chaque mot du contexte un poids d'importance et prend davantage en compte les mots aux gros poids",
+        "Il trouve le seul mot le plus important et écarte tous les autres",
+        "Il mémorise tout le texte mot pour mot, pour ne rien perdre",
+        "Il remplace le mot par sa définition de dictionnaire"
+      ],
+      "correct": 0,
+      "explain": "L'attention répartit des poids sur tous les mots du contexte à la fois : les importants reçoivent de grosses parts, les autres de petites — mais aucun n'est écarté complètement et rien n'est appris par cœur."
+    },
+    {
+      "q": "Le modèle traite le mot « glace » dans la phrase « une glace à deux boules fondait doucement dans son cornet ». Que se passera-t-il grâce à l'attention ?",
+      "options": [
+        "Le modèle choisira le bon sens dans un dictionnaire de définitions intégré",
+        "L'embedding du mot « glace » glissera vers le sens « dessert » sous l'influence des mots « boules », « fondait », « cornet »",
+        "Le mot « glace » recevra un nouveau token distinct avec le sens « dessert »",
+        "Le modèle demandera à l'utilisateur quel sens était visé"
+      ],
+      "correct": 1,
+      "explain": "L'attention mélange dans le vecteur du mot l'information venue du contexte, et le vecteur de « glace » se déplace vers le sens « dessert ». Il n'existe aucun dictionnaire des sens dans le modèle, et le token reste exactement le même."
+    },
+    {
+      "q": "Pourquoi le transformeur compte-t-il des dizaines de couches et de têtes d'attention, et non une seule couche ?",
+      "options": [
+        "Les couches de réserve s'activent quand la principale se trompe",
+        "Une seule couche est physiquement incapable de voir tout le contexte",
+        "Plus il y a de couches, plus le vocabulaire du modèle peut contenir de mots",
+        "Couches et têtes différentes captent des types de liens différents : la grammaire, le sens, les renvois des pronoms"
+      ],
+      "correct": 3,
+      "explain": "Même une seule couche voit tout le contexte, mais elle ne capte qu'une seule « strate » de liens. Une multitude de têtes et de couches permet de suivre en même temps la grammaire, les renvois des pronoms, les thèmes — et de construire, couche après couche, une compréhension de plus en plus abstraite."
+    },
+    {
+      "q": "Quels sont les deux avantages qui ont valu au transformeur sa victoire sur les réseaux récurrents ?",
+      "options": [
+        "Il n'a pas besoin d'entraînement et fonctionne dès l'assemblage",
+        "Il voit tout le contexte d'un coup et se parallélise à merveille sur GPU",
+        "Il occupe moins de mémoire et ne se trompe jamais",
+        "Ses développeurs y ont intégré d'avance les règles de grammaire de toutes les langues"
+      ],
+      "correct": 1,
+      "explain": "Les réseaux récurrents lisaient le texte mot à mot et « oubliaient » le début. Le transformeur regarde tous les mots simultanément, et comme la file d'attente disparaît, les calculs se répartissent idéalement sur les milliers de cœurs d'un GPU — c'est ce qui a permis d'entraîner les modèles sur des volumes de texte gigantesques."
+    },
+    {
+      "q": "Que signifie le sigle GPT ?",
+      "options": [
+        "General Purpose Technology — technologie à usage général",
+        "Global Prediction Tool — outil global de prédiction",
+        "Generative Pretrained Transformer — transformeur génératif pré-entraîné",
+        "Gradient Processing Unit — unité de traitement des gradients"
+      ],
+      "correct": 2,
+      "explain": "GPT — Generative Pretrained Transformer : le modèle génère du texte en prédisant le token suivant, a d'abord été entraîné sur un immense corpus de textes et repose sur l'architecture du transformeur."
+    }
+  ]
+}

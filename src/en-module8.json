@@ -1,0 +1,103 @@
+{
+  "title": "The Birth of an Answer: Probabilities and Temperature",
+  "minutes": 12,
+  "intro": "You send off a question — and words start racing across the screen, as if the model were reading out a prepared answer. In reality there is no prepared answer: every next word is born right now, in a tiny lottery that plays out dozens of times per second. In this module we'll take that mechanism apart step by step — and you'll understand why the same question produces a different answer every time, and what that mysterious \"temperature\" setting is actually in charge of.",
+  "sections": [
+    {
+      "heading": "What Comes Out of the Network: Fifty Thousand Numbers",
+      "html": "<p>Let's recall where we left off. The text of your prompt has been sliced into tokens and turned into numbers (module 4), passed through dozens of layers with the attention mechanism (module 5) — and now the signal has reached the very last layer. What's waiting at the finish line?</p><p>Not a word. Not even a short list of candidate words. The network's output is <strong>one number for every token in the vocabulary</strong>. If the model's vocabulary holds 50,000 tokens, then at every step it produces 50,000 numbers. Each of these numbers is called a <strong>logit</strong> — a raw score, an estimate of how fitting that token would be as the next one.</p><div class=\"example\"><p>Say the text so far reads: \"The cat settled down on the…\". The model scores the entire vocabulary at once: \"rug\" — 8.2; \"windowsill\" — 7.4; \"lap\" — 6.9; \"fridge\" — 2.1; \"democracy\" — minus 4.5. And so on for all 50,000 tokens, including the most absurd ones: every single token gets a score — the absurd ones just get deeply negative ones.</p></div><p>Note that logits are awkward numbers. They can be negative, they have no natural scale, and \"8.2\" means nothing by itself — all that matters is that it's bigger than \"7.4.\" You can compare them, but you can't yet say \"how much more likely.\" On top of that, this whole avalanche — fifty thousand scores — is recomputed from scratch at every step, all for the sake of one single next token. To do anything further with the scores, they need to be turned into something meaningful. Percentages, for instance.</p>"
+    },
+    {
+      "heading": "Softmax: Scores Become Percentages",
+      "html": "<p>That's what the <strong>softmax</strong> function is for (literally, a \"soft maximum\"). It takes the whole list of logits and turns it into a list of probabilities with two ironclad properties: every probability is greater than zero, and together they add up to exactly 100%.</p><p>Nothing mystical happens inside: each logit gets \"inflated\" by an exponential — the bigger the score, the disproportionately stronger the inflation — and then all the results are divided by their total, so they become shares of a whole. Because of the exponential, gaps get amplified: a token that led its neighbor by just a couple of points walks away with the lion's share of the probability.</p><div class=\"example\"><p>After softmax, our scores might come out like this: \"rug\" — 54%, \"windowsill\" — 24%, \"lap\" — 15%, a few more percent smeared across words like \"table\" and \"couch,\" and the \"fridge\" gets 0.1%. Even \"democracy\" received its microscopic chance — something like 0.0002%. Nobody gets zero.</p></div><p>An important detail: at this point, the neural network's work is done. All the weights, all the training from the previous modules — everything has already run its course and been pressed into these percentages. What comes next is an entirely different stage: from this distribution, one single word has to be chosen.</p><div class=\"callout\"><p><strong>The key idea:</strong> a language model doesn't output the next word. It outputs a forecast — a probability distribution over the entire vocabulary, like a weather service: \"70% chance of rain tomorrow.\" The word itself still has to be picked, and that's a separate step with rules of its own.</p></div>"
+    },
+    {
+      "heading": "Greedy Choice vs. the Roulette Wheel",
+      "html": "<p>The most obvious way to pick a word is to take the most probable one. This is called <strong>greedy decoding</strong>: always take the token with the highest percentage, no exceptions. Sounds sensible, but in practice it works out badly. The text comes out gray and predictable — and worse, prone to loops: the model falls into a rut like \"This is very important, because this is very important, because…\" and can't climb out — at every step, the \"most probable\" token drags it around the same circle again.</p><p>The thing is, living human text is not made of wall-to-wall most-probable words. If every word were the most expected one, reading would be unbearably dull — easy to verify by tapping the first word in your phone keyboard's suggestions over and over.</p><p>So in practice, <strong>sampling</strong> is used — a random choice proportional to the probabilities. Picture a roulette wheel with sectors of different sizes: \"rug\" gets 54% of the circle, \"windowsill\" 24%, \"lap\" 15%, and everything else — thin slivers. Spin it; wherever the ball lands, that's the word we write. Most often it'll be \"rug,\" but a quarter of the time — \"windowsill,\" and once in a while, something unexpected.</p><p>This also clears up the difference in behavior. Greedy decoding is deterministic: the same prompt — the same answer, letter for letter, even a thousand times in a row. Sampling takes a fresh path on every run: the wheel is under no obligation to land where it landed last time.</p><p>It's important to understand: this isn't \"the model made a mistake\" and it isn't noise in the wires. The randomness is built in deliberately, by design — it's exactly what makes the text lively, varied, and human-like.</p>"
+    },
+    {
+      "heading": "Temperature and Top-p: Tuning the Roulette Wheel",
+      "html": "<p>Fine, but who decides how daring the wheel is? That's the job of <strong>temperature</strong> — a number that all the logits are divided by before being handed to softmax. One tweak — and the model's personality changes before your eyes.</p><p>The only formula in this module: <strong>probability of a token = e^(logit ÷ T) / sum of e^(logit ÷ T) over all tokens in the vocabulary</strong>. Here e is the mathematical constant, roughly 2.718 — that same exponential; \"logit\" is the token's raw score; T is the temperature, which you set; and dividing by the sum over the whole vocabulary guarantees the percentages add up to exactly 100%. At T = 1, this is the ordinary softmax from the previous section.</p><p>What does dividing by T change? At a <strong>low temperature</strong> (say, 0.2), the logits are divided by a small number and spread far apart. The exponential turns a gap into a chasm: the leader takes nearly everything, and the distribution \"sharpens.\" The model becomes cautious and predictable — almost greedy decoding.</p><p>At a <strong>high temperature</strong> (1.5–2), the logits get squeezed together instead, and after softmax, the wheel's sectors even out. The underdogs' chances grow, the text becomes bolder and more surprising — but alongside the interesting finds, outright nonsense comes up more and more often.</p><div class=\"example\"><p>The same three candidates at different temperatures. T = 0.3: \"rug\" — 96%, \"windowsill\" — 3%, \"lap\" — 1%. T = 1: 54%, 24%, 15%. T = 1.8: 36%, 28%, 24% — nearly a lottery. The logits haven't budged a hair; only the \"sharpness\" of their conversion into percentages has changed.</p></div><p>High temperature has a side effect: even the wildest tokens from the tail — those thousands of \"democracies\" — see their chances rise. Against that, there's a safety valve: <strong>top-p</strong> (also known as nucleus sampling). The idea is simple: sort the tokens by descending probability and keep only the top of the list that together adds up to p — say, 90%. The long tail of improbable junk gets thrown out, and the wheel spins among the survivors, with 100% redistributed between them. Temperature sets the daring; top-p insures against truly ludicrous bets — they usually work as a pair.</p><p>Hence the practical takeaway: for factual answers and code, set the temperature low; for brainstorming and poetry, turn it up. It's not a \"creativity level\" somewhere inside the model — just a setting on the roulette wheel at the very output.</p>"
+    },
+    {
+      "heading": "Autoregression: the Answer Grows Token by Token",
+      "html": "<p>So the wheel has picked a word — let's say \"windowsill.\" What now? Now comes the key trick of the whole construction. The chosen token is <strong>appended to the text</strong>, and the entire procedure starts over: \"The cat settled down on the windowsill\" goes through the network, out come a fresh 50,000 logits, softmax, temperature, the wheel… This is called <strong>autoregression</strong>: the model keeps feeding on its own output, and the answer grows token by token, like knitting — stitch by stitch.</p><p>An astonishing consequence follows: at the moment it picks the next word, the model has <strong>no finished plan for the sentence</strong>. It hasn't \"formed a thought and is now writing it down\" — each time, it decides afresh which token fits after everything already written. When a chatbot types its answer word by word, that's not an animation for show: the words really are coming into existence at roughly that pace, one after another.</p><p>And one more consequence — the butterfly effect. Let the wheel pick \"windowsill\" instead of \"rug\" just once, and the entire text that follows takes a different road: the next step sees a different context, the probabilities shift, the choices pile up. A hundred tokens later, you have two completely different answers. And there's the solution to a puzzle everyone knows: you ask the same question — you get different answers. Not because the model \"changed its mind\" or got retrained overnight, but because randomness is honestly built into the mechanism. Incidentally, the \"regenerate response\" button in chatbots is literally \"spin all the wheels again.\" And if you set the temperature to zero, answers to the same prompt become (almost) identical — the wheel turns into greedy decoding.</p><p>Autoregression has a flip side, too: since the answer is written forward, word by word, the model can't \"think it through to the end first, then check and rewrite\" — whatever fell out of the wheel is already in the text. That's partly why models are asked to \"reason step by step\": the intermediate reasoning lands in the context and helps the choices that follow. As for what limitations grow out of this — that's for the final module.</p><div class=\"callout\"><p><strong>The circle is complete:</strong> this is the same \"predict the next one — append it — repeat\" loop we started the course with, back in the Markov chain module. Only instead of a little table of word pairs, there's now a giant attention-equipped network that has read the internet and been through obedience school. The principle hasn't changed one iota.</p></div>"
+    },
+    {
+      "heading": "Try It Yourself",
+      "html": "<p>Below is a phrase builder where this whole kitchen is on display live: the start of a sentence and bars showing the probabilities of the next word. First, drag the temperature slider and watch how, at low values, one bar crushes the rest, while at high values they even out. Then grow the phrase with the word-pick button — and notice that even a modest bar wins from time to time. Assemble the phrase a few times at different temperatures and compare: where does the text turn duller, and where does it start to swerve?</p>"
+    },
+    {
+      "heading": "Key Takeaways",
+      "html": "<ul><li>At every step, the network outputs not a word but a <strong>logit</strong> — a raw score — for each of the tens of thousands of tokens in the vocabulary.</li><li><strong>Softmax</strong> turns logits into probabilities: all greater than zero, summing to exactly 100%.</li><li>Greedy decoding (always the most probable token) produces dull text prone to loops, so <strong>sampling</strong> is used instead — a roulette wheel with sectors sized by probability.</li><li><strong>Temperature</strong> is the daring dial: low sharpens the distribution (the leader nearly always wins), high flattens it (more surprises — and more risk of nonsense).</li><li><strong>Top-p</strong> cuts off the tail of very unlikely tokens and spins the wheel among the remaining top.</li><li><strong>Autoregression</strong>: the chosen token is appended to the text, and everything repeats — the answer is born token by token, with no finished plan for the sentence.</li><li>Different answers to the same question aren't a glitch — they're honest randomness, built into the choice of every word.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "What sits at the very output of the neural network at the moment the next word is being decided?",
+      "options": [
+        "One word — the one the model judged to be correct",
+        "Several ready-made versions of the phrase, from which the best is chosen",
+        "A numeric score (logit) for every token in the vocabulary — tens of thousands of numbers at once",
+        "A list of synonyms for the last word of the prompt"
+      ],
+      "correct": 2,
+      "explain": "The output is a raw score for every token in the vocabulary, even the most absurd ones. The word has yet to be derived from those scores: first softmax turns them into probabilities, then the selection procedure kicks in."
+    },
+    {
+      "q": "What job does softmax do?",
+      "options": [
+        "It turns raw logit scores into probabilities that sum to 100%",
+        "It picks the most probable token out of all of them",
+        "It speeds up generation by discarding unneeded layers of the network",
+        "It fixes grammatical errors in the finished answer"
+      ],
+      "correct": 0,
+      "explain": "Softmax is only a conversion of scores into percentages: they all become positive, and the total is exactly 100%. Choosing the token itself is a separate step that comes afterward."
+    },
+    {
+      "q": "Why is greedy decoding — always taking the most probable token — almost never used in practice?",
+      "options": [
+        "It requires too much computation",
+        "It produces random gibberish too often",
+        "It makes the model forget the beginning of the conversation",
+        "The text comes out monotonous and prone to getting stuck in loops"
+      ],
+      "correct": 3,
+      "explain": "Greedy decoding drags the model down the most well-worn rut: the text comes out gray and easily gets stuck repeating itself. Computationally it's actually the cheapest option — and there's no randomness in it at all."
+    },
+    {
+      "q": "You raised the temperature from 0.3 to 1.8. What happened to the probabilities of the next token?",
+      "options": [
+        "Nothing — temperature only affects generation speed",
+        "The distribution flattened out: unlikely tokens' chances grew, and the leader lost its edge",
+        "The model became more creative inside — its weights changed",
+        "The distribution sharpened: the leader started getting almost 100%"
+      ],
+      "correct": 1,
+      "explain": "High temperature squeezes the gaps between logits, and after softmax, the wheel's sectors even out. The model's weights don't change at all — it's a setting at the very output only."
+    },
+    {
+      "q": "What does the top-p parameter do?",
+      "options": [
+        "It caps the answer's length at a set number of tokens",
+        "It glues the p most probable tokens together into one phrase",
+        "It discards the tail of unlikely tokens and spins the wheel among the remaining top",
+        "It boosts the probability of rare words to make the text more varied"
+      ],
+      "correct": 2,
+      "explain": "Top-p keeps the top of the list that together accumulates the set share of probability (say, 90%) — the rest of the tail sits out the lottery. It's insurance against truly wild tokens at high temperature."
+    },
+    {
+      "q": "Why does the model answer the very same question differently every time?",
+      "options": [
+        "The model retrains after every answer and changes its opinion",
+        "The servers are overloaded, and some of the computations come out wrong",
+        "The model deliberately paraphrases so its answers don't look copied",
+        "Every token is chosen by the roulette wheel, and one different choice changes everything that follows"
+      ],
+      "correct": 3,
+      "explain": "The randomness is built into sampling on purpose. If the wheel picks a different token at any step, the context changes, the probabilities of the following words shift, and the text heads down a different road."
+    }
+  ]
+}

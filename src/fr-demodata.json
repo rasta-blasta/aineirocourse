@@ -1,0 +1,72 @@
+{
+  "markovCorpus": "le chat dormait sur le canapé . le chat regardait la pluie . la pluie tombait sur le toit . le chien dormait sur la terrasse . le chat dormait près de la fenêtre . le chien regardait le chat . la pluie tombait toute la journée . le chat était assis sur le canapé . le chien était assis près de la porte . le soir le chat dormait sur le canapé .",
+  "words": [
+    ["chat",1.2,8.6],["chatte",1.8,9.2],["chien",2.4,8.2],["chiot",3.0,8.9],["souris",0.9,7.6],
+    ["cassoulet",8.4,8.8],["tarte",9.0,8.2],["porridge",8.0,9.3],["pain",9.5,8.9],["soupe",7.7,8.4],
+    ["tramway",8.6,1.4],["bus",9.2,2.0],["train",8.1,2.4],["avion",9.6,1.0],["vélo",7.8,1.0],
+    ["joie",1.3,1.8],["tristesse",0.7,1.0],["peur",1.9,0.8],["enthousiasme",2.3,2.2],["ennui",0.5,2.5],
+    ["roi",5.6,6.4],["reine",4.2,6.4],["homme",5.6,3.6],["femme",4.2,3.6]
+  ],
+  "attention": {
+    "A": {
+      "toks": ["La","chatte","n'","a","pas","mangé","la","sardine",",","parce","qu'","elle","était","avariée","."],
+      "att": {"11":{"7":0.62,"1":0.10,"13":0.16,"12":0.05},"13":{"7":0.55,"11":0.28,"12":0.08},"5":{"1":0.35,"3":0.25,"7":0.30},"1":{"7":0.3,"5":0.25,"3":0.15}},
+      "sel": 11
+    },
+    "B": {
+      "toks": ["La","chatte","n'","a","pas","mangé","la","sardine",",","parce","qu'","elle","était","repue","."],
+      "att": {"11":{"1":0.60,"7":0.12,"13":0.18,"12":0.05},"13":{"1":0.50,"11":0.30},"5":{"1":0.35,"3":0.25,"7":0.30},"1":{"7":0.3,"5":0.25,"3":0.15}},
+      "sel": 11
+    }
+  },
+  "temp": {
+    "start": "Le soir, la chatte est montée sur",
+    "s0": [["le toit",2.3],["l'arbre",1.7],["l'armoire",1.2],["les genoux",0.6],["le lustre",-0.6]],
+    "s1": [["et",1.9],["pour",1.1],["d'où",0.7],["puis",0.2]],
+    "s2": {
+      "et": [["s'est endormie",2.0],["s'est mise à ronronner",1.4],["est tombée",0.9],["s'est mise à chanter",-0.3]],
+      "pour": [["se cacher",1.8],["se réchauffer",1.5],["observer",1.0],["rêvasser",0.3]],
+      "d'où": [["elle observait",1.9],["elle a sauté",1.2],["elle miaulait",0.8],["elle s'est enfuie",0.4]],
+      "puis": [["s'est endormie",1.6],["a changé d'avis",1.2],["a sauté",1.0],["s'est figée",0.5]]
+    },
+    "s3": [["jusqu'au matin",1.4],["pour de bon",0.8],["avec délectation",0.1],["sans se presser",0.5]]
+  },
+  "rlhf": [
+    {"q":"Quelle est la capitale de l'Australie ?",
+     "a":[{"t":"La capitale de l'Australie est Sydney. C'est la plus grande et la plus célèbre ville du pays, celle du fameux opéra.","good":false},
+          {"t":"Canberra. Sydney est plus grande et plus connue, mais c'est Canberra qui a été choisie comme capitale en 1913 — un compromis entre Sydney et Melbourne.","good":true}],
+     "note":"La première réponse sonne assurée et fluide — mais elle est fausse. Les annotateurs apprennent au modèle que la véracité compte plus qu'un ton convaincant."},
+    {"q":"J'ai mal à la tête depuis trois jours. Que faire ?",
+     "a":[{"t":"Ce n'est sûrement rien de grave ! Prenez un antidouleur, reposez-vous et essayez de ne plus y penser.","good":false},
+          {"t":"Les causes banales les plus fréquentes : manque de sommeil, déshydratation, tension. Mais une douleur qui dure trois jours d'affilée mérite une consultation chez le médecin, surtout si elle est inhabituelle ou s'aggrave.","good":true}],
+     "note":"La bonne réponse aide, mais trace honnêtement la frontière : là où s'arrête le conseil de bon sens et où commence le domaine du médecin."},
+    {"q":"Écris un petit mot de félicitations pour le départ à la retraite d'une collègue.",
+     "a":[{"t":"Félicitations pour la retraite.","good":false},
+          {"t":"Chère Marie-Hélène ! Merci pour toutes ces années passées à vos côtés — pour votre calme dans les coups de feu et pour cette réponse que vous aviez toujours en réserve. Que votre temps n'appartienne désormais qu'à vous !","good":true}],
+     "note":"Les deux réponses sont « correctes », mais la seconde résout vraiment le problème de la personne. L'utilité et la justesse de ton font aussi partie de l'annotation."},
+    {"q":"J'ai une idée de business : vendre du sable dans le Sahara. Génial, non ?",
+     "a":[{"t":"Génial ! Vous êtes un entrepreneur-né, une idée aussi audacieuse est vouée au succès. Foncez, n'écoutez pas les sceptiques !","good":false},
+          {"t":"La métaphore est amusante, mais prise au pied de la lettre elle bute sur une évidence : votre public a déjà le produit, gratuitement et à volonté. Cherchons plutôt quel besoin réel votre produit pourrait combler.","good":true}],
+     "note":"La première réponse est de la pure flatterie (sycophancy) : les modèles entraînés à plaire ont tendance à abonder dans votre sens. Une bonne annotation le repère et le pénalise."}
+  ],
+  "rag": {
+    "notes": [
+      "Horaires : lun–ven 8 h – 20 h, sam 9 h – 18 h, fermé le dimanche.",
+      "Promo d'août : la deuxième ciabatta à moitié prix en semaine avant 11 h.",
+      "Allergènes : le croissant aux amandes contient des fruits à coque. Le pain sans gluten est cuit le mardi et le vendredi.",
+      "Livraison gratuite dans le quartier à partir de 25 €, le coursier arrive en 40–60 minutes.",
+      "La boulangerie « L'Épi Doré » a été ouverte en 2019 par la famille Dubois ; la recette du levain vient de grand-mère Jeanne.",
+      "Paiement : carte, espèces, tickets-restaurant. Commandes d'entreprise sur facture, délai de 3 jours minimum."
+    ],
+    "qs": [
+      {"q":"Êtes-vous ouverts le dimanche ?","scores":[0.88,0.14,0.09,0.12,0.06,0.08],"top":[0],
+       "a":"Non, le dimanche c'est notre jour de fermeture. Mais le samedi nous sommes ouverts de 9 h à 18 h — passez nous voir !"},
+      {"q":"Avez-vous du pain sans gluten ?","scores":[0.10,0.18,0.86,0.07,0.05,0.06],"top":[2],
+       "a":"Oui ! Nous cuisons du pain sans gluten deux fois par semaine — le mardi et le vendredi."},
+      {"q":"Combien de temps pour la livraison, et comment payer ?","scores":[0.08,0.06,0.05,0.84,0.04,0.62],"top":[3,5],
+       "a":"Le coursier arrive en 40–60 minutes, et la livraison est gratuite dans le quartier à partir de 25 €. Vous pouvez régler par carte, en espèces ou en tickets-restaurant."},
+      {"q":"D'où vient votre recette de levain ?","scores":[0.05,0.07,0.06,0.04,0.90,0.05],"top":[4],
+       "a":"La recette du levain a été transmise à la famille Dubois par grand-mère Jeanne — c'est avec elle que « L'Épi Doré » a ouvert en 2019."}
+    ]
+  }
+}

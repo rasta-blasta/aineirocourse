@@ -1,0 +1,107 @@
+{
+  "title": "Training: How the Network Finds the Right Weights",
+  "minutes": 12,
+  "intro": "In module two you met the neuron and its little weights. But where do the right values come from? Nobody sets them by hand — big models have hundreds of billions of weights. This module is about the most beautiful trick in machine learning: how a network finds the right weights on its own, feeling its way, like hiking down a mountain in thick fog.",
+  "sections": [
+    {
+      "heading": "First — confident nonsense",
+      "html": "<p>Picture a newborn neural network — say, the very one you’ll be training at the end of this course to recognize handwritten digits. It already has everything from the last module: neurons, connections between them, and weights — those little dials that decide which input signal matters and which doesn’t. There is just one problem: at the moment of birth, all the weights are set <em>at random</em>.</p><p>What does such a network produce? Confident nonsense. You show it a neatly written seven — it answers “two.” You show it a zero — “six.” It’s like a piano whose strings were tightened at random: the keys press down, sound comes out, but instead of music you get clatter.</p><p>The key here is to catch the central shift in thinking. Nobody is going to sit down and write rules like “a seven is a horizontal bar on top and a slanted line going down.” That’s how early artificial intelligence tried to do it — and drowned in exceptions: one person’s seven has a crossbar, another’s has a little tail, a third’s leans to the side. Instead, the network will <strong>tune itself</strong> — by a method comically similar to the game of “hot and cold”: it tries, gets it wrong, nudges the dials a little, tries again. Millions of times.</p><p>For this to work, two questions must be answered. First: how do you measure “got it wrong” — so it’s not a vague feeling, but a concrete number? Second: how do you figure out <em>which</em> dials to turn, and in which direction, when there are thousands or billions of them? This entire module is about answering those two questions.</p>"
+    },
+    {
+      "heading": "A thermometer for wrongness",
+      "html": "<p>To improve something, you first have to learn to measure it. That is what the <strong>loss function</strong> (or simply loss) is for — a way to boil all of the network’s “wrongness” down to a single number. The worse the network’s answers, the bigger the number. Perfect answers — zero.</p><div class=\"example\"><p>The network looks at a picture of a seven and outputs its confidence for each digit: “one — 60%, seven — 10%, four — 8%…” The correct answer is seven, and the network gave it a measly 10%. The loss function compares this to the ideal (“seven — 100%, everything else — 0%”) and delivers its verdict: say, 2.3. After training, on the same picture the network will say “seven — 95%,” and the loss will drop to 0.05.</p></div><p>The loss isn’t computed on a single picture: it is averaged over thousands of training examples, yielding one final number — a single overall reading for the whole ward. This is the network’s “thermometer for wrongness.” During training, everyone watches it constantly: creeping down — the network is getting smarter; frozen or rising — something has gone wrong.</p><p>Why go to all this trouble? Because a number is something you can <em>decrease</em>. The task “make the network smarter” offers no handhold. The task “find the weight values at which this number is minimal” is already precise, mechanical, solvable.</p><div class=\"callout\"><p><strong>Training a neural network is not magic, and it is not “explaining the material.” It is a search for the set of weights at which the loss function hits its minimum.</strong> Everything else in this module is about how exactly that search works.</p></div>"
+    },
+    {
+      "heading": "Downhill in thick fog",
+      "html": "<p>Imagine for a moment that the network has only two weights. Then you could draw a map: left-right is the first weight, forward-back is the second, and the height at each point is the loss for that combination of weights. You’d get a landscape: hills (bad combinations), valleys (good ones), and somewhere — the deepest point of all, those very ideal weights.</p><p>So why not just survey the whole map and find the minimum? Because even the tiny network from the final game has around ten thousand weights, and the map isn’t two-dimensional but ten-thousand-dimensional. No computer could try every combination before the universe ends. So the full map we never see. We stand at one point on it — our current, still random, weights — and all around is thick fog.</p><p>But there is something we can do: feel the slope under our feet. For each weight, we can find out: if I increase it a tiny bit, does the loss rise or fall? And how steeply? That is the local slope at the current point. From there the strategy is as simple as an actual descent in fog: feel which way the ground drops away — take a small step in that direction. Feel the slope again, step again. And so on, thousands of times, until you reach the bottom of a valley where there’s nowhere further down to go.</p><p>This method is called <strong>gradient descent</strong>. “Gradient” is just the mathematical word for the direction of steepest slope. Virtually all of modern machine learning — from a digit recognizer to ChatGPT and Claude — is, at its core, walking down the mountain exactly this way.</p>"
+    },
+    {
+      "heading": "Step size decides everything",
+      "html": "<p>Descending a mountain has one tunable parameter, and it turns out to be surprisingly temperamental: the length of the step. In machine learning it’s called the <strong>learning rate</strong>. This is the module’s only formula, and here it is:</p><p><em>new weight = old weight − learning rate × slope</em></p><p>Let’s unpack every term. <strong>Old weight</strong> — the dial’s current value. <strong>Slope</strong> — a number showing which way, and how steeply, the loss changes if you nudge this dial. <strong>Learning rate</strong> — the multiplier, the step size. And the minus sign is there because we move against the slope: not uphill, but down.</p><div class=\"example\"><p>Say the weight is 0.50, the slope at this point is 2 (the loss grows if the weight increases), and the learning rate is 0.1. The new weight: 0.50 − 0.1 × 2 = 0.30. One step taken — the weight moved by 0.2 toward lower loss.</p></div><p>Now, why is this temperamental? Too small a step — say, 0.0001 — and the descent takes forever: thousands of steps to crawl off a single hillock. Worse, it’s easy to get stuck in the first little dip you meet — a <strong>local minimum</strong>. That’s a shallow dent in the slope: tiny steps can’t climb out of it, even though the real valley lies farther on and lower down. Too large a step is the opposite disaster: you vault clear across the valley and land on the far slope, then back again, and again, and again. The loss doesn’t decrease — it bounces, and may even grow. In practice the learning rate is tuned experimentally and often changed along the way: bold steps at the start of training, cautious ones as the valley nears.</p>"
+    },
+    {
+      "heading": "Who’s to blame: backpropagation",
+      "html": "<p>One billion-dollar question remains. For every weight we need its slope: “if we nudge this dial, does the loss rise or fall?” But large language models have billions of weights. The naive approach — nudge one weight, run all the examples through, check the loss, put the weight back, move to the next — would demand billions of full passes for a single step downhill. You’d never get down that way.</p><p>The rescue is called <strong>backpropagation</strong>. The idea, without a single formula, goes like this: once the network has produced an answer and we’ve computed the loss, that error can be run through the network backwards — from the output toward the input. Passing back through the layers, it hands each weight its share of the blame: “you inflated the signal, because of you the answer drifted off course — turn yourself down,” “and you smothered a useful signal — turn yourself up.”</p><p>An analogy: a restaurant gets a scathing review. A foolish manager would replace employees one at a time and wait a month for new reviews after each swap. A smart one traces the chain of events in reverse: the guest was unhappy with the dessert → the dessert was made by the pastry chef → the cream split because the heavy cream was warm → the cream was left out of the fridge by the intern. One debrief — and everyone in the chain knows exactly what to change, and by how much.</p><p>The beauty of backpropagation is that this entire “handing out of blame” happens in one backward pass — costing roughly as much as running the example through the network one more time. The trick was invented back in the 1980s, and it remains the beating heart of training every neural network, including the very largest language models.</p>"
+    },
+    {
+      "heading": "Billions of multiplications: why GPUs",
+      "html": "<p>Let’s assemble the full cycle: show the network a batch of examples → compute the loss → run the backward pass to find each weight’s share of blame → shift all the weights one small step downhill. One cycle makes the network only slightly better, so you need thousands and millions of cycles. One complete pass through all the training examples is called an <strong>epoch</strong>; even small networks are run for dozens of epochs, seeing the same examples over and over again.</p><p>Hence the two famous appetites of neural networks. The first is data. A slope estimated from a couple of examples is noisy and jittery: a network that has seen three sevens will decide a seven is “something with a slanted stroke” and start confusing it with a one. For the steps to head in the right direction, a digit recognizer needs tens of thousands of images, and a language model needs trillions of words. The second appetite is compute. Inside every pass churn the multiplications “signal × weight,” and with billions of weights the operation count runs to billions per step.</p><p>And here something amusing comes to light. An ordinary processor (CPU) is like a brilliant courier: it can handle any task, but it carries one package at a time. A <strong>GPU</strong> (graphics processing unit) was created for games — recalculating millions of pixels at once. In essence it is several thousand simple little calculators working in parallel. Training a network is exactly that — billions of identical, independent multiplications, the perfect job for a GPU: what a processor would grind through for months, a graphics card does in hours. That is why training large models costs millions of dollars and requires entire halls full of GPUs — we’ll come back to that scale in the module on pretraining.</p><p>But before a network can learn from texts, the texts have to be turned into numbers. That’s what we’ll take on in the next module.</p>"
+    },
+    {
+      "heading": "Try it yourself",
+      "html": "<p>Below is a loss curve and a ball rolling down it by gradient descent. Click “step,” switch on auto-descent, and above all — play with the learning-rate slider. Watch for the two classic failure modes: with the rate too small, the ball barely crawls and gets stuck in a shallow dip — a local minimum; with it too large, it starts vaulting across the valley and bouncing between the slopes, never reaching the bottom. Try to find the rate at which the descent is both fast and accurate.</p>"
+    },
+    {
+      "heading": "Key takeaways",
+      "html": "<ul><li>A newborn network gets random weights and spouts nonsense. Nobody writes rules into it — it tunes itself on examples.</li><li>The <strong>loss function</strong> is a “thermometer for wrongness”: a single number showing how far the network’s answers are from correct. Training is a search for the weights that minimize it.</li><li><strong>Gradient descent</strong> is a downhill hike in fog: the network can’t see the whole loss landscape, but it can feel the slope at its current point and step downward.</li><li>The <strong>learning rate</strong> is the step size: too small — the walk takes forever and you get stuck in a shallow dip; too large — you vault back and forth across the valley.</li><li><strong>Backpropagation</strong> computes each weight’s “share of the blame” in a single backward pass and tells it which way to turn.</li><li>Training means millions of repetitions (epochs) on huge data: billions of identical multiplications, which a <strong>GPU</strong> performs thousands at a time in parallel. That’s why neural networks are trained on graphics cards.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "What is a loss function?",
+      "options": [
+        "A list of all the weights the network has tuned incorrectly",
+        "A single number showing how far the network’s answers are from the correct ones",
+        "The percentage of neurons that fired during the answer",
+        "The time remaining until training is complete"
+      ],
+      "correct": 1,
+      "explain": "The loss boils all of the network’s “wrongness” down to one number: the worse the answers, the bigger it is. That number is exactly what training decreases — it says nothing directly about individual “wrong” weights or neurons."
+    },
+    {
+      "q": "What does training a neural network essentially consist of?",
+      "options": [
+        "Programmers gradually write rules into it: what a seven looks like, what a two looks like",
+        "The network memorizes all the training examples and then searches for the closest match",
+        "It is a search for the weight values at which the loss function is minimal",
+        "New neurons are added to the network until it starts answering correctly"
+      ],
+      "correct": 2,
+      "explain": "The network’s structure doesn’t change during training, and nobody writes rules into it. Only the weights change — training searches, step by step, for the combination that minimizes the loss on the examples."
+    },
+    {
+      "q": "Why is gradient descent compared to climbing down a mountain in thick fog?",
+      "options": [
+        "The network can’t “see” the entire loss landscape — it can only gauge the slope at its current point and step downhill",
+        "Because the outcome of training is random and impossible to predict",
+        "Because training data is always noisy, like a picture in fog",
+        "Because the network gradually shrinks all its weights from large values to small ones"
+      ],
+      "correct": 0,
+      "explain": "Computing the loss for every combination of weights is impossible — there are astronomically many. Only “local” information is available: which way the loss surface tilts right underfoot. So the descent proceeds in small steps, blind, as if in fog."
+    },
+    {
+      "q": "What happens if you set the learning rate too high?",
+      "options": [
+        "Training will go too slowly and take years",
+        "The network will memorize the examples and stop coping with new ones",
+        "The network will run out of GPU memory",
+        "The steps will start vaulting across the valley: the loss will bounce back and forth instead of decreasing"
+      ],
+      "correct": 3,
+      "explain": "Too large a step overshoots the minimum: the network ends up first on one slope of the valley, then on the other. The loss bounces around and may even grow — a descent like that never reaches the bottom."
+    },
+    {
+      "q": "What problem does backpropagation solve?",
+      "options": [
+        "It runs an example through the network over and over until the answer is right",
+        "In one backward pass it computes how much each weight is “to blame” for the error, and which way to adjust it",
+        "It returns wrong answers to the training data so the network won’t learn from them",
+        "It finds and switches off the neurons that made the biggest mistakes"
+      ],
+      "correct": 1,
+      "explain": "Backpropagation is a fast way to hand out the “share of blame” to all weights at once: the error travels through the network from output to input, and each weight learns its direction of adjustment. Without it, you’d have to test billions of weights one at a time."
+    },
+    {
+      "q": "Why are neural networks trained on graphics cards (GPUs) rather than ordinary processors?",
+      "options": [
+        "Training consists of billions of identical multiplications, and a GPU performs thousands of such operations in parallel",
+        "A GPU is “smarter” than a processor and decides on its own which weights to change",
+        "Ordinary processors can’t handle fractional numbers",
+        "Only a graphics card’s memory can hold all the training data"
+      ],
+      "correct": 0,
+      "explain": "GPUs were built to recalculate millions of pixels simultaneously — they are thousands of simple calculators working in parallel. Training a network consists of exactly this kind of massive, identical multiplication, so a GPU gets it done tens of times faster than a CPU."
+    }
+  ]
+}

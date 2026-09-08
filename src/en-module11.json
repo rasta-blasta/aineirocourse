@@ -1,0 +1,197 @@
+{
+  "title": "Open Weights vs. Closed Models",
+  "minutes": 14,
+  "intro": "You already know that a neural network is, at its core, a single file holding billions of weight numbers. The trillion-dollar question: post that file on the internet, or keep it under lock and key? The industry has split into two camps over it — and both sides have very serious arguments.",
+  "sections": [
+    {
+      "heading": "What \"open weights\" means",
+      "html": "<p>Let's go back to something you learned at the very start of the course: a neural network is not a magical spirit in the cloud — it's a file. A huge table of weight numbers accumulated over the course of training. For large models this file runs to hundreds of gigabytes — but it's still just a file: it can be copied, sent around, posted online.</p><p>This is exactly where the industry's great divide runs.</p><p><strong>Open weights</strong> — the company posts that file publicly. Anyone can download it, run the model on their own computer or server, fine-tune it for their own task — and never ask anyone's permission.</p><p><strong>A proprietary, or closed, model</strong> — the weights sit on the company's servers and never leave them. You send in a question through a chat interface or an API and get an answer back — but what happens inside is known only to the owner. Access usually costs money: a subscription, or payment for every token processed.</p><div class=\"example\"><p>Think of the difference between a recipe and a restaurant. Open weights: you've been handed the recipe — cook at home as much as you like, change the spices, feed your friends. But the stove, the ingredients, and the cooking skills are your problem. A closed model is a restaurant: the dish arrives ready-made, delicious and hassle-free, but the recipe is a trade secret, you pay for every serving, and if the chef changes the menu — nobody asks you.</p></div><p>One important caveat: \"download\" doesn't mean \"understand.\" Open weights are billions of numbers with no instructions attached; why the model answers one way rather than another can't be read straight off them — even the creators struggle to work that out. But running the model and using it at full power — that you absolutely can do.</p>"
+    },
+    {
+      "heading": "The lay of the land",
+      "html": "<p>Now — who's who as of today.</p><p><strong>The closed camp</strong> — the three loudest names in the industry:</p><ul><li><strong>GPT</strong> from OpenAI — the line of models behind ChatGPT;</li><li><strong>Claude</strong> from Anthropic — a company that, as a matter of principle, does not publish its models' weights;</li><li><strong>Gemini</strong> from Google.</li></ul><p><strong>The open camp</strong> is more varied — and noticeably more international:</p><ul><li><strong>Llama</strong> from Meta — the family that kicked off the open-model boom in 2023;</li><li><strong>DeepSeek</strong> — the Chinese company whose open reasoning model R1 sent chipmakers' stocks tumbling in January 2025: for the first time, the market believed an open model could chase down the frontier at a fraction of the cost;</li><li><strong>Qwen</strong> from Alibaba — one of the most popular families: on Hugging Face (a kind of \"GitHub for neural networks\") there are more than a hundred thousand fine-tuned versions of it;</li><li><strong>Mistral</strong> — the French company, Europe's main bet in this race;</li><li><strong>Kimi</strong> from Moonshot AI and <strong>GLM</strong> from Zhipu — two more strong Chinese families.</li></ul><p>And now, two surprises. <strong>Gemma</strong> is an open family… from Google — the very same Google whose Gemini is locked up tight. And <strong>gpt-oss</strong> is a set of open models from OpenAI: in August 2025, for the first time since GPT-2 (2019), the company publicly released the weights of a language model. One and the same company can happily play both fields: keep the flagship closed and sell it through an API, while releasing the smaller models — for developers, for researchers, and for its own reputation.</p><div class=\"callout\"><p><strong>A nuance people often mix up:</strong> open weights are not yet open source. In classic open source, everything is open: both the program and the source code it was built from. With \"open\" models, what usually gets published is only the weights — while the data the model was trained on and the training code remain secret. Licenses vary, too: some are genuinely free (Apache 2.0 for Qwen or gpt-oss), others come with strings attached — the Llama license, for instance, requires separate permission for extremely large companies. That's why purists avoid saying \"open model\" and say, carefully, \"open-weights model.\"</p></div>"
+    },
+    {
+      "heading": "The difference in practice",
+      "html": "<p>What does this difference mean in real life? Let's lay it all out.</p><p><strong>Money.</strong> A closed model is a running meter: you pay for a subscription or for every request. An open one you can run for free and without limits — but on your own hardware. Small models like the junior Gemmas run on an ordinary laptop; big ones demand powerful GPUs, and the largest need entire server racks. \"Free\" here means \"no charge for the software,\" not \"no costs\": hardware, electricity, and specialists all cost money.</p><p><strong>Privacy.</strong> With a closed model, every request you make goes off to someone else's server. For chit-chat about recipes that hardly matters — but for a hospital with medical records, a law firm with client documents, or a government agency with sensitive data, it's a matter of principle. An open model runs on your premises: the data never leaves the building.</p><p><strong>Customization.</strong> An open model can be fine-tuned on your own data — the same technique companies used to raise their models through RLHF, only aimed at your task: medical terminology, corporate style, a rare language. Closed models let you adjust a few things too, but strictly within the limits the owner has set.</p><p><strong>Control.</strong> A downloaded model is yours forever. Nobody will \"improve\" it in a way that breaks your working setups, double the price, or switch it off by a board decision. For a business building a product on top of a model, that's a serious argument.</p><div class=\"example\"><p>Here's how it looks in real life: a startup builds a contract-analysis service. It starts with a closed model's API — fast, high-quality, and with no investment in hardware. But when banks appear among its clients and demand that documents never leave their servers, the startup switches to an open model fine-tuned on legal texts and installs it right inside the customer's own infrastructure. Both strategies are sound — just at different stages.</p></div><p>Now, honestly, about the downsides. An open model is a recipe without the restaurant: no support, every problem is yours. You need expensive GPUs or rented servers. And most importantly — open models lag behind the frontier. Though by less than you might think: researchers at Epoch AI put the gap at mere months — what only the best closed models can do today shows up in open ones within a few months to half a year. Nobody has had a years-long head start for quite a while now.</p>"
+    },
+    {
+      "heading": "Safety: two honest lists",
+      "html": "<p>Now for the thorniest question — safety. A genuine debate is underway here, with smart, honest people standing on both sides of it. Let's give each side the floor.</p><p><strong>The case for keeping models closed:</strong></p><ul><li><em>Weights can't be recalled.</em> A published file will spread to thousands of computers within a day. If it later turns out the model can do something dangerous, nothing can be done — you can't un-publish a printed book. A closed model its owner can fix or switch off at any moment.</li><li><em>Guardrails come off for pennies.</em> Remember the module on RLHF: the model's polite refusals are a thin layer of behavioral tuning on top of its knowledge, not a removal of the knowledge itself. Researchers have shown many times over that fine-tuning on a small set of \"harmful\" examples rips those guardrails off — it takes minutes of compute and anywhere from cents to a couple hundred dollars. With a closed model that trick won't work: nobody will hand you the weights.</li><li><em>Misuse.</em> A model with the guardrails off is a ready-made tool for spam farms, fraud schemes, and advice that would be better off not existing. The provider of a closed model can monitor and block that sort of thing; nobody keeps watch over a downloaded model.</li></ul><p><strong>The case for openness:</strong></p><ul><li><em>Transparency and independent audit.</em> A closed model is checked only by its owner — everyone else has to take their word for it. Open weights can be studied by any researcher: hunting for vulnerabilities, hidden biases, oddities of behavior. In cryptography this principle won long ago: open algorithms proved more secure than secret ones, because thousands of eyes had checked them.</li><li><em>Science and education.</em> Almost everything scientists know about how language models work \"from the inside\" was learned on open weights — closed ones simply cannot be studied.</li><li><em>Independence.</em> Building a business, medicine, or public services on a model that tomorrow might be changed, made more expensive, or shut down is risky.</li><li><em>Distributing power.</em> If the most capable models exist only at two or three corporations, those corporations hold unprecedented power over information. Advocates of openness believe such power is safer distributed than concentrated.</li><li><em>Safety through study.</em> Threats are better researched in the open than hidden away: secrecy protects for a little while, understanding protects always.</li></ul><p>Notice: both columns appeal to safety — they simply see the main risk in different places. One side fears uncontrolled spread; the other, uncontrolled concentration. The industry has no ready-made \"right answer.\"</p>"
+    },
+    {
+      "heading": "Where this is heading",
+      "html": "<p>There's one thesis that's popular in the industry — far from everyone agrees with it, but it's worth knowing.</p><p>The thesis goes like this: model capabilities are becoming <strong>commoditized</strong> (from \"commodity\" — an exchange-traded good like grain or oil, roughly the same no matter who's selling). What only the expensive frontier behind a subscription can do today, an open model on a laptop can do in a year or two. The gap is months, and holding \"knowledge in a box\" while selling access to it gets harder and harder: the box leaks. Back in 2023, a leaked internal memo by a Google engineer captured this in a famous phrase — \"we have no moat\" — no insurmountable defense against competitors from the open world. The logic of this camp is simple: why pay for a subscription if nearly the same thing will soon be available for free?</p><p>Sounds convincing. But there are counterarguments, and they carry no less weight:</p><ul><li><strong>The frontier doesn't stand still.</strong> The chaser is chasing a moving target. While an open model masters yesterday's tricks, the closed ones pull ahead — and for the very newest, people are still willing to pay.</li><li><strong>Value is shifting from the weights to the scaffolding around them.</strong> A raw model is not yet a product. Fresh data, search, tools, agent infrastructure (remember the module on agents), reliability, integrations with business systems, support, and legal responsibility to the customer — none of that comes bundled with downloaded weights. More and more, companies make their money precisely on this layer around the model.</li><li><strong>Running locally isn't free.</strong> GPUs, electricity, and engineers cost money — sometimes more than an API subscription. The economics aren't always on the side of \"your own hardware.\"</li></ul><p>The most likely scenario is not a victory for either side but a long coexistence. History offers an exact analogy: Linux and Windows. The open operating system never \"killed\" the closed one — they've lived side by side for decades, each in its own niche: Linux quietly runs almost every server on the internet and sits inside Android, while Windows runs office and home computers. Neural networks look headed the same way: open models where privacy, cost, and control matter most; closed ones where you want maximum quality with zero hassle. Besides, the choice isn't binary: many companies already combine the two — routine tasks go to a cheap open model on their own server, and the hard ones get sent to the closed frontier. We won't play prophet — but nearly everything today points to a hybrid future.</p>"
+    },
+    {
+      "heading": "Try it yourself",
+      "html": "<p>Let's see how well you can read the map now. Below are ten cards with well-known models. Your task: guess whether each model's weights are open or closed. Fair warning: decoys have been deliberately slipped into the deck — the name of the owning company doesn't always point to the right answer. After each answer, the card reveals an interesting fact about the model.</p>"
+    },
+    {
+      "heading": "Key takeaways",
+      "html": "<ul><li>A model is a file of weights. <strong>Open weights</strong> — the file is posted publicly: download it, run it yourself, fine-tune it. <strong>A closed model</strong> — the weights stay on the company's servers, with paid access through a chat interface or API. Recipe versus restaurant.</li><li>The closed camp: GPT, Claude, Gemini. The open camp: Llama, DeepSeek, Qwen, Mistral, Kimi, GLM — plus the decoys Gemma (from Google) and gpt-oss (from OpenAI): one company can play both fields.</li><li>Open weights ≠ open source: the training data and training code usually stay closed, and licenses can come with restrictions.</li><li>An open model gives you privacy, customization, and control, but demands your own hardware and lags behind the frontier — by researchers' estimates, by months, not years.</li><li>The safety debate is honest on both sides: published weights can't be recalled, and guardrails come off with cheap fine-tuning — but openness brings transparency and independent audit, and distributes power instead of concentrating it.</li><li>The future is almost certainly hybrid — as with Linux and Windows: open and closed coexist for decades, each in its own niche.</li></ul>"
+    }
+  ],
+  "demo": [
+    { "name": "Claude", "dev": "Anthropic", "open": false, "fact": "Anthropic has never published the weights of a single Claude model — access is only through the chat interface and the API." },
+    { "name": "GPT (the ChatGPT line)", "dev": "OpenAI", "open": false, "fact": "The flagship GPT models are closed — even though the very name OpenAI is a holdover from the days when the company promised to be open." },
+    { "name": "Gemini", "dev": "Google", "open": false, "fact": "Google's frontier line is closed — but the same company also has an open family, Gemma." },
+    { "name": "Llama", "dev": "Meta", "open": true, "fact": "It was Llama that launched the open-model boom in 2023 — though the license comes with strings attached: extremely large companies need separate permission from Meta." },
+    { "name": "DeepSeek", "dev": "DeepSeek", "open": true, "fact": "The release of the open reasoning model DeepSeek R1 in January 2025 sent chipmakers' stocks tumbling: for the first time, the market believed open models were capable of chasing down the frontier." },
+    { "name": "Qwen", "dev": "Alibaba", "open": true, "fact": "One of the most-forked families around: Hugging Face hosts more than a hundred thousand fine-tuned versions of Qwen, many under the permissive Apache 2.0 license." },
+    { "name": "Mistral", "dev": "Mistral AI", "open": true, "fact": "The French company is Europe's main bet in the race: many of its models ship under a permissive license, though some flagships are available only via API." },
+    { "name": "Gemma", "dev": "Google", "open": true, "fact": "Did the decoy get you? An open family from Google: the junior Gemma versions run on an ordinary laptop — and even on a phone." },
+    { "name": "gpt-oss", "dev": "OpenAI", "open": true, "fact": "In August 2025, for the first time since GPT-2 (2019), OpenAI publicly released the weights of a language model — under the permissive Apache 2.0 license." },
+    { "name": "Kimi", "dev": "Moonshot AI", "open": true, "fact": "The Chinese company Moonshot released into the open a model with on the order of a trillion weights — one of the largest open models in history." }
+  ],
+  "quiz": [
+    {
+      "q": "A company announces: \"We've released a model with open weights.\" What exactly has become available to everyone?",
+      "options": [
+        "The full code and all the data the model was trained on",
+        "Free unlimited access to the company's chat service",
+        "The file with the model's parameters — you can download it, run it yourself, and fine-tune it",
+        "Internal documentation on how the model works"
+      ],
+      "correct": 2,
+      "explain": "Open weights means a published file of the model's number-parameters. The training data and code usually stay closed."
+    },
+    {
+      "q": "How do \"open weights\" differ from classic open source?",
+      "options": [
+        "With open weights, the training data and code usually stay closed — only the file with the parameters is published",
+        "They don't; the terms are exact synonyms",
+        "Open source exists only for operating systems, not for models",
+        "Open weights always prohibit commercial use"
+      ],
+      "correct": 0,
+      "explain": "In classic open source, everything is open, \"sources\" included. With models, it's usually only the weights that get published, while the recipe for producing them — the training data and code — is kept secret."
+    },
+    {
+      "q": "Which company keeps its flagship Gemini closed while releasing the open Gemma family?",
+      "options": [
+        "Meta",
+        "OpenAI",
+        "Anthropic",
+        "Google"
+      ],
+      "correct": 3,
+      "explain": "Google plays both fields: the frontier Gemini is closed, while the compact Gemma family is published with open weights. OpenAI does the same with gpt-oss."
+    },
+    {
+      "q": "Why do hospitals and law firms often look specifically at open models?",
+      "options": [
+        "Open models are smarter than closed ones",
+        "The data is processed on their own servers and never goes to a third party",
+        "Closed models are legally banned from working with medicine",
+        "Open models never get terminology wrong"
+      ],
+      "correct": 1,
+      "explain": "The main argument is privacy: an open model runs on your own hardware, and sensitive data — medical records, client documents — never leaves the organization."
+    },
+    {
+      "q": "Which of the following is IMPOSSIBLE to do with weights that have already been published?",
+      "options": [
+        "Recall them so that people stop using them",
+        "Fine-tune them for a new task",
+        "Run the model on a computer with no internet connection",
+        "Copy the file to another server"
+      ],
+      "correct": 0,
+      "explain": "Published weights spread to thousands of computers, and there's no getting them back — you can't un-publish a printed book. That's the closed camp's main argument."
+    },
+    {
+      "q": "By researchers' estimates (for example, Epoch AI), how far do the best open models lag behind the closed frontier?",
+      "options": [
+        "By 5–10 years",
+        "There's practically no gap",
+        "On the order of a few months",
+        "By 2–3 years"
+      ],
+      "correct": 2,
+      "explain": "The estimates point to mere months: what only the frontier can do today shows up in open models within a few months to half a year."
+    }
+  ],
+  "quiz2": [
+    {
+      "q": "Why does fine-tuning strip the safety guardrails off an open model so cheaply — in minutes and for small money?",
+      "options": [
+        "The guardrails are stored in a separate small file that's easy to delete",
+        "The guardrails are a thin layer of behavioral tuning on top of the model's knowledge, not a removal of the knowledge: a short fine-tune restores access to what the model could already do",
+        "Open models are trained without an RLHF stage in the first place",
+        "It's a myth: removing the guardrails actually costs millions of dollars"
+      ],
+      "correct": 1,
+      "explain": "RLHF teaches the model to refuse, but the \"dangerous\" knowledge itself stays in the weights. Studies have shown that a small set of examples and minutes of compute tear that tuning off."
+    },
+    {
+      "q": "What does the thesis about the \"commoditization\" of model capabilities mean?",
+      "options": [
+        "Models will start being traded on commodity exchanges",
+        "All models will eventually become the property of governments",
+        "Model capabilities grow only at large companies",
+        "What was unique and expensive yesterday quickly becomes widely available and cheap — the way it goes with commodities"
+      ],
+      "correct": 3,
+      "explain": "A commodity is a good that's the same no matter who sells it. The thesis: within a year or two an open model replicates the frontier's capabilities, and selling \"knowledge in a box\" gets ever harder."
+    },
+    {
+      "q": "What is the essence of the \"safety through study\" argument?",
+      "options": [
+        "Open weights let thousands of independent researchers hunt for vulnerabilities and study the model from the inside — the way open algorithms in cryptography proved more secure than secret ones",
+        "Open models are safer because they're deliberately weaker than closed ones",
+        "A model can only be studied through its answers in a chat",
+        "Safety is guaranteed by choosing the right license"
+      ],
+      "correct": 0,
+      "explain": "Advocates of openness argue that threats are more reliably researched in the open than hidden away. A closed model is checked only by its owner; an open one, by the entire scientific community."
+    },
+    {
+      "q": "A company built its product on a closed model via an API. What risk does the \"control\" argument describe?",
+      "options": [
+        "The model might physically break under the load",
+        "Competitors will see the company's requests",
+        "The model's owner can change its behavior, raise the price, or cut off access — and the whole product depends on it",
+        "An API is always slower than running locally"
+      ],
+      "correct": 2,
+      "explain": "With a closed model you depend on someone else's decisions: an update can break your workflows, and the terms of access can change. A downloaded model can't be taken away from you."
+    },
+    {
+      "q": "Why is the Linux and Windows analogy considered a good fit for the future of open and closed models?",
+      "options": [
+        "Linux ended up displacing Windows — the same will happen with models",
+        "Both systems belong to one company, like Gemini and Gemma",
+        "Windows was open once, too",
+        "Open and closed have coexisted for decades, each in its own niche — neither defeated the other"
+      ],
+      "correct": 3,
+      "explain": "Linux quietly runs on servers and inside Android; Windows, on office computers. Models will most likely split into niches the same way: open where privacy and control matter, closed where you want maximum quality with no hassle."
+    },
+    {
+      "q": "According to the skeptics of commoditization, where does value shift if \"raw\" weights get cheap?",
+      "options": [
+        "Into GPU manufacturing",
+        "Into the scaffolding around the model: fresh data, tools, agent infrastructure, integrations, and responsibility to the customer",
+        "Into advertising and marketing for the models",
+        "Back into collecting data for pretraining"
+      ],
+      "correct": 1,
+      "explain": "A raw model is not yet a product. Even if the weights become common property, the money is paid for the layer around them: reliability, tools, support, and guarantees."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain to a friend who's far removed from technology the difference between an open and a closed model — in one or two sentences, using any everyday analogy (other than the one from the module, if you can manage it).",
+      "ref": "For example: a closed model is like a taxi — convenient, but you pay for every ride, and the company sets the routes and the fares. An open one is like your own car: drive as much as you like, wherever you like, but the purchase, the fuel, and the repairs are on you. Any analogy works as long as it captures the pair \"access to a service versus owning a copy.\""
+    },
+    {
+      "q": "You're an adviser to a hospital director. The hospital wants to bring in a neural network to work with medical records. Open or closed model — which do you recommend, and which two arguments do you give?",
+      "ref": "Most likely open, deployed on the hospital's own servers: patient data never leaves the institution (privacy and legal requirements), and the model can be fine-tuned on medical terminology. An honest adviser will also mention the price tag: it will take hardware and specialists of the hospital's own, and the quality may lag slightly behind the best closed models."
+    },
+    {
+      "q": "Pick a side in the safety debate — for openness or for closedness. Now state the opposing side's strongest argument — well enough that one of its supporters would say: \"yes, that's exactly what I mean.\"",
+      "ref": "A supporter of openness has to honestly concede: published weights can't be recalled, and the guardrails come off with cheap fine-tuning — the risk of misuse is real. A supporter of closedness — that concentrating the most powerful models in the hands of two or three corporations, with no independent audit, is also a risk, and no small one. Being able to retell the other side's argument fairly is a sure sign of understanding the topic."
+    }
+  ]
+}

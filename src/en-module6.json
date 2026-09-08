@@ -1,0 +1,103 @@
+{
+  "title": "Pretraining: Reading the Whole Internet",
+  "minutes": 12,
+  "intro": "You already know how a transformer is built: tokens, embeddings, attention. But so far it's an empty machine — billions of weights filled with random numbers. This module is about the most expensive and strangest event in a neural network's life: it is going to read something close to the entire internet, all while solving one single childishly simple puzzle.",
+  "sections": [
+    {
+      "heading": "One Task, Repeated Trillions of Times",
+      "html": "<p>Pretraining is the stage that turns a neural network from a useless heap of random numbers into something that can talk. And it is almost comically simple. Take a chunk of real text. Show the model the beginning, hide the continuation. Ask it to guess the next token. Compare the guess with what actually came next in the text. If the model got it wrong — nudge the weights a tiny bit, with exactly the gradient descent you saw in the third module. And repeat. Trillions of times.</p><div class=\"example\"><p>The model sees 'The cat sat on the…' — and produces probabilities for every token in the vocabulary: 'sofa' — 30%, 'floor' — 20%, 'mat' — 10%, and so on. In the original text, the next word was 'mat.' So ten percent is too low: all the weights behind that guess shift one tiny step, so that in a similar situation 'mat' gets a bit more. One such nudge changes almost nothing. A trillion nudges change everything.</p></div><p>The beauty of this scheme is that no teacher is needed. Nobody labels the data, nobody writes out 'correct answers' — the correct answer is already sitting in the text itself: it's simply the next word. That's why this approach is called self-supervised learning: the text is its own workbook and its own answer key.</p><p>And it takes a lot of text. Into the corpus — the name for the training collection — goes everything within reach: web pages, books, Wikipedia, scientific papers, forums, news, and vast amounts of programming code from open repositories. Today's large models are trained on roughly 15 trillion tokens — on the order of ten trillion words.</p><p>Granted, 'the whole internet' is a slight exaggeration: the raw internet is mostly garbage. Before training, the corpus is scrubbed with care: duplicates, spam, and machine-generated pages get thrown out, and low-quality texts are filtered away. The cleaner and more diverse the corpus, the smarter the resulting model — which is why labs guard their data recipes almost more jealously than the code itself.</p>"
+    },
+    {
+      "heading": "Billions of Little Knobs",
+      "html": "<p>So what exactly gets 'nudged' trillions of times? The model's parameters — the same weight-knobs from the second module, where a neuron weighed its inputs. Except there we had three of them, and here there are billions. GPT-3 had 175 billion parameters, the open Llama 3 goes up to 405 billion, and today's flagships also run to hundreds of billions.</p><div class=\"example\"><p>Let's try to picture 175 billion numbers. Print them in a column, 50 per page — that's 3.5 billion pages. At 0.1 mm per page, the stack of paper stretches 350 kilometers — nearly to the orbit of the ISS. And it's just a list of numbers like 0.231 and −1.87, without a single word.</p></div><p>Here's the crucial thing to understand: apart from these numbers, the model has nothing. There is no database inside, no saved articles, no search engine over what it has read. After training, the corpus could be erased — the model never looks at it again. Everything it 'knows' about the world, about language, and about you is squeezed into those billions of weights.</p><p>Note the proportions, by the way: tokens in the corpus — trillions; parameters — 'only' hundreds of billions, dozens of times fewer. The model physically cannot memorize everything it has read word for word — it wouldn't fit. It is forced to do what any student does before an exam when there are more lecture notes than time: not cram, but distill the general patterns. As we're about to see, that very limitation is what makes it smart.</p>"
+    },
+    {
+      "heading": "Why 'Guess the Word' Teaches Everything Under the Sun",
+      "html": "<p>At first glance the task looks pitiful. Guessing the next word — surely you could teach a parrot to do that? The Markov chain from the first module was doing roughly this. But there's a catch: a parrot guesses any old way, while the model is required to guess <strong>well</strong> — in any text in the world. And here it turns out there is no getting off cheap.</p><p>Look at what it actually takes to confidently continue different phrases:</p><ul><li>'The capital of Australia is…' — you need facts: the right answer is 'Canberra,' however loudly 'Sydney' begs to be picked.</li><li>'She grabbed the umbrella because outside…' — you need the cause-and-effect of everyday life.</li><li>'Five plus seven equals…' — you need arithmetic.</li><li>'The murderer turned out to be…' at the end of a detective novel — you need to hold a three-hundred-page plot in your head and draw a conclusion from the clues.</li><li>Continuing a Python program so that it actually runs — you need logic.</li><li>And in every single sentence: 'one cat sleeps' but 'two cats sleep' — you need grammar.</li></ul><p>Every gap in knowledge is a prediction error. An error is a signal to gradient descent: tweak the weights. And the weights keep getting tweaked until something settles inside that removes the error: a rule, a fact, a pattern.</p><div class=\"callout\"><p><strong>The key idea of this course.</strong> Nobody loaded the model with the rules of grammar, the multiplication table, or the capitals of the world. They settled into the weights on their own — simply because they help predict the next token. Grammar, facts, styles, chains of reasoning — all of it is a byproduct of one primitive task repeated trillions of times.</p></div><p>Predicting the next word turned out to be an exam in everything at once. That is why such a 'dumb' objective produced such an unexpectedly smart result. And the bigger the model and the more text it has seen, the subtler the patterns that manage to settle into its weights: a small network masters only grammar and stock phrases, a mid-sized one starts to retain facts, and a truly large one can reason coherently several steps ahead. There is no magic in that transition: a larger model simply has enough knobs to hold more complex rules.</p>"
+    },
+    {
+      "heading": "The Price Tag: Months, Megawatts, Millions",
+      "html": "<p>Now for what all this costs — honestly, and with no science fiction. Pretraining a large model is not 'left it running overnight on a laptop.' It is thousands — for the flagships, tens of thousands — of specialized graphics processors (GPUs) running non-stop for months. Why graphics processors? Because all the math of a neural network is giant multiplication tables: billions of weights have to be multiplied by billions of numbers, and GPUs — originally built to render video-game graphics — can do thousands of such multiplications at once. Training one large model costs tens of millions of dollars; for the very largest, hundreds of millions. A compute cluster like that draws megawatts of power — as much as a small town.</p><div class=\"example\"><p>The open Llama 3 at 405 billion parameters: about 15 trillion tokens of corpus, 16 thousand GPUs, on the order of 30 million GPU-hours — two to three months of uninterrupted computation. The compute alone, at market rental prices, comes to several tens of millions of dollars. And that is not even the industry's flagship.</p></div><p>For balance, two caveats. First, smaller models are considerably cheaper to train: the bill runs to hundreds of thousands or a few million dollars, and dozens of labs do it, not three corporations. Second, the whole price is paid <em>once</em>. The trained weights are just a file; from then on millions of people use them, and each individual answer costs fractions of a cent.</p><p>And one more consequence, important for understanding your conversations with ChatGPT or Claude: after pretraining, the weights are frozen. When you chat with the model, it is <strong>not</strong> learning; your messages do not tweak its knobs. Training is a rare, expensive, separate event; a conversation is simply the use of ready-made weights.</p>"
+    },
+    {
+      "heading": "The Base Model: A Walking Encyclopedia, but Not an Assistant",
+      "html": "<p>So what comes out at the end of months of training? What's called a base model. And here a surprise awaits many people: this is still nothing like ChatGPT.</p><p>A base model is a genius autocomplete. Hand it the opening of a business letter — it will finish the business letter. Start a poem — it will continue in meter and rhyme. Paste in half a Python function — it will write the other half. It has absorbed the styles, genres, and intonations of the entire internet, and it will continue any text in the most plausible way.</p><p>But ask it 'How do I bake an apple pie?' — and it may well answer like this:</p><div class=\"example\"><p>'How do I keep a sponge cake from sinking? How do I make a cheesecake? What can I substitute for eggs in baking? 12 more questions beginner bakers ask…'</p></div><p>This is not a glitch, and it is not mockery. The model is doing exactly what it was trained to do: continuing the text. And on the internet, a question is very often followed by other questions — on forums, in 'related searches' blocks, in 'frequently asked' lists. So a list of questions is, statistically, an excellent continuation. A base model has no goal of helping you; it has no goals at all, except one — to continue plausibly.</p><p>The funny thing is that the knowledge is already in there — it just has to be coaxed out by trickery. Give it not a question but a setup like 'Question: how do I bake an apple pie? A pastry chef's answer:' — and it will obediently produce the recipe, because now the most plausible continuation is precisely the answer. That's roughly how people worked with early models: not asking, but arranging the text so the desired answer would fall into place on its own.</p><p>The gap between 'brilliantly continues text' and 'usefully answers a person' is a chasm of its own, and a separate bridge is built across it: further training on examples of good dialogue and on feedback from people. How the untamed savant gets turned into a polite conversational partner is the whole next module — on SFT and RLHF.</p>"
+    },
+    {
+      "heading": "Try It Yourself",
+      "html": "<p>To make the scale of the corpus more than an abstract number, try it on for size. In the calculator below, drag the slider for how many books you read per day — and see how many thousands of years it would take you to get through what a model reads in a single pretraining run. Notice that even at the utterly fantastical pace of a hundred books a day, the count still runs to thousands of years — longer than writing has existed.</p>"
+    },
+    {
+      "heading": "Key Takeaways",
+      "html": "<ul><li>Pretraining is one task — 'guess the next token' — repeated trillions of times on text from the internet, books, and code. The correct answer always sits in the text itself, so no human labeling is needed.</li><li>The model's parameters are the same weight-knobs as before, only now there are billions of them. Apart from them, the model has nothing: no database, no stored texts.</li><li>To predict any text in the world well, you have to learn grammar, facts, styles, and logic. Nobody put them in explicitly — they settled into the weights on their own, because they reduce prediction error.</li><li>The numbers are honest: months of training, thousands or tens of thousands of GPUs, tens to hundreds of millions of dollars for a large model. It is paid once — and your conversations with the finished model no longer change its weights.</li><li>The result is a base model: a genius autocomplete, but not an assistant. Ask it a question and it may reply with a list of similar questions. How it gets turned into a conversational partner is the next module.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "What task does the model solve during pretraining?",
+      "options": [
+        "It learns to answer users' questions politely and helpfully",
+        "It guesses the next token in real texts — over and over again",
+        "It memorizes grammar rules drawn up by linguists",
+        "It finds and fixes factual errors on the internet"
+      ],
+      "correct": 1,
+      "explain": "The whole of pretraining is one single task — predict the next token — repeated trillions of times. The model becomes a helpful conversational partner later, at the fine-tuning stage."
+    },
+    {
+      "q": "How does a base model 'know' the rules of English grammar?",
+      "options": [
+        "The developers loaded academic grammar reference books into it",
+        "While answering, it checks dictionaries on the internet",
+        "Linguists hand-programmed the morphology and syntax",
+        "The patterns of the language settled into the weights on their own, because they help predict the next token"
+      ],
+      "correct": 3,
+      "explain": "No explicit rules were ever put in. Grammatically coherent text is easier to predict, so gradient descent 'finds' grammar on its own and writes it into the weights — just as it does with facts, styles, and logic."
+    },
+    {
+      "q": "What are a model's '405 billion parameters'?",
+      "options": [
+        "Its weights — those same tunable 'knobs' that, after training, store everything the model can do",
+        "The number of texts it read during training",
+        "The number of tokens in its vocabulary",
+        "The number of GPUs it was trained on"
+      ],
+      "correct": 0,
+      "explain": "Parameters are the same weights from the module about the neuron, only now there are billions of them. The model keeps no separate base of texts: everything it 'knows' is squeezed into these numbers."
+    },
+    {
+      "q": "You ask a base model (not yet fine-tuned): 'How do I fix a leaky faucet?' — and it produces a list of ten similar questions. Why?",
+      "options": [
+        "The model is broken: something went wrong during training",
+        "It doesn't know the answer and is trying to hide it",
+        "It continues the text in the statistically most plausible way, and on the internet a question is often followed by other questions",
+        "It is checking whether you really need the answer before helping"
+      ],
+      "correct": 2,
+      "explain": "A base model is an autocomplete: it doesn't answer, it continues. On forums and in 'related questions' blocks, a question really is often followed by more questions, so such a list is an excellent continuation from a statistical point of view."
+    },
+    {
+      "q": "Which of these is a realistic description of training a large modern LLM?",
+      "options": [
+        "A few hours on a powerful gaming PC",
+        "Months of work by thousands of GPUs and tens to hundreds of millions of dollars",
+        "The model trains continuously: every conversation with a user immediately changes its weights",
+        "Several years of manual work by editors who write facts into the model"
+      ],
+      "correct": 1,
+      "explain": "Pretraining a large model means months of computation on thousands or tens of thousands of GPUs and a budget of tens to hundreds of millions of dollars. After training, the weights are frozen: your conversations with the model do not change them."
+    },
+    {
+      "q": "The pretraining corpus is around 15 trillion tokens, while the model has 'only' hundreds of billions of parameters. What follows from this?",
+      "options": [
+        "The model stores all the texts verbatim, just compressed, like a ZIP archive",
+        "Most of the corpus goes unused: the model only has time to read the beginning",
+        "The model cannot memorize the corpus verbatim and is forced to learn general patterns — which is exactly what makes it smart",
+        "The developers miscalculated and built too small a model"
+      ],
+      "correct": 2,
+      "explain": "The corpus is dozens of times larger than the 'capacity' of the weights, so verbatim storage is impossible. It pays instead to learn general patterns — grammar, facts, logic — that help predict a huge variety of different texts at once."
+    }
+  ]
+}

@@ -1,0 +1,197 @@
+{
+  "title": "Poids ouverts contre modèles fermés",
+  "minutes": 14,
+  "intro": "Vous le savez déjà : tout le réseau de neurones, au fond, c'est un seul fichier rempli de milliards de nombres — les poids. Question à mille milliards de dollars : publier ce fichier sur Internet ou le garder sous clé ? Autour d'elle, l'industrie s'est scindée en deux camps — et chacun a des arguments très sérieux.",
+  "sections": [
+    {
+      "heading": "Ce que signifie « poids ouverts »",
+      "html": "<p>Revenons à ce que vous avez appris au tout début du cours : un réseau de neurones n'est pas un esprit magique dans le cloud, mais un fichier. Un immense tableau de nombres-poids accumulés au fil de l'entraînement. Pour les grands modèles, ce fichier pèse des centaines de gigaoctets — mais cela reste un simple fichier : on peut le copier, l'envoyer, le mettre en ligne.</p><p>C'est exactement là que passe la grande ligne de partage de l'industrie.</p><p><strong>Poids ouverts (open weights)</strong> — l'entreprise publie ce fichier. N'importe qui peut le télécharger, faire tourner le modèle sur son ordinateur ou son serveur, l'affiner (fine-tuning) pour sa propre tâche — sans demander la permission à personne.</p><p><strong>Modèle propriétaire, ou fermé (proprietary model)</strong> — les poids restent sur les serveurs de l'entreprise et ne les quittent jamais. Vous envoyez votre question via le chat ou l'API, vous recevez la réponse — mais ce qui se passe à l'intérieur, seul le propriétaire le sait. L'accès est généralement payant : abonnement, ou facturation à chaque token traité.</p><div class=\"example\"><p>Imaginez la différence entre une recette et un restaurant. Poids ouverts : on vous a donné la recette — cuisinez chez vous autant que vous voulez, changez les épices, régalez vos amis. Mais la cuisinière, les ingrédients et le savoir-faire sont votre affaire. Modèle fermé : le restaurant — le plat arrive tout prêt, délicieux et sans tracas, mais la recette est un secret commercial, chaque portion se paie, et si le chef change le menu, on ne vous demandera pas votre avis.</p></div><p>Une réserve importante : « télécharger » ne veut pas dire « comprendre ». Des poids ouverts, ce sont des milliards de nombres sans mode d'emploi ; pourquoi le modèle répond ainsi et pas autrement, on ne peut pas le lire directement dedans — même ses créateurs s'y cassent les dents. Mais faire tourner le modèle et l'exploiter à pleine puissance — ça, oui.</p>"
+    },
+    {
+      "heading": "La carte du terrain",
+      "html": "<p>Voyons maintenant qui est qui à ce jour.</p><p><strong>Le camp fermé</strong> — les trois noms les plus retentissants de l'industrie :</p><ul><li><strong>GPT</strong> d'OpenAI — la gamme qui fait tourner ChatGPT ;</li><li><strong>Claude</strong> d'Anthropic — l'entreprise ne publie par principe les poids d'aucun de ses modèles ;</li><li><strong>Gemini</strong> de Google.</li></ul><p><strong>Le camp ouvert</strong> est plus varié — et nettement plus international :</p><ul><li><strong>Llama</strong> de Meta — la famille qui a lancé le boom des modèles ouverts en 2023 ;</li><li><strong>DeepSeek</strong> — l'entreprise chinoise dont le modèle de raisonnement ouvert R1 a fait plonger, en janvier 2025, les actions des fabricants de puces : pour la première fois, le marché a cru qu'un modèle ouvert pouvait rattraper la frontière (frontier) pour bien moins d'argent ;</li><li><strong>Qwen</strong> d'Alibaba — l'une des familles les plus populaires : sur la plateforme Hugging Face (une sorte de « GitHub des réseaux de neurones »), il en existe plus de cent mille versions affinées ;</li><li><strong>Mistral</strong> — l'entreprise française, principal pari européen dans cette course ;</li><li><strong>Kimi</strong> de Moonshot AI et <strong>GLM</strong> de Zhipu — deux autres solides familles chinoises.</li></ul><p>Et maintenant, deux surprises. <strong>Gemma</strong> — une famille ouverte… de Google, celui-là même dont le Gemini est verrouillé à double tour. Et <strong>gpt-oss</strong> — des modèles ouverts d'OpenAI : en août 2025, pour la première fois depuis GPT-2 (2019), l'entreprise a publié les poids d'un modèle de langage. Une même entreprise joue tranquillement sur les deux tableaux : elle garde son vaisseau amiral fermé et le vend via l'API, tout en publiant des modèles plus petits — pour les développeurs, les chercheurs et sa propre réputation.</p><div class=\"callout\"><p><strong>Une nuance souvent confondue :</strong> poids ouverts ne veut pas encore dire code ouvert (open source). Dans l'open source classique, tout est ouvert : le programme et les sources qui ont servi à le construire. Pour les modèles « ouverts », on ne publie en général que les poids — les données sur lesquelles le modèle a été entraîné et le code d'entraînement restent secrets. Et les licences varient : certaines sont véritablement libres (Apache 2.0 pour Qwen ou gpt-oss), d'autres assorties de réserves — la licence de Llama, par exemple, exige une autorisation à part pour les très grandes entreprises. Les puristes ne disent donc pas « modèle ouvert », mais, prudemment : « modèle à poids ouverts ».</p></div>"
+    },
+    {
+      "heading": "La différence en pratique",
+      "html": "<p>Qu'est-ce que cette différence change dans la vraie vie ? Passons tout en revue.</p><p><strong>L'argent.</strong> Un modèle fermé, c'est un compteur : vous payez l'abonnement ou chaque requête. Un modèle ouvert peut tourner gratuitement et sans limites — mais sur votre propre matériel. Les petits modèles, comme les Gemma d'entrée de gamme, tournent sur un ordinateur portable ordinaire ; les grands exigent de puissantes cartes graphiques, et les plus gros, des baies de serveurs entières. « Gratuit » signifie ici « sans payer le logiciel », pas « sans frais » : le matériel, l'électricité et les spécialistes coûtent de l'argent.</p><p><strong>La confidentialité.</strong> Avec un modèle fermé, chacune de vos requêtes part sur un serveur qui n'est pas le vôtre. Pour bavarder recettes de cuisine, peu importe ; mais pour un hôpital avec ses dossiers médicaux, un cabinet juridique avec les documents de ses clients ou une administration avec des données sensibles, c'est une question de principe. Un modèle ouvert travaille chez vous : les données ne quittent pas le bâtiment.</p><p><strong>La personnalisation.</strong> Un modèle ouvert peut être affiné sur vos propres données — le même procédé par lequel les entreprises ont éduqué leurs modèles via le RLHF, mais au service de votre tâche : terminologie médicale, style maison, langue rare. Les modèles fermés permettent aussi quelques réglages, mais strictement dans les limites fixées par le propriétaire.</p><p><strong>Le contrôle.</strong> Un modèle téléchargé est à vous pour toujours. On ne l'« améliorera » pas au point de casser vos scénarios de travail, on ne doublera pas son prix, on ne le débranchera pas sur décision d'un conseil d'administration. Pour une entreprise qui bâtit un produit sur le modèle, l'argument pèse lourd.</p><div class=\"example\"><p>Voici à quoi cela ressemble en vrai : une start-up crée un service d'analyse de contrats. Elle démarre avec l'API d'un modèle fermé — rapide, de qualité, sans investir dans le matériel. Mais quand des banques arrivent parmi ses clients et exigent que les documents ne quittent pas leurs serveurs, la start-up passe à un modèle ouvert affiné sur des textes juridiques et l'installe directement dans l'infrastructure du client. Les deux stratégies sont sensées — simplement à des étapes différentes.</p></div><p>Et maintenant, parlons franchement des inconvénients. Un modèle ouvert, c'est la recette sans le restaurant : aucun support, tous les problèmes sont pour vous. Il faut des cartes graphiques coûteuses ou des serveurs de location. Et surtout : les modèles ouverts sont en retard sur la frontière. Moins qu'on ne le croirait, cependant : les chercheurs d'Epoch AI estiment l'écart à quelques mois — ce que seuls les meilleurs modèles fermés savent faire aujourd'hui apparaît dans les modèles ouverts quelques mois ou un semestre plus tard. L'avance qui se comptait en années, plus personne ne l'a depuis longtemps.</p>"
+    },
+    {
+      "heading": "Sécurité : deux listes honnêtes",
+      "html": "<p>Venons-en à la question la plus brûlante : la sécurité. Un vrai débat fait rage, et des gens intelligents et honnêtes se tiennent des deux côtés. Donnons la parole à chacun.</p><p><strong>Les arguments pour la fermeture :</strong></p><ul><li><em>Des poids publiés ne se rappellent pas.</em> Un fichier mis en ligne se retrouve en vingt-quatre heures sur des milliers d'ordinateurs. Si l'on découvre ensuite que le modèle sait faire quelque chose de dangereux, on ne peut plus rien y faire — pas plus qu'on ne peut « dépublier » un livre imprimé. Un modèle fermé, son propriétaire peut le corriger ou l'éteindre à tout moment.</li><li><em>Les garde-fous sautent pour trois fois rien.</em> Souvenez-vous du module sur le RLHF : les refus polis du modèle sont un réglage fin du comportement par-dessus ses connaissances, pas une suppression des connaissances elles-mêmes. Les chercheurs l'ont montré maintes fois : un affinage sur un petit jeu d'exemples « nocifs » fait sauter ces garde-fous — l'affaire de quelques minutes de calcul et de sommes allant de quelques centimes à deux cents dollars. Avec un modèle fermé, le tour ne marche pas : personne ne vous donnera les poids.</li><li><em>Les usages malveillants (misuse).</em> Un modèle sans garde-fous est un outil clé en main pour les usines à spam, les montages frauduleux et les recettes qu'il vaudrait mieux ne jamais voir circuler. Le fournisseur d'un modèle fermé peut détecter et bloquer tout cela ; un modèle téléchargé, personne ne le surveille.</li></ul><p><strong>Les arguments pour l'ouverture :</strong></p><ul><li><em>Transparence et audit indépendant.</em> Un modèle fermé n'est vérifié que par son propriétaire — les autres doivent le croire sur parole. Des poids ouverts, n'importe quel chercheur peut les étudier : chercher des vulnérabilités, des biais cachés, des bizarreries de comportement. En cryptographie, ce principe a gagné depuis longtemps : les algorithmes ouverts se sont révélés plus sûrs que les secrets, parce que des milliers d'yeux les ont vérifiés.</li><li><em>Science et éducation.</em> Presque tout ce que les scientifiques savent du fonctionnement « interne » des modèles de langage a été obtenu sur des poids ouverts — les fermés sont tout simplement impossibles à étudier.</li><li><em>Indépendance.</em> Bâtir une entreprise, la médecine ou des services publics sur un modèle qui, demain, peut être modifié, renchéri ou fermé — c'est risqué.</li><li><em>Répartition du pouvoir.</em> Si les modèles les plus puissants n'existent que chez deux ou trois multinationales, celles-ci détiennent un pouvoir sans précédent sur l'information. Les partisans de l'ouverture jugent plus sûr de répartir une telle force que de la concentrer.</li><li><em>La sécurité par l'étude.</em> Mieux vaut étudier les menaces au grand jour que les cacher : le secret ne protège qu'un temps, la compréhension — toujours.</li></ul><p>Remarquez : les deux colonnes invoquent la sécurité — elles ne situent simplement pas le risque principal au même endroit. Les uns redoutent la diffusion incontrôlée, les autres la concentration incontrôlée. De « bonne réponse » toute prête, l'industrie n'en a pas.</p>"
+    },
+    {
+      "heading": "Où tout cela s'en va",
+      "html": "<p>Une thèse circule beaucoup dans l'industrie — loin de faire l'unanimité, mais il faut la connaître.</p><p>La voici : les capacités des modèles se <strong>commoditisent</strong> (de l'anglais commodity — une « matière première » de marché, comme le blé ou le pétrole : à peu près identique chez tous les vendeurs). Ce que seule la coûteuse frontière sur abonnement sait faire aujourd'hui, un modèle ouvert sur un ordinateur portable le fera dans un an ou deux. L'écart se compte en mois, et garder « le savoir dans une boîte » pour en vendre l'accès devient de plus en plus difficile : la boîte fuit. Dès 2023, une note interne d'un ingénieur de Google, sortie par une fuite, l'a résumé d'une phrase devenue célèbre : « nous n'avons pas de douves » — autrement dit, pas de rempart infranchissable contre les concurrents du monde ouvert. La logique des partisans de cette thèse est simple : pourquoi payer un abonnement si presque la même chose sera bientôt disponible gratuitement ?</p><p>Convaincant. Mais il existe des contre-arguments, tout aussi solides :</p><ul><li><strong>La frontière ne reste pas en place.</strong> Le poursuivant court après un point qui bouge. Pendant qu'un modèle ouvert assimile les astuces d'hier, les modèles fermés filent devant — et pour le tout dernier cri, les gens restent prêts à payer.</li><li><strong>La valeur migre des poids vers la couche du dessus.</strong> Un modèle brut n'est pas encore un produit. Données fraîches, recherche, outils, infrastructure agentique (souvenez-vous du module sur les agents), fiabilité, intégrations aux systèmes de travail, support et responsabilité juridique envers le client — rien de tout cela ne se télécharge avec les poids. C'est de plus en plus sur cet enrobage que les entreprises gagnent leur argent.</li><li><strong>L'exécution locale n'est pas gratuite.</strong> Cartes graphiques, électricité et ingénieurs coûtent de l'argent — parfois plus qu'un abonnement à l'API. L'économie ne penche pas toujours du côté du « matériel maison ».</li></ul><p>Le scénario le plus probable n'est pas la victoire d'un camp, mais une longue coexistence. L'histoire en offre une analogie exacte : Linux et Windows. Le système d'exploitation ouvert n'a pas « tué » le fermé — ils vivent côte à côte depuis des décennies, chacun dans sa niche : Linux tourne discrètement sur presque tous les serveurs d'Internet et à l'intérieur d'Android, Windows équipe les ordinateurs de bureau et domestiques. Il en ira sans doute de même pour les réseaux de neurones : les modèles ouverts là où comptent la confidentialité, le prix et le contrôle ; les fermés là où il faut le maximum de qualité sans tracas. D'autant que le choix n'est pas binaire : beaucoup d'entreprises combinent déjà — les tâches routinières vont à un modèle ouvert bon marché sur leur serveur, les tâches complexes partent vers la frontière fermée. Ne jouons pas les prophètes — mais presque tout, aujourd'hui, pointe vers un avenir hybride.</p>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Vérifions comment vous vous repérez désormais sur la carte. Voici dix cartes de modèles connus. Votre tâche : deviner si les poids de chaque modèle sont ouverts ou fermés. Attention : des pièges ont été glissés exprès dans le jeu — le nom de l'entreprise propriétaire ne souffle pas toujours la bonne réponse. Après chaque réponse, la carte révélera un fait intéressant sur le modèle.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Un modèle, c'est un fichier de poids. <strong>Poids ouverts</strong> — le fichier est publié : téléchargez, exécutez chez vous, affinez. <strong>Modèle fermé</strong> — les poids restent sur les serveurs de l'entreprise, accès payant via le chat ou l'API. La recette contre le restaurant.</li><li>Le camp fermé : GPT, Claude, Gemini. Le camp ouvert : Llama, DeepSeek, Qwen, Mistral, Kimi, GLM — plus les pièges Gemma (de Google) et gpt-oss (d'OpenAI) : une même entreprise peut jouer sur les deux tableaux.</li><li>Poids ouverts ≠ open source : les données et le code d'entraînement restent en général fermés, et les licences comportent parfois des restrictions.</li><li>Un modèle ouvert offre confidentialité, personnalisation et contrôle, mais exige son propre matériel et reste derrière la frontière — de quelques mois selon les chercheurs, pas de quelques années.</li><li>Le débat sur la sécurité est honnête des deux côtés : des poids publiés ne se rappellent pas, et les garde-fous sautent par affinage pour trois fois rien — mais l'ouverture apporte transparence et audit indépendant, et répartit le pouvoir au lieu de le concentrer.</li><li>L'avenir sera presque à coup sûr hybride — comme avec Linux et Windows : l'ouvert et le fermé coexistent depuis des décennies, chacun dans sa niche.</li></ul>"
+    }
+  ],
+  "demo": [
+    { "name": "Claude", "dev": "Anthropic", "open": false, "fact": "Anthropic n'a jamais publié les poids d'aucun modèle Claude — accès uniquement via le chat et l'API." },
+    { "name": "GPT (линейка ChatGPT)", "dev": "OpenAI", "open": false, "fact": "Les GPT phares sont fermés — alors même que le nom OpenAI date de l'époque où l'entreprise promettait d'être ouverte." },
+    { "name": "Gemini", "dev": "Google", "open": false, "fact": "La gamme de frontière de Google est fermée — mais la même entreprise possède aussi la famille ouverte Gemma." },
+    { "name": "Llama", "dev": "Meta", "open": true, "fact": "C'est Llama qui a lancé le boom des modèles ouverts en 2023 ; sa licence comporte toutefois des réserves — les très grandes entreprises doivent obtenir une autorisation à part de Meta." },
+    { "name": "DeepSeek", "dev": "DeepSeek", "open": true, "fact": "La sortie du modèle de raisonnement ouvert DeepSeek R1, en janvier 2025, a fait plonger les actions des fabricants de puces : pour la première fois, le marché a cru que les modèles ouverts pouvaient rattraper la frontière." },
+    { "name": "Qwen", "dev": "Alibaba", "open": true, "fact": "L'une des familles les plus « forkées » : Hugging Face héberge plus de cent mille versions affinées de Qwen, souvent sous la licence libre Apache 2.0." },
+    { "name": "Mistral", "dev": "Mistral AI", "open": true, "fact": "L'entreprise française est le principal pari européen de la course : nombre de ses modèles sortent sous licence libre, même si une partie des vaisseaux amiraux n'est accessible que par API." },
+    { "name": "Gemma", "dev": "Google", "open": true, "fact": "Le piège a fonctionné ? Famille ouverte signée Google : les petites versions de Gemma tournent sur un ordinateur portable ordinaire, et même sur un téléphone." },
+    { "name": "gpt-oss", "dev": "OpenAI", "open": true, "fact": "En août 2025, pour la première fois depuis GPT-2 (2019), OpenAI a publié les poids d'un modèle de langage — sous la licence libre Apache 2.0." },
+    { "name": "Kimi", "dev": "Moonshot AI", "open": true, "fact": "L'entreprise chinoise Moonshot a mis en libre accès un modèle d'environ mille milliards de poids — l'un des plus grands modèles ouverts de l'histoire." }
+  ],
+  "quiz": [
+    {
+      "q": "Une entreprise annonce : « Nous avons publié un modèle à poids ouverts. » Qu'est-ce qui, exactement, est devenu accessible à tous ?",
+      "options": [
+        "Le code complet et toutes les données sur lesquelles le modèle a été entraîné",
+        "Un accès gratuit et illimité au chat de l'entreprise",
+        "Le fichier des paramètres du modèle — on peut le télécharger, l'exécuter chez soi et l'affiner",
+        "La documentation interne décrivant comment le modèle est construit"
+      ],
+      "correct": 2,
+      "explain": "Les poids ouverts, c'est la publication du fichier de nombres-paramètres du modèle. Les données et le code d'entraînement, eux, restent en général fermés."
+    },
+    {
+      "q": "En quoi les « poids ouverts » diffèrent-ils de l'open source classique ?",
+      "options": [
+        "Avec les poids ouverts, les données et le code d'entraînement restent en général fermés — seul le fichier des paramètres est publié",
+        "En rien, ce sont de parfaits synonymes",
+        "L'open source n'existe que pour les systèmes d'exploitation, pas pour les modèles",
+        "Les poids ouverts interdisent toujours l'usage commercial"
+      ],
+      "correct": 0,
+      "explain": "Dans l'open source classique, tout est ouvert, « sources » comprises. Pour les modèles, on ne publie le plus souvent que les poids ; la recette de leur fabrication — données et code d'entraînement — reste secrète."
+    },
+    {
+      "q": "Quelle entreprise garde fermé son vaisseau amiral Gemini tout en publiant la famille ouverte Gemma ?",
+      "options": [
+        "Meta",
+        "OpenAI",
+        "Anthropic",
+        "Google"
+      ],
+      "correct": 3,
+      "explain": "Google joue sur les deux tableaux : le Gemini de frontière est fermé, tandis que la famille compacte Gemma est publiée avec ses poids. OpenAI fait de même avec gpt-oss."
+    },
+    {
+      "q": "Pourquoi les hôpitaux et les cabinets juridiques s'intéressent-ils souvent précisément aux modèles ouverts ?",
+      "options": [
+        "Les modèles ouverts sont plus intelligents que les fermés",
+        "Les données sont traitées sur leurs propres serveurs et ne partent pas chez un tiers",
+        "La loi interdit aux modèles fermés de travailler dans la médecine",
+        "Les modèles ouverts ne se trompent jamais dans la terminologie"
+      ],
+      "correct": 1,
+      "explain": "L'argument central, c'est la confidentialité : un modèle ouvert tourne sur son propre matériel, et les données sensibles — dossiers médicaux, documents des clients — ne quittent pas l'organisation."
+    },
+    {
+      "q": "Parmi les actions suivantes, laquelle est IMPOSSIBLE avec des poids déjà publiés ?",
+      "options": [
+        "Les rappeler pour que plus personne ne les utilise",
+        "Les affiner pour une nouvelle tâche",
+        "Exécuter le modèle sur un ordinateur sans Internet",
+        "Copier le fichier sur un autre serveur"
+      ],
+      "correct": 0,
+      "explain": "Des poids publiés se répandent sur des milliers d'ordinateurs, et impossible de les récupérer — pas plus qu'on ne peut « dépublier » un livre imprimé. C'est l'argument principal des partisans de la fermeture."
+    },
+    {
+      "q": "Selon les estimations des chercheurs (par exemple Epoch AI), de combien les meilleurs modèles ouverts sont-ils en retard sur la frontière fermée ?",
+      "options": [
+        "De 5 à 10 ans",
+        "Il n'y a pratiquement pas d'écart",
+        "De l'ordre de quelques mois",
+        "De 2 à 3 ans"
+      ],
+      "correct": 2,
+      "explain": "Les estimations parlent de quelques mois : ce que seule la frontière sait faire aujourd'hui apparaît dans les modèles ouverts quelques mois ou un semestre plus tard."
+    }
+  ],
+  "quiz2": [
+    {
+      "q": "Pourquoi l'affinage fait-il sauter les garde-fous d'un modèle ouvert à si bas prix — en quelques minutes et pour quelques dollars ?",
+      "options": [
+        "Les garde-fous sont stockés dans un petit fichier à part, facile à supprimer",
+        "Les garde-fous sont un réglage fin du comportement par-dessus les connaissances du modèle, pas une suppression des connaissances : un court affinage redonne accès à ce que le modèle sait déjà faire",
+        "Les modèles ouverts sont entraînés d'emblée sans étape de RLHF",
+        "C'est un mythe : en réalité, retirer les garde-fous coûte des millions de dollars"
+      ],
+      "correct": 1,
+      "explain": "Le RLHF apprend au modèle à refuser, mais les connaissances « dangereuses » elles-mêmes restent dans les poids. Les études l'ont montré : un petit jeu d'exemples et quelques minutes de calcul suffisent à défaire ce réglage."
+    },
+    {
+      "q": "Que signifie la thèse de la « commoditisation » des capacités des modèles ?",
+      "options": [
+        "Les modèles seront bientôt vendus en bourse des matières premières",
+        "Tous les modèles deviendront à terme la propriété des États",
+        "Les capacités des modèles ne progressent que chez les grandes entreprises",
+        "Ce qui était hier unique et cher devient vite accessible à tous et bon marché — comme les matières premières de marché"
+      ],
+      "correct": 3,
+      "explain": "Une commodity est un produit identique chez tous les vendeurs. La thèse : les capacités de la frontière sont reproduites en un an ou deux par un modèle ouvert, et vendre « le savoir dans une boîte » devient de plus en plus difficile."
+    },
+    {
+      "q": "Quel est le fond de l'argument « la sécurité par l'étude » ?",
+      "options": [
+        "Les poids ouverts permettent à des milliers de chercheurs indépendants de traquer les vulnérabilités et d'étudier le modèle de l'intérieur — comme en cryptographie, où les algorithmes ouverts se sont révélés plus sûrs que les secrets",
+        "Les modèles ouverts sont plus sûrs parce qu'ils sont forcément plus faibles que les fermés",
+        "On ne peut étudier un modèle qu'à travers ses réponses dans le chat",
+        "La sécurité est garantie par le bon choix de licence"
+      ],
+      "correct": 0,
+      "explain": "Les partisans de l'ouverture estiment qu'il est plus fiable d'étudier les menaces au grand jour que de les cacher. Un modèle fermé n'est vérifié que par son propriétaire ; un modèle ouvert, par toute la communauté scientifique."
+    },
+    {
+      "q": "Une entreprise a bâti son produit sur un modèle fermé via l'API. Quel risque décrit l'argument du « contrôle » ?",
+      "options": [
+        "Le modèle peut tomber physiquement en panne sous la charge",
+        "Les concurrents verront les requêtes de l'entreprise",
+        "Le propriétaire du modèle peut en changer le comportement, augmenter le prix ou couper l'accès — et tout le produit en dépend",
+        "L'API est toujours plus lente qu'une exécution locale"
+      ],
+      "correct": 2,
+      "explain": "Avec un modèle fermé, vous dépendez des décisions d'autrui : une mise à jour peut casser vos scénarios, et les conditions d'accès peuvent changer. Un modèle téléchargé, personne ne peut vous le reprendre."
+    },
+    {
+      "q": "Pourquoi l'analogie Linux/Windows est-elle jugée pertinente pour l'avenir des modèles ouverts et fermés ?",
+      "options": [
+        "Linux a fini par évincer Windows — il en ira de même avec les modèles",
+        "Les deux systèmes appartiennent à la même entreprise, comme Gemini et Gemma",
+        "Windows aussi a été ouvert autrefois",
+        "L'ouvert et le fermé coexistent depuis des décennies, chacun dans sa niche — aucun n'a vaincu l'autre"
+      ],
+      "correct": 3,
+      "explain": "Linux tourne discrètement sur les serveurs et dans Android, Windows sur les ordinateurs de bureau. Les modèles se partageront sans doute les niches de la même façon : les ouverts là où comptent confidentialité et contrôle, les fermés là où il faut le maximum de qualité sans tracas."
+    },
+    {
+      "q": "Vers où, selon les sceptiques de la commoditisation, migre la valeur si les poids « bruts » ne coûtent plus rien ?",
+      "options": [
+        "Vers la production de cartes graphiques",
+        "Vers la couche autour du modèle : données fraîches, outils, infrastructure agentique, intégrations et responsabilité envers le client",
+        "Vers la publicité et le marketing des modèles",
+        "De nouveau vers la collecte de données pour le pré-entraînement"
+      ],
+      "correct": 1,
+      "explain": "Un modèle brut n'est pas encore un produit. Même si les poids deviennent un bien commun, on paie pour l'enrobage : fiabilité, outils, support et garanties."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez à un ami fâché avec la technologie la différence entre modèle ouvert et modèle fermé — en une ou deux phrases, avec n'importe quelle analogie du quotidien (autre que celle du module, si possible).",
+      "ref": "Par exemple : un modèle fermé, c'est comme le taxi — pratique, mais chaque course se paie, et c'est la compagnie qui fixe itinéraires et tarifs. Un modèle ouvert, c'est la voiture personnelle : roulez autant et où vous voulez, mais l'achat, l'essence et les réparations sont pour vous. Toute analogie qui rend le couple « accès à un service contre possession d'une copie » convient."
+    },
+    {
+      "q": "Vous êtes conseiller du directeur d'un hôpital. L'hôpital veut brancher un réseau de neurones sur les dossiers médicaux. Modèle ouvert ou fermé — que recommandez-vous, et quels deux arguments avancez-vous ?",
+      "ref": "Plutôt un modèle ouvert, déployé sur les serveurs de l'hôpital : les données des patients ne quittent pas l'établissement (confidentialité et exigences légales), et le modèle peut être affiné sur la terminologie médicale. Un conseiller honnête ajoutera le coût de l'affaire : il faudra son propre matériel et des spécialistes, et la qualité peut rester un peu en deçà des meilleurs modèles fermés."
+    },
+    {
+      "q": "Choisissez un camp dans le débat sur la sécurité — pour l'ouverture ou pour la fermeture. Puis formulez l'argument le plus fort du camp adverse — de sorte qu'un de ses partisans dise : « oui, c'est exactement ce que je veux dire ».",
+      "ref": "Le partisan de l'ouverture doit reconnaître honnêtement : des poids publiés ne se rappellent pas, et les garde-fous sautent par un affinage bon marché — le risque d'usages malveillants est réel. Le partisan de la fermeture — que la concentration des modèles les plus puissants chez deux ou trois multinationales, sans audit indépendant, est elle aussi un risque, et pas des moindres. Savoir restituer honnêtement l'argument d'autrui est le signe le plus sûr qu'on a compris le sujet."
+    }
+  ]
+}

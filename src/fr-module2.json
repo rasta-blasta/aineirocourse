@@ -1,0 +1,103 @@
+{
+  "title": "Le neurone : des poids sur la balance",
+  "minutes": 12,
+  "intro": "Dans le module précédent, la chaîne de Markov se contentait de compter quel mot suit le plus souvent quel autre — et atteignait vite son plafond. Les vrais réseaux de neurones sont bâtis avec une autre brique : un minuscule « décideur » capable de peser des facteurs. Démontons-le pièce par pièce et faisons le calcul à la main — sur l'exemple de l'éternelle question : sortir se promener ou rester à la maison.",
+  "sections": [
+    {
+      "heading": "Décider, c'est peser",
+      "html": "<p>Souvenez-vous de la façon dont vous décidez d'aller vous promener le soir. Plusieurs facteurs vous trottent dans la tête : il fait soleil — c'est un « pour ». Il bruine — c'est un « contre ». Vous êtes de bonne humeur — plutôt « pour ». Vous ne posez pas l'opération sur papier, mais il se passe quelque chose de très proche d'une pesée : chaque facteur se pose sur le plateau de la balance, et chacun a son propre « poids », sa propre force d'influence.</p><p>Et ces poids diffèrent d'une personne à l'autre. Pour l'un, la pluie est une catastrophe qui raye n'importe quel soleil. Pour l'autre, un charmant prétexte à enfiler un imperméable. Les faits sont les mêmes, les décisions diffèrent, parce que le <strong>poids</strong> de chaque fait n'est pas le même.</p><p>Un neurone artificiel (artificial neuron), c'est exactement cette petite machine à peser, en version parfaitement honnête et simple. Il reçoit quelques nombres en entrée, multiplie chacun par son poids, additionne les résultats et, selon la somme obtenue, rend sa décision. C'est tout. Aucune magie, aucune « compréhension » — quatre opérations arithmétiques.</p><p>Cela sonne trop simple pour la technologie qui fait tourner ChatGPT et Claude ? C'est vrai : un neurone seul ne sait faire que très peu. Mais d'ici la fin du module, nous verrons comment des milliards de ces pesées élémentaires, empilées en couches, finissent par composer un système qui écrit des textes et repère des chats sur des photos. En attendant, assemblons un neurone de nos propres mains.</p>"
+    },
+    {
+      "heading": "De quoi est fait un neurone",
+      "html": "<p>Un neurone a trois pièces, et vous les connaissez déjà toutes les trois intuitivement.</p><p><strong>Les entrées (inputs)</strong> — des nombres qui décrivent la situation. Le neurone ne comprend pas les mots « couvert » ou « cafard », donc tout est traduit en nombres. Convenons de noter les facteurs sur une échelle de 0 à 10 : soleil — 7 (plutôt dégagé), pluie — 2 (une bruine légère), humeur — 6 (pas mauvaise).</p><p><strong>Les poids (weights)</strong> — les fameux contrepoids, un par entrée. Un poids est aussi un nombre, et il encode deux choses. Le signe dit si le facteur joue « pour » ou « contre » : un poids positif pousse vers la promenade, un poids négatif retient à la maison. La valeur dit avec quelle force. Prenons ce personnage : le soleil lui est agréable mais pas décisif — poids +0,8 ; il ne supporte pas la pluie — poids −2 ; l'humeur aide un peu — poids +0,5. Remarquez : avec son poids de −2, la pluie pèse sur la décision deux fois et demie plus fort que le soleil et son +0,8. Les poids, c'est le caractère de notre neurone.</p><p><strong>Le biais (bias)</strong> — la position de départ du plateau de la balance, avant même toute entrée. Notre personnage est casanier : même par temps neutre, sortir lui coûte. Voici cette paresse sous forme de nombre : biais −3. Il s'ajoute simplement à la somme totale et décale le point de départ. Chez quelqu'un de toujours partant, le biais serait positif : n'importe quoi le ferait descendre dans la rue.</p><p>Au passage, notez l'astuce : nous venons de traduire en nombres la météo, l'humeur et même la paresse. C'est le tour de passe-passe central de tout le domaine — un réseau de neurones ne travaille qu'avec des nombres, donc tout au monde (mots, images, sons) est d'abord converti en nombres. Comment on le fait avec les mots, nous le verrons dans le module sur les tokens et les embeddings.</p><p>Bilan : trois entrées arrivent de l'extérieur, et le neurone possède quatre nombres à lui — trois poids et un biais. Reste à tout multiplier et additionner.</p>"
+    },
+    {
+      "heading": "Calculons : somme, seuil, décision",
+      "html": "<p>Voici l'unique formule de ce module — elle contient tout le travail du neurone :</p><p><strong>décision = f(x₁·w₁ + x₂·w₂ + x₃·w₃ + b)</strong></p><p>Déchiffrons chaque symbole : x₁, x₂, x₃ — les entrées (notre soleil, la pluie et l'humeur) ; w₁, w₂, w₃ — les poids attachés à chaque entrée ; le point · — une simple multiplication ; b — le biais, le décalage de départ ; f — la fonction d'activation (activation function), on y vient dans une minute. Ce qui est entre parenthèses s'appelle la somme pondérée (weighted sum) : chaque entrée compte non pas telle quelle, mais multipliée par son poids.</p><div class=\"example\"><p>Calculons pour notre casanier :</p><ul><li>soleil : 7 · 0,8 = 5,6</li><li>pluie : 2 · (−2) = −4</li><li>humeur : 6 · 0,5 = 3</li><li>biais : −3</li></ul><p>Somme : 5,6 − 4 + 3 − 3 = <strong>1,6</strong>. Convenons que le seuil est zéro : si la somme dépasse zéro, on sort. 1,6 est au-dessus de zéro, donc — promenade !</p></div><p>Et maintenant regardez comme la décision dépend des circonstances. Supposons que la bruine tourne à l'averse : l'entrée « pluie » passe de 2 à 8. On recalcule : 5,6 − 16 + 3 − 3 = −10,4. La somme s'effondre loin sous zéro — on reste à la maison, et aucun soleil n'y changera rien. Une seule entrée dotée d'un gros contrepoids surpasse aisément toutes les autres.</p><p>Il y a ici une distinction importante à saisir. Les entrées changent chaque jour : aujourd'hui le soleil vaut 7, demain 2. Mais les poids et le biais restent attachés au neurone — c'est son « caractère » stable, son expérience apprise. La même météo, servie à des neurones aux poids différents, produira des décisions différentes. Retenez cette séparation : <em>les entrées décrivent la situation du jour, les poids — l'expérience accumulée</em>. Ce sont précisément les poids que le réseau acquiert lors de l'apprentissage.</p><p>Reste la lettre f — la fonction d'activation. Dans notre exemple, elle est on ne peut plus simple : « somme au-dessus de zéro — sors un 1 (j'y vais), sinon — un 0 (je reste) ». Cet interrupteur brutal s'appelle une fonction à seuil. Les vrais réseaux préfèrent souvent des variantes douces. La sigmoïde (sigmoid) transforme n'importe quelle somme en un nombre entre 0 et 1 — une sorte de degré de confiance : non pas « j'y vais / je n'y vais pas », mais « j'y vais avec une confiance de 0,83 ». La très simple ReLU est populaire aussi : elle met à zéro toute somme négative et laisse passer telle quelle une somme positive. Le sens est toujours le même : convertir la somme brute en un signal propre, commode à transmettre plus loin. Plus loin, à qui ? Voilà la question la plus intéressante.</p>"
+    },
+    {
+      "heading": "Les couches : des points au chat",
+      "html": "<p>Un neurone seul sait tracer une seule frontière : « somme au-dessus du seuil — oui, en dessous — non ». Pour décider d'une promenade, cela suffit. Mais pour distinguer un chat d'un chien sur une photo, une frontière ne suffit pas — il faut beaucoup de neurones travaillant ensemble.</p><p>On les assemble ainsi : <strong>les sorties des uns deviennent les entrées des autres</strong>. Les neurones sont rangés en couches (layers) : la première couche reçoit les données brutes, la deuxième — les résultats de la première, la troisième — ceux de la deuxième, et ainsi de suite. Un réseau à nombreuses couches est dit profond — d'où le terme « apprentissage profond » (deep learning).</p><p>Le plus beau ici, c'est la façon dont le niveau d'abstraction grimpe de couche en couche. Prenons un réseau qui cherche des chats sur des photos. Les entrées de la première couche sont de simples luminosités de pixels, des centaines de milliers de nombres. Les neurones de la première couche apprennent à repérer l'élémentaire : un point sombre à côté d'un point clair, un petit trait. La deuxième couche combine les traits en lignes, en angles, en arcs. La troisième assemble les lignes en formes : le triangle d'une oreille, l'amande d'un œil, l'arc d'un dos. Et quelque part dans les profondeurs siège un neurone dont la somme pondérée s'affole quand « oreilles », « moustaches » et « yeux » se déclenchent en même temps — en somme, un détecteur de chat. Points → lignes → formes → « chat » : chaque étage pense en catégories plus larges, alors que chaque neurone pris à part ne fait toujours que multiplier et additionner.</p><p>Important : personne n'a programmé le « détecteur d'oreille ». Les ingénieurs n'ont fixé que la construction — combien de couches, combien de neurones dedans. Ce que chaque neurone remarque au juste s'est décidé tout seul, par les valeurs des poids, pendant l'apprentissage.</p><p>Le mot « neurone » est bien sûr emprunté aux biologistes, et l'idée se ressemble vraiment : un neurone vivant collecte les signaux de ses voisins par ses prolongements, les dendrites, et si l'excitation totale franchit un seuil, il décoche une impulsion plus loin le long de l'axone. Mais une vraie cellule nerveuse est une usine chimique d'une complexité extrême, pas un additionneur à seuil. L'analogie est inspirante mais approximative : le cerveau, nous ne l'avons toujours pas percé à jour, tandis que les réseaux de neurones, nous les comprenons — parce que c'est nous qui les avons assemblés.</p>"
+    },
+    {
+      "heading": "À l'intérieur, rien que des nombres",
+      "html": "<p>Voici maintenant la conclusion principale, celle pour laquelle nous avons fait tous ces calculs. Notre neurone casanier est entièrement décrit par quatre nombres à lui : trois poids et un biais. Changez-les — et le « caractère » change : amoureux de la pluie, optimiste toujours partant, reclus sans espoir. En dehors de ces nombres, le neurone ne possède rien.</p><p>Avec les grands réseaux, même histoire, autre échelle. L'ensemble des poids et des biais de tous les neurones s'appelle les paramètres (parameters). Dans un petit réseau qui lit des chiffres manuscrits — des dizaines de milliers de paramètres. Dans les modèles de langage actuels, comme ceux derrière ChatGPT et Claude — des centaines de milliards. Pour sentir l'échelle : à imprimer un tel nombre par ligne, on obtiendrait une bibliothèque de millions de gros volumes remplis de fractions du genre 0,0031 et −1,74. Quand vous téléchargez un modèle de langage sur votre ordinateur, c'est exactement cela que vous téléchargez — un gigantesque fichier de nombres, et rien d'autre.</p><div class=\"callout\"><p><strong>Tout le « savoir » d'un réseau de neurones tient dans les valeurs de ses poids. Une immense table de nombres — et rien de plus.</strong> À l'intérieur, pas de base de faits, pas de textes enregistrés, pas de règles de grammaire. Quand le modèle « sait » que Paris est la capitale de la France, ce savoir ne loge pas dans une case précise — il est étalé sur des millions de poids, dont chacun pousse un tout petit peu le réseau vers la bonne réponse.</p></div><p>D'où une question inévitable. Nos quatre nombres, nous les avons choisis à la main, de tête. Mais aucun humain ne réglera à la main des centaines de milliards. Comment le réseau trouve-t-il les bons poids tout seul ? C'est cela, l'apprentissage — le sujet du prochain module. En attendant, ancrons la leçon du jour — avec les mains.</p>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Ci-dessous, un neurone vivant qui décide s'il faut aller se promener. Commencez par bouger les entrées — soleil, pluie, humeur — et observez comment la somme pondérée évolue et à quel moment la décision bascule. Puis attaquez-vous aux poids : transformez le casanier en amoureux de la pluie en donnant à celle-ci un poids positif, ou trouvez une configuration où un seul facteur puissant l'emporte sur les deux autres. Notez bien : la décision ne change pas en douceur mais d'un coup — à l'instant précis où la somme franchit le seuil.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Un neurone artificiel est une machine simple : il multiplie les entrées par les poids, additionne, ajoute le biais et émet un signal selon la somme.</li><li>Le poids, c'est la force et le sens de l'influence d'une entrée : le signe dit « pour » ou « contre », la valeur dit avec quelle intensité.</li><li>Le biais (bias) est la prédisposition de base du neurone, sa « paresse » ou son « enthousiasme » avant même de considérer les entrées.</li><li>La fonction d'activation transforme la somme pondérée en signal final : brutalement (seuil) ou en douceur (sigmoïde, ReLU).</li><li>Un réseau, ce sont des couches de neurones : les sorties des uns deviennent les entrées des autres, et à chaque couche les traits gagnent en abstraction — points → lignes → formes → « chat ».</li><li>Tout le savoir du réseau tient dans des nombres-poids, par millions et par milliards. Comment le réseau les trouve tout seul — au prochain module.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Qu'est-ce qu'un poids (weight) dans un neurone artificiel ?",
+      "options": [
+        "Le volume d'information que le neurone peut mémoriser",
+        "Un nombre qui indique avec quelle force et dans quel sens une entrée influence la décision",
+        "La vitesse à laquelle le neurone traite le signal",
+        "Le nombre d'entrées connectées au neurone"
+      ],
+      "correct": 1,
+      "explain": "Le poids est le contrepoids attaché à une entrée : le signe dit si le facteur tire « pour » ou « contre », et la valeur dit avec quelle force il appuie sur le plateau de la balance."
+    },
+    {
+      "q": "Un neurone a deux entrées : « soleil » = 4 et « pluie » = 6. Poids : +1 et −1, biais 0. Le neurone s'active si la somme dépasse zéro. Que se passe-t-il ?",
+      "options": [
+        "Il s'active : le soleil brille, et c'est l'entrée principale",
+        "Impossible à dire d'avance : il faut d'abord entraîner le neurone",
+        "Il ne s'active pas : la somme 4·1 + 6·(−1) = −2 est inférieure à zéro",
+        "Il s'active : il y a deux entrées, donc le signal arrive en double"
+      ],
+      "correct": 2,
+      "explain": "Calculons honnêtement : 4·1 + 6·(−1) = −2. La somme est sous le seuil, le neurone se tait — la pluie et son poids négatif l'ont emporté sur le soleil."
+    },
+    {
+      "q": "À quoi sert le biais (bias) d'un neurone ?",
+      "options": [
+        "Il fixe la « prédisposition » de base du neurone : avec quelle facilité il s'active avant même de considérer les entrées",
+        "Il corrige les erreurs commises par les neurones voisins",
+        "Il garde en réserve la bonne réponse au cas où les entrées feraient défaut",
+        "Il accélère la multiplication des entrées par les poids"
+      ],
+      "correct": 0,
+      "explain": "Le biais est la position de départ du plateau de la balance : chez le « casanier » il est négatif, et les entrées doivent forcer pour que le neurone se déclenche ; chez le « toujours partant », il est positif."
+    },
+    {
+      "q": "Pourquoi dit-on que les couches profondes d'un réseau reconnaissent des choses plus abstraites que les premières ?",
+      "options": [
+        "Parce qu'on donne aux couches profondes une image en plus haute résolution",
+        "Parce que les couches profondes contiennent plus de neurones, donc plus d'« intelligence »",
+        "Parce que les couches profondes travaillent plus longtemps et ont le temps de « réfléchir »",
+        "Parce que chaque couche combine les traits de la précédente : des petits traits naissent les lignes, des lignes les formes, des formes les objets"
+      ],
+      "correct": 3,
+      "explain": "Chaque couche construit ses traits à partir de ce que la précédente a trouvé, donc l'abstraction monte étage par étage : points → lignes → formes → « chat ». Les neurones eux-mêmes restent partout aussi simples."
+    },
+    {
+      "q": "Un réseau entraîné « sait » à quoi ressemble un chat. Où ce savoir est-il physiquement stocké ?",
+      "options": [
+        "Dans une base d'images de chats que le réseau consulte pour répondre",
+        "Dans les valeurs de millions de poids et de biais — c'est-à-dire dans un simple ensemble de nombres",
+        "Dans des règles du type « moustaches plus oreilles égalent chat », écrites par des programmeurs",
+        "Dans un module de mémoire à part, où le réseau range les faits appris"
+      ],
+      "correct": 1,
+      "explain": "À l'intérieur du réseau, ni base d'images, ni règles, ni module de faits — seulement des poids. Le savoir est « étalé » sur des millions de nombres, dont chacun pousse un tout petit peu le réseau vers la bonne réponse."
+    },
+    {
+      "q": "Quel rôle joue la fonction d'activation (activation function) ?",
+      "options": [
+        "Elle mélange les poids au hasard pour éviter que le réseau ne tourne en rond",
+        "Elle reconvertit en mots les nombres qui sortent du réseau",
+        "Elle transforme la somme pondérée en signal final du neurone — par exemple, elle décide s'il s'est « déclenché » ou non",
+        "Elle supprime du réseau les neurones superflus qui gênent l'apprentissage"
+      ],
+      "correct": 2,
+      "explain": "La fonction d'activation se tient à la sortie du neurone : recevant la somme pondérée, elle émet le signal final — brutalement, comme un interrupteur à seuil, ou en douceur, comme la sigmoïde et son « degré de confiance »."
+    }
+  ]
+}

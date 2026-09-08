@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "You set the temperature to zero in the settings and sent the exact same prompt three times in a row. What will you most likely see?",
+      "options": [
+        "Three noticeably different answers: randomness is built into the network itself and doesn't depend on temperature",
+        "Three (almost) identical answers: the roulette wheel turns into greedy decoding, and the leading token wins at every step",
+        "The model will refuse to answer: at zero temperature the probabilities can't be computed",
+        "The answers will become longer and more detailed: low temperature makes the model try harder"
+      ],
+      "correct": 1,
+      "explain": "At a temperature near zero, the distribution sharpens to the limit: the leader takes practically everything, and sampling collapses into greedy decoding. All the randomness lived in the wheel, not inside the network — take it away, and the answers coincide."
+    },
+    {
+      "q": "At what point in the pipeline — from your prompt to the finished answer — does randomness enter the game?",
+      "options": [
+        "In the attention mechanism: the network's layers fire slightly differently each time",
+        "When the text is sliced into tokens: the slicing comes out different every time",
+        "In softmax: it divides the percentages among the tokens at random",
+        "Only at the very last step, when the roulette wheel picks one token from the ready-made probabilities"
+      ],
+      "correct": 3,
+      "explain": "The entire network computes deterministically right up to the output: the same input — the same logits and the same percentages after softmax. Randomness appears only at the sampling step, when the wheel picks one token from the distribution."
+    },
+    {
+      "q": "The model is running at a high temperature, but top-p = 0.9 is switched on. The token \"democracy\" from the module's example had a microscopic probability. What happens to it at this step?",
+      "options": [
+        "It won't make it into the wheel at all: the top of the list will accumulate its 90% without it, and the tail gets discarded",
+        "Its chances will grow: high temperature boosts precisely the rare tokens",
+        "It will take part in the lottery with its tiny chance — top-p excludes no one",
+        "Top-p will force-pick it, to make the text more varied"
+      ],
+      "correct": 0,
+      "explain": "Top-p sorts tokens by descending probability and keeps only the top that together accumulates 90%; the deep tail sits out the lottery. That's exactly how it insures against wild tokens whose chances crept up because of the high temperature."
+    },
+    {
+      "q": "A chatbot has typed half a sentence and keeps writing. At that moment, what can be said about how the sentence will end?",
+      "options": [
+        "It has already been computed in full and is simply displayed with a delay, for effect",
+        "It exists as a draft that the model keeps polishing as it types",
+        "It doesn't exist yet: each next token will be chosen anew, in light of everything already written",
+        "It was chosen the moment the model read your question"
+      ],
+      "correct": 2,
+      "explain": "Autoregression means there is no finished plan for the sentence: the chosen token is appended to the text, and the probabilities of the next one are recomputed from scratch. Word-by-word typing isn't an animation — it's the real pace at which the answer is born."
+    },
+    {
+      "q": "Why does the request \"reason step by step\" genuinely help the model, if you recall the mechanism of autoregression?",
+      "options": [
+        "The intermediate reasoning gets appended to the context and influences the probabilities of all subsequent tokens",
+        "That phrase automatically lowers the temperature to a safe level",
+        "The model switches to a separate \"logic\" block that otherwise stays off",
+        "The model gains the ability to check and rewrite the text it has already printed"
+      ],
+      "correct": 0,
+      "explain": "The model can't \"think it through to the end first, then write it down\": whatever's been chosen is already in the text. But intermediate steps, once in the context, shift the probabilities of the tokens that follow — reasoning out loud literally paves the road to the answer."
+    },
+    {
+      "q": "How does a modern LLM's generation loop differ from the Markov chain at the start of the course?",
+      "options": [
+        "An LLM picks words with no randomness at all, while a Markov chain picks at random",
+        "A Markov chain works with letters, while an LLM works with whole sentences at once",
+        "The loop itself — \"predict — append — repeat\" — is the same; what differs is the predictor: instead of a little table of word pairs, a huge attention-equipped network",
+        "In every way: an LLM first builds a complete plan of the answer and then writes it down"
+      ],
+      "correct": 2,
+      "explain": "The principle hasn't changed one iota: pick a token, append it, predict onward. The difference is in who produces the probabilities — for a Markov chain it's a table of word pairs; for an LLM, a network with dozens of attention layers, trained on enormous texts."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Explain in your own words what people mean when they say: \"a language model doesn't output the next word — it outputs a forecast.\" What exactly comes out of the network, and how does a word eventually come out of that?",
+      "ref": "What comes out of the network isn't a word but a score for every token in the vocabulary: raw logits, which softmax turns into probabilities — something like a weather forecast (\"rug\" — 54%, \"windowsill\" — 24%). The word itself appears in a separate step: the roulette wheel picks a token at random, in proportion to those percentages. And temperature and top-p are settings of that wheel, not of the network itself."
+    },
+    {
+      "q": "Predict what happens: you ask the model to write a short formal letter to the tax office, but the temperature is accidentally set to 1.8. What will the text be like, and which setting would you change?",
+      "ref": "At a temperature of 1.8, the distribution flattens out: the wheel's sectors even out, and unexpected underdog words break into the text more and more often. The formal letter will most likely come out odd — with sudden turns of phrase and, in places, outright nonsense. The fix is lowering the temperature (say, to 0.2–0.3): formal and factual texts need predictability, not daring."
+    },
+    {
+      "q": "Give your own example of a real-life process built like autoregression: the next step is chosen in light of everything already done, and there's no complete plan in advance. Explain what plays the role of the \"appended token\" in your example.",
+      "ref": "An improvised spoken story works well, for example: there's no prepared script, each next sentence is born from what's already been said, and one unexpected remark steers the whole story down a different road. The role of the \"appended token\" is played by the sentence you've just spoken: it becomes part of the context and shapes what you say next. The essence of any such example: each step's result becomes the next step's input, and a complete plan never exists in advance."
+    }
+  ]
+}

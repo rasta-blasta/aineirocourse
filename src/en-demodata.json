@@ -1,0 +1,72 @@
+{
+  "markovCorpus": "the cat sat on the mat . the cat looked at the rain . the rain fell on the roof . the dog slept by the door . the cat slept on the couch . the dog looked at the cat . the rain fell all day . the cat sat on the couch . the dog sat by the door . at night the cat slept by the fire .",
+  "words": [
+    ["cat",1.2,8.6],["kitten",1.8,9.2],["dog",2.4,8.2],["puppy",3.0,8.9],["mouse",0.9,7.6],
+    ["stew",8.4,8.8],["pie",9.0,8.2],["porridge",8.0,9.3],["bread",9.5,8.9],["soup",7.7,8.4],
+    ["tram",8.6,1.4],["bus",9.2,2.0],["train",8.1,2.4],["plane",9.6,1.0],["bicycle",7.8,1.0],
+    ["joy",1.3,1.8],["sadness",0.7,1.0],["fear",1.9,0.8],["delight",2.3,2.2],["boredom",0.5,2.5],
+    ["king",5.6,6.4],["queen",4.2,6.4],["man",5.6,3.6],["woman",4.2,3.6]
+  ],
+  "attention": {
+    "A": {
+      "toks": ["The","cat","didn't","eat","the","fish","because","it","was","spoiled","."],
+      "att": {"7":{"5":0.62,"1":0.10,"9":0.16,"8":0.05},"9":{"5":0.55,"7":0.28,"8":0.08},"3":{"1":0.35,"2":0.25,"5":0.30},"1":{"5":0.3,"3":0.25,"2":0.15}},
+      "sel": 7
+    },
+    "B": {
+      "toks": ["The","cat","didn't","eat","the","fish","because","it","was","full","."],
+      "att": {"7":{"1":0.60,"5":0.12,"9":0.18,"8":0.05},"9":{"1":0.50,"7":0.30},"3":{"1":0.35,"2":0.25,"5":0.30},"1":{"5":0.3,"3":0.25,"2":0.15}},
+      "sel": 7
+    }
+  },
+  "temp": {
+    "start": "In the evening the cat climbed onto",
+    "s0": [["the roof",2.3],["the tree",1.7],["the wardrobe",1.2],["someone's lap",0.6],["the chandelier",-0.6]],
+    "s1": [["and",1.9],["to",1.1],["where",0.7],["then",0.2]],
+    "s2": {
+      "and": [["fell asleep",2.0],["started purring",1.4],["tumbled off",0.9],["burst into song",-0.3]],
+      "to": [["hide",1.8],["warm up",1.5],["keep watch",1.0],["daydream",0.3]],
+      "where": [["it watched",1.9],["it jumped down",1.2],["it meowed",0.8],["it fled",0.4]],
+      "then": [["fell asleep",1.6],["changed its mind",1.2],["jumped down",1.0],["froze",0.5]]
+    },
+    "s3": [["till morning",1.4],["for a while",0.8],["in style",0.1],["serenely",0.5]]
+  },
+  "rlhf": [
+    {"q":"What's the capital of Australia?",
+     "a":[{"t":"The capital of Australia is Sydney. It's the country's biggest and most famous city — home to the celebrated Opera House.","good":false},
+          {"t":"Canberra. Sydney is bigger and better known, but in 1913 Canberra was chosen as the capital — a compromise between Sydney and Melbourne.","good":true}],
+     "note":"The first answer sounds confident and polished — but it's wrong. Labelers teach the model that truthfulness beats a convincing tone."},
+    {"q":"I've had a headache for three days now. What should I do?",
+     "a":[{"t":"It's probably nothing! Take a painkiller, get some rest, and try not to think about it.","good":false},
+          {"t":"Common everyday causes include lack of sleep, dehydration, and tension. But three days of pain in a row is a reason to see a doctor — especially if it's unusual for you or getting worse.","good":true}],
+     "note":"The good answer helps, but it's honest about its limits: where everyday advice ends and the doctor's territory begins."},
+    {"q":"Write a short send-off note for a colleague who's retiring.",
+     "a":[{"t":"Congrats on retiring.","good":false},
+          {"t":"Dear Margaret! Thank you for all the years side by side — for your calm in every crunch, and for always having the answer. May your time now belong to you alone!","good":true}],
+     "note":"Both answers are \"correct,\" but the second one actually does what the person needed. Helpfulness and fit are part of what gets labeled, too."},
+    {"q":"I've got a business idea: selling ice to Eskimos. Genius, right?",
+     "a":[{"t":"Genius! You're a born entrepreneur — an idea this bold is destined to succeed. Go for it and don't listen to the skeptics!","good":false},
+          {"t":"As a metaphor it's fun, but taken literally it runs into the obvious: your audience already has the product for free. Let's think about what real need your product could actually meet.","good":true}],
+     "note":"The first answer is pure flattery (sycophancy): models trained to please tend to agree with everything. Good labeling catches that and penalizes it."}
+  ],
+  "rag": {
+    "notes": [
+      "Opening hours: Mon–Fri 8 am–8 pm, Sat 9 am–6 pm, closed on Sundays.",
+      "August special: your second ciabatta half price on weekdays before 11 am.",
+      "Allergens: the almond croissant contains nuts. Gluten-free bread is baked on Tuesdays and Fridays.",
+      "Local delivery is free on orders over $25; the courier takes 40–60 minutes.",
+      "The Golden Crust bakery was opened in 2019 by the Miller family; the sourdough starter recipe comes from Grandma Rose.",
+      "Payment: cards, cash, or Apple Pay. Corporate orders are invoiced, with at least 3 days' notice."
+    ],
+    "qs": [
+      {"q":"Are you open on Sundays?","scores":[0.88,0.14,0.09,0.12,0.06,0.08],"top":[0],
+       "a":"No, Sunday is our day off. But on Saturdays we're open from 9 am to 6 pm — come by!"},
+      {"q":"Do you ever have gluten-free bread?","scores":[0.10,0.18,0.86,0.07,0.05,0.06],"top":[2],
+       "a":"Yes! We bake gluten-free bread twice a week — on Tuesdays and Fridays."},
+      {"q":"How long does delivery take, and how can I pay?","scores":[0.08,0.06,0.05,0.84,0.04,0.62],"top":[3,5],
+       "a":"The courier arrives in 40–60 minutes, and local delivery is free on orders over $25. You can pay by card, cash, or Apple Pay."},
+      {"q":"Where does your sourdough starter recipe come from?","scores":[0.05,0.07,0.06,0.04,0.90,0.05],"top":[4],
+       "a":"The starter recipe came down to the Miller family from Grandma Rose — the Golden Crust opened with it back in 2019."}
+    ]
+  }
+}

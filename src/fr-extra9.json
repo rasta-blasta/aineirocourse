@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Laquelle de ces requêtes a le plus de chances de déboucher sur une hallucination ?",
+      "options": [
+        "« Rédige le plan d'un rapport sur le marché immobilier, en cinq sections »",
+        "« Explique en termes simples comment fonctionne un prêt hypothécaire »",
+        "« Donne la date exacte et le numéro de l'arrêté ministériel concernant une réforme obscure de 2011 »",
+        "« Réécris cette lettre sur un ton plus amical »"
+      ],
+      "correct": 2,
+      "explain": "Plus un fait est précis et rare, plus il est stocké de façon floue dans les poids — et le modèle complétera avec aplomb une invention plausible. Les explications générales, les plans et le remaniement d'un texte collé dans le chat s'appuient, eux, sur des régularités solidement compressées."
+    },
+    {
+      "q": "Un ami vous assure : « ChatGPT a retenu que je suis végétarien — donc le modèle continue de s'entraîner sur nos conversations ». Que se passe-t-il en réalité ?",
+      "options": [
+        "Le service garde des notes sur l'utilisateur dans une base de données ordinaire et les glisse au début de chaque dialogue — les poids du modèle, eux, sont gelés",
+        "Le modèle se ré-entraîne chaque nuit sur les échanges des utilisateurs, et ses poids évoluent petit à petit",
+        "Le réseau de neurones contient un module distinct de mémoire à long terme, où s'enregistrent les faits sur l'interlocuteur",
+        "Le modèle reconnaît l'utilisateur à son style d'écriture et reconstitue les faits le concernant à partir de régularités générales"
+      ],
+      "correct": 0,
+      "explain": "Le modèle n'apprend rien de vos conversations : ses poids sont figés depuis l'entraînement. La « mémoire » est une surcouche du service : les notes vivent dans une base externe et sont discrètement ajoutées à la fenêtre de contexte (context window) du nouveau chat."
+    },
+    {
+      "q": "Vous écrivez au modèle : « Examine mon bail et repère les clauses risquées » — mais vous n'avez pas collé le texte du bail dans le chat. Quelle est l'issue fâcheuse la plus probable ?",
+      "options": [
+        "Le modèle retrouvera le bail sur Internet grâce à des indices indirects et l'analysera",
+        "Le modèle va se figer : sans fichier, il n'a physiquement rien à traiter",
+        "Rien de grave : les modèles signalent toujours honnêtement qu'ils ne voient pas le document",
+        "Le modèle peut livrer avec aplomb une « analyse » plausible d'un bail qu'il n'a jamais vu"
+      ],
+      "correct": 3,
+      "explain": "Le modèle ne voit que ce qui est entré dans la fenêtre de contexte, et il est entraîné à prolonger le texte de façon plausible — or, dans ses données, une demande d'analyse est généralement suivie d'une analyse. Parfois il réclamera honnêtement le texte, mais impossible d'y compter : collez le document dans le chat vous-même."
+    },
+    {
+      "q": "Vous avez collé dans le chat un rapport de 400 pages (il tient encore dans la fenêtre de contexte) et vous posez des questions de détail. Quels détails le modèle risque-t-il le plus de manquer ?",
+      "options": [
+        "Ceux du début du rapport — c'est lui qui est coupé en premier de la fenêtre de contexte",
+        "Ceux du milieu — l'attention repère moins bien les détails au milieu d'un long texte qu'à son début ou à sa fin",
+        "Aucun : tant que le texte tient dans la fenêtre, toutes ses parties sont traitées avec la même précision",
+        "Ceux de la fin — vers la fin d'un long texte, le modèle « fatigue » et lit moins attentivement"
+      ],
+      "correct": 1,
+      "explain": "Un long contexte n'est pas gratuit : le mécanisme d'attention repêche moins bien les détails du milieu d'un grand texte — placez donc les passages importants près de la question. Le début, lui, n'est coupé que lorsque le dialogue ne tient plus dans la fenêtre."
+    },
+    {
+      "q": "Pour quelle tâche est-il raisonnable d'activer le mode de raisonnement approfondi (reasoning), malgré son coût en temps et en tokens ?",
+      "options": [
+        "Demander en quelle année Saint-Pétersbourg a été fondée",
+        "Réécrire un paragraphe de lettre sur un ton officiel",
+        "Composer le planning de garde de six employés avec une dizaine de contraintes qui se recoupent",
+        "Demander une liste de synonymes du mot « important »"
+      ],
+      "correct": 2,
+      "explain": "Le brouillon de raisonnement aide là où la réponse exige de nombreuses étapes et de l'auto-vérification : chaque étape couchée par écrit devient un appui pour la suivante. Pour les questions simples, c'est prendre un char d'assaut pour aller chercher le pain — un surcoût en temps et en tokens sans gain de qualité."
+    },
+    {
+      "q": "Pourquoi le conseil « découpez une tâche complexe en étapes : d'abord le plan, puis section par section » améliore-t-il réellement le résultat ?",
+      "options": [
+        "Chaque résultat intermédiaire entre dans le contexte et sert d'appui aux prédictions suivantes — le même principe que chez les modèles à raisonnement",
+        "Entre vos messages, le modèle a le temps de réfléchir davantage à la tâche",
+        "Les requêtes courtes consomment moins de tokens, et en mode économe le modèle répond plus précisément",
+        "À chaque nouveau message, le modèle se ré-entraîne un peu sur votre tâche"
+      ],
+      "correct": 0,
+      "explain": "Le modèle prédit la suite de ce qui se trouve dans le contexte : le plan validé et les sections déjà rédigées deviennent l'appui de l'étape suivante. Entre deux requêtes, il ne médite rien et ne se ré-entraîne pas — seul compte le texte présent dans la fenêtre."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots pourquoi il est inexact de dire d'une hallucination « le modèle a menti » — et pourquoi ce n'est pas un bug qu'on pourrait simplement réparer.",
+      "ref": "Mentir suppose de connaître la vérité et de la cacher ; or le modèle n'a aucun entrepôt de faits où se référer — seulement des poids où sont compressées les régularités des textes. Il fait toujours une seule et même chose : compléter par la suite la plus plausible. Pour les faits fréquents, le plausible coïncide avec le vrai ; à la place d'un fait rare, stocké de façon floue, il fabrique une invention avec la même assurance. C'est le revers du principe même de la prédiction de texte, pas une panne à part."
+    },
+    {
+      "q": "Prédisez la suite : hier, vous avez discuté deux heures avec le modèle du plan d'un livre ; aujourd'hui, vous ouvrez un nouveau chat et écrivez « On reprend au chapitre trois ». La fonction « mémoire » du service est désactivée. Comment le modèle va-t-il se comporter, et qu'aurait-il fallu faire autrement ?",
+      "ref": "Un nouveau chat, c'est une page blanche : les mêmes poids gelés et une fenêtre de contexte vide — la conversation d'hier n'existe pas pour le modèle. Soit il redemandera de quel livre il s'agit, soit — plus sournois — il enchaînera avec aplomb sur un « chapitre trois » plausible dont vous n'avez jamais parlé. Le bon réflexe : ouvrir le nouveau chat par un bref résumé des conclusions de la veille — le contexte n'atteint le modèle que par la fenêtre."
+    },
+    {
+      "q": "Inventez votre propre exemple de deux requêtes au modèle : l'une dont on peut croire la réponse presque sans vérifier, l'autre où le recoupement avec la source originale est obligatoire. Expliquez la différence par le fonctionnement du modèle.",
+      "ref": "Par exemple : « explique la différence entre location vide et location meublée » — et « quel est le montant des frais d'enregistrement d'un bail en 2026 ». Les explications générales s'appuient sur des régularités répétées des milliers de fois dans les textes d'entraînement et solidement compressées dans les poids. Un fait précis et rare — chiffre, date, numéro, citation — est stocké de façon floue, et le modèle complétera avec assurance une valeur plausible. La règle : plus le fait est précis et rare, et plus l'erreur coûte cher, plus la vérification s'impose."
+    }
+  ]
+}

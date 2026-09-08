@@ -1,0 +1,103 @@
+{
+  "title": "La naissance d'une réponse : probabilités et température",
+  "minutes": 12,
+  "intro": "Vous envoyez votre question — et les mots se mettent à défiler à l'écran, comme si le modèle lisait une réponse préparée d'avance. En réalité, il n'existe aucune réponse toute prête : chaque mot naît à l'instant même, dans une minuscule loterie qui se rejoue des dizaines de fois par seconde. Dans ce module, nous démontons ce mécanisme pas à pas — et vous comprendrez pourquoi la même question donne chaque fois des réponses différentes, et à quoi sert la mystérieuse « température » dans les réglages.",
+  "sections": [
+    {
+      "heading": "Ce qui sort du réseau : cinquante mille nombres",
+      "html": "<p>Rappelons où nous en étions. Le texte de votre requête a été découpé en tokens et converti en nombres (module 4), il a traversé des dizaines de couches dotées du mécanisme d'attention (module 5) — et voici que le signal atteint la toute dernière couche. Qu'y a-t-il à l'arrivée ?</p><p>Pas un mot. Pas même une courte liste de mots candidats. En sortie du réseau : <strong>un nombre pour chaque token du vocabulaire</strong>. Si le vocabulaire du modèle compte 50 000 tokens, à chaque étape il produit 50 000 nombres. Chacun de ces nombres s'appelle un <strong>logit</strong> — un score brut, une estimation de la pertinence de ce token comme suite du texte.</p><div class=\"example\"><p>Supposons que le texte soit pour l'instant : « Le chat s'est installé sur… ». Le modèle note tout le vocabulaire d'un coup : « le tapis » — 8,2 ; « le rebord de la fenêtre » — 7,4 ; « les genoux » — 6,9 ; « le réfrigérateur » — 2,1 ; « la démocratie » — moins 4,5. Et ainsi pour les 50 000 tokens, y compris les plus absurdes : chacun reçoit un score ; simplement, pour les absurdes, il est profondément négatif.</p></div><p>Notez : les logits sont des nombres peu commodes. Ils peuvent être négatifs, ils n'ont pas d'échelle naturelle, et « 8,2 » ne veut rien dire en soi — ce qui compte, c'est seulement qu'il soit plus grand que « 7,4 ». On peut comparer, mais dire « à quel point c'est plus probable » — pas encore. Et toute cette masse — cinquante mille scores — est recalculée de zéro à chaque étape, pour un seul et unique token suivant. Pour pouvoir travailler avec ces scores, il faut les transformer en quelque chose de parlant. En pourcentages, par exemple.</p>"
+    },
+    {
+      "heading": "Softmax : les scores deviennent des pourcentages",
+      "html": "<p>C'est le rôle de la fonction <strong>softmax</strong> (littéralement « maximum doux »). Elle prend toute la liste des logits et la transforme en une liste de probabilités dotée de deux propriétés en béton : chaque probabilité est supérieure à zéro, et leur somme fait exactement 100 %.</p><p>Rien de mystique à l'intérieur : chaque logit est « gonflé » par une exponentielle — plus le score est grand, plus le gonflement est disproportionné —, puis tous les résultats sont divisés par la somme totale, pour obtenir des parts d'un tout. À cause de l'exponentielle, les écarts s'amplifient : un token qui ne devançait son voisin que de deux points rafle la part du lion de la probabilité.</p><div class=\"example\"><p>Après softmax, nos scores pourraient devenir : « le tapis » — 54 %, « le rebord de la fenêtre » — 24 %, « les genoux » — 15 %, quelques pour cent encore éparpillés sur des mots comme « la table » et « le canapé », et 0,1 % pour « le réfrigérateur ». Même « la démocratie » a reçu sa chance microscopique — quelque chose comme 0,0002 %. Personne ne reçoit zéro.</p></div><p>Détail important : à ce stade, le réseau de neurones a terminé son travail. Tous les poids, tout le dressage des modules précédents — tout a déjà joué son rôle et s'est condensé dans ces pourcentages. Ensuite commence une étape toute différente : de cette distribution, il faut choisir un seul et unique mot.</p><div class=\"callout\"><p><strong>Idée clé :</strong> un modèle de langue ne produit pas le mot suivant. Il produit une prévision — une distribution de probabilités sur tout le vocabulaire, comme la météo : « demain, pluie avec une probabilité de 70 % ». Le mot lui-même reste à choisir, et c'est une étape à part, avec ses propres règles.</p></div>"
+    },
+    {
+      "heading": "Le choix glouton contre la roulette",
+      "html": "<p>La façon la plus évidente de choisir un mot : prendre le plus probable. Cela s'appelle le <strong>décodage glouton (greedy decoding)</strong> : prends toujours le token au pourcentage maximal, sans exception. Ça semble raisonnable, mais en pratique le résultat est mauvais. Le texte sort terne et prévisible, et pire encore — enclin à tourner en boucle : le modèle tombe dans une ornière du genre « C'est très important, parce que c'est très important, parce que… » et n'arrive plus à en sortir — puisqu'à chaque étape, le token « le plus probable » le tire à nouveau dans le même cercle.</p><p>C'est que le texte humain vivant n'est pas fait uniquement des mots les plus probables. Si chaque mot était le plus attendu, la lecture serait d'un ennui insupportable — facile à vérifier en appuyant encore et encore sur le premier mot des suggestions du clavier de votre smartphone.</p><p>C'est pourquoi, en pratique, on utilise l'<strong>échantillonnage (sampling)</strong> — un tirage aléatoire proportionnel aux probabilités. Imaginez une roulette aux secteurs de tailles différentes : « le tapis » occupe 54 % du cercle, « le rebord de la fenêtre » — 24 %, « les genoux » — 15 %, et tout le reste — de minces lamelles. On fait tourner ; là où la bille tombe, c'est le mot qu'on écrit. Le plus souvent, ce sera « le tapis », mais dans un quart des cas — « le rebord de la fenêtre », et de temps en temps quelque chose d'inattendu.</p><p>Du même coup, la différence de comportement s'éclaire. Le choix glouton est déterministe : la même requête — lettre pour lettre la même réponse, mille fois de suite s'il le faut. L'échantillonnage, lui, prend chaque fois un chemin nouveau : la roulette n'est pas obligée de retomber là où elle est tombée la fois précédente.</p><p>Comprenez bien : ce n'est ni « une erreur du modèle » ni des parasites sur la ligne. Le hasard est ici intégré à dessein, par calcul — c'est lui qui rend le texte vivant, varié et semblable à celui d'un humain.</p>"
+    },
+    {
+      "heading": "Température et top-p : les réglages de la roulette",
+      "html": "<p>Bien, mais qui décide à quel point la roulette est joueuse ? C'est le rôle de la <strong>température (temperature)</strong> — un nombre par lequel on divise tous les logits avant de les passer au softmax. Une seule retouche — et le caractère du modèle change à vue d'œil.</p><p>L'unique formule de ce module : <strong>probabilité d'un token = e^(logit ÷ T) / somme des e^(logit ÷ T) sur tous les tokens du vocabulaire</strong>. Ici, e est la constante mathématique, environ 2,718, la fameuse exponentielle ; « logit » — le score brut du token ; T — la température, que vous fixez vous-même ; et la division par la somme sur tout le vocabulaire garantit que les pourcentages totalisent exactement 100 %. À T = 1, c'est le softmax ordinaire de la section précédente.</p><p>Que change la division par T ? À <strong>basse température</strong> (disons 0,2), les logits sont divisés par un petit nombre et s'écartent loin les uns des autres. L'exponentielle transforme l'écart en gouffre : le leader rafle presque tout, la distribution « s'aiguise ». Le modèle devient prudent et prévisible — presque un choix glouton.</p><p>À <strong>haute température</strong> (1,5–2), les logits, au contraire, se tassent en un petit paquet, et après softmax les secteurs de la roulette s'égalisent. Les chances des outsiders montent, le texte devient plus audacieux et plus inattendu — mais avec les trouvailles intéressantes, on voit tomber de plus en plus souvent du grand n'importe quoi.</p><div class=\"example\"><p>Les trois mêmes candidats à différentes températures. T = 0,3 : « le tapis » — 96 %, « le rebord de la fenêtre » — 3 %, « les genoux » — 1 %. T = 1 : 54 %, 24 %, 15 %. T = 1,8 : 36 %, 28 %, 24 % — presque une loterie. Les logits n'ont pas bougé d'un cheveu ; seule a changé la « netteté » de leur conversion en pourcentages.</p></div><p>La haute température a un effet secondaire : même les tokens complètement farfelus de la queue — ces milliers de « démocraties » — voient leurs chances grimper. Contre cela, il existe un garde-fou : le <strong>top-p</strong> (on l'appelle aussi nucleus sampling, « échantillonnage du noyau »). L'idée est simple : trier les tokens par probabilité décroissante et ne garder que le haut de la liste, dont la somme atteint p — par exemple 90 %. La longue queue d'âneries improbables est jetée, et on fait tourner la roulette parmi les tokens restants, en repartageant entre eux les 100 %. La température règle l'audace, le top-p assure contre les paris vraiment absurdes — d'ordinaire, ils travaillent en tandem.</p><p>D'où la conclusion pratique : pour les réponses factuelles et le code, on met la température basse ; pour le brainstorming et la poésie — plus haute. Ce n'est pas un « niveau de créativité » quelque part à l'intérieur du modèle, mais un simple réglage de la roulette, tout en bout de chaîne.</p>"
+    },
+    {
+      "heading": "L'autorégression : la réponse grandit token par token",
+      "html": "<p>Voilà, la roulette a choisi un mot — disons « le rebord de la fenêtre ». Et ensuite ? Ensuite vient l'astuce clé de toute la construction. Le token choisi est <strong>ajouté au texte</strong>, et toute la procédure repart de zéro : « Le chat s'est installé sur le rebord de la fenêtre » traverse le réseau, en sortie — 50 000 nouveaux logits, softmax, température, roulette… Cela s'appelle l'<strong>autorégression (autoregression)</strong> : le modèle se nourrit en permanence de sa propre sortie, et la réponse grandit token par token, comme un tricot — maille après maille.</p><p>Il en découle une chose stupéfiante : au moment de choisir le mot suivant, le modèle <strong>n'a aucun plan de phrase tout prêt</strong>. Il n'a pas « conçu une idée qu'il est en train de coucher sur le papier » — il décide chaque fois à nouveau quel token convient après tout ce qui est déjà écrit. Quand le chatbot tape sa réponse mot à mot, ce n'est pas une animation décorative : les mots viennent réellement au monde à peu près à ce rythme, l'un après l'autre.</p><p>Autre conséquence — l'effet papillon. Qu'une seule fois la roulette choisisse « le rebord de la fenêtre » au lieu du « tapis », et tout le texte suivant prendra une autre route : l'étape d'après voit déjà un autre contexte, les probabilités se déplacent, les choix s'accumulent. Cent tokens plus loin, ce sont deux réponses complètement différentes. Voilà résolue l'énigme que chacun connaît : vous posez la même question — vous obtenez des réponses différentes. Non que le modèle ait « changé d'avis » ou se soit réentraîné pendant la nuit : c'est que le hasard est honnêtement intégré au mécanisme. Au passage, le bouton « régénérer la réponse » des chatbots, c'est littéralement « relancer toutes les roulettes ». Et si l'on met la température à zéro, les réponses à une même requête deviennent (presque) identiques — la roulette se mue en choix glouton.</p><p>L'autorégression a aussi un revers : puisque la réponse s'écrit vers l'avant, mot après mot, le modèle ne peut pas « réfléchir d'abord jusqu'au bout, puis vérifier et réécrire » — ce qui est sorti de la roulette est déjà dans le texte. C'est en partie pour cela qu'on demande aux modèles de « raisonner étape par étape » : les raisonnements intermédiaires entrent dans le contexte et aident les choix suivants. Quant aux limites qui en découlent — rendez-vous au module final.</p><div class=\"callout\"><p><strong>La boucle est bouclée :</strong> c'est la même boucle « prédis la suite — ajoute — recommence » par laquelle nous avons ouvert le cours, au module sur la chaîne de Markov. Sauf qu'à la place d'un petit tableau de paires de mots, il y a maintenant un réseau géant doté d'attention, qui a lu Internet et est passé par le dressage. Le principe n'a pas changé d'un iota.</p></div>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Ci-dessous, un constructeur de phrase où toute cette cuisine se voit en direct : un début de phrase et les barres de probabilité du mot suivant. Commencez par déplacer le curseur de température et regardez comment, aux valeurs basses, une barre écrase toutes les autres, tandis qu'aux valeurs hautes elles s'égalisent. Puis faites grandir la phrase avec le bouton de choix du mot — et remarquez que même une barre modeste gagne de temps en temps. Assemblez la phrase plusieurs fois à différentes températures et comparez : où le texte est-il plus ennuyeux, et où commence-t-il à partir dans le décor ?</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>À chaque étape, le réseau ne produit pas un mot, mais un <strong>logit</strong> — un score brut — pour chacun des dizaines de milliers de tokens du vocabulaire.</li><li>Le <strong>softmax</strong> transforme les logits en probabilités : toutes supérieures à zéro, pour une somme d'exactement 100 %.</li><li>Le choix glouton (toujours le token le plus probable) donne un texte ennuyeux, enclin à tourner en boucle ; on utilise donc l'<strong>échantillonnage</strong> — une roulette dont les secteurs sont proportionnels aux probabilités.</li><li>La <strong>température</strong> est le curseur d'audace : basse, elle aiguise la distribution (le leader sort presque toujours) ; haute, elle l'aplanit (plus de surprises — et plus de risque d'absurdités).</li><li>Le <strong>top-p</strong> coupe la queue des tokens vraiment improbables et fait tourner la roulette parmi le haut du panier restant.</li><li>L'<strong>autorégression</strong> : le token choisi est ajouté au texte, et tout recommence — la réponse naît token par token, sans plan de phrase préétabli.</li><li>Des réponses différentes à la même question ne sont pas une panne, mais un hasard assumé, intégré au choix de chaque mot.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Que trouve-t-on à la sortie même du réseau de neurones au moment où se décide le mot suivant ?",
+      "options": [
+        "Un seul mot — celui que le modèle a jugé correct",
+        "Plusieurs variantes de phrase toutes prêtes, parmi lesquelles on choisit la meilleure",
+        "Un nombre-score (logit) pour chaque token du vocabulaire — des dizaines de milliers de nombres d'un coup",
+        "Une liste de synonymes du dernier mot de la requête"
+      ],
+      "correct": 2,
+      "explain": "En sortie, il y a un score brut pour chaque token du vocabulaire, même les plus absurdes. Le mot reste encore à obtenir à partir de ces scores : d'abord softmax les transforme en probabilités, puis vient la procédure de choix."
+    },
+    {
+      "q": "Quel travail accomplit le softmax ?",
+      "options": [
+        "Il transforme les scores bruts (logits) en probabilités dont la somme fait 100 %",
+        "Il choisit parmi tous les tokens le plus probable",
+        "Il accélère la génération en éliminant les couches superflues du réseau",
+        "Il corrige les fautes de grammaire dans la réponse finie"
+      ],
+      "correct": 0,
+      "explain": "Le softmax n'est qu'une conversion des scores en pourcentages : tous deviennent positifs et leur somme fait exactement 100 %. Le choix du token lui-même est une étape séparée, qui vient après."
+    },
+    {
+      "q": "Pourquoi le choix glouton — prendre toujours le token le plus probable — n'est-il presque jamais utilisé en pratique ?",
+      "options": [
+        "Il exige trop de calculs",
+        "Il produit trop souvent du non-sens aléatoire",
+        "À cause de lui, le modèle oublie le début de la conversation",
+        "Le texte en ressort monotone et enclin à tourner en boucle"
+      ],
+      "correct": 3,
+      "explain": "Le choix glouton traîne le modèle dans l'ornière la plus battue : le texte sort terne et se coince facilement dans les répétitions. Côté calcul, c'est justement le moins cher, et il ne contient aucun hasard."
+    },
+    {
+      "q": "Vous avez monté la température de 0,3 à 1,8. Qu'est-il arrivé aux probabilités du token suivant ?",
+      "options": [
+        "Rien — la température n'influe que sur la vitesse de génération",
+        "La distribution s'est aplanie : les chances des tokens peu probables ont monté, le leader a perdu son avance",
+        "Le modèle est devenu plus créatif de l'intérieur — ses poids ont changé",
+        "La distribution s'est aiguisée : le leader s'est mis à recevoir presque 100 %"
+      ],
+      "correct": 1,
+      "explain": "Une température élevée resserre les écarts entre logits, et après softmax les secteurs de la roulette s'égalisent. Les poids du modèle, eux, ne changent pas — c'est un réglage situé tout en bout de chaîne."
+    },
+    {
+      "q": "Que fait le paramètre top-p ?",
+      "options": [
+        "Il limite la longueur de la réponse à un nombre donné de tokens",
+        "Il colle les p tokens les plus probables en une seule phrase",
+        "Il écarte la queue des tokens peu probables et fait tourner la roulette parmi le haut du panier restant",
+        "Il augmente la probabilité des mots rares pour rendre le texte plus varié"
+      ],
+      "correct": 2,
+      "explain": "Le top-p garde le haut de la liste dont la somme atteint la part de probabilité fixée (par exemple 90 %) — le reste de la queue ne participe pas à la loterie. C'est l'assurance contre les tokens vraiment farfelus à haute température."
+    },
+    {
+      "q": "Pourquoi le modèle répond-il chaque fois différemment à la même question ?",
+      "options": [
+        "Le modèle se réentraîne après chaque réponse et change d'avis",
+        "Les serveurs sont surchargés, et une partie des calculs s'exécute avec des erreurs",
+        "Le modèle reformule exprès, pour que les réponses n'aient pas l'air copiées",
+        "Chaque token est tiré à la roulette, et un seul choix différent change toute la suite"
+      ],
+      "correct": 3,
+      "explain": "Le hasard est intégré à l'échantillonnage à dessein. Qu'à n'importe quelle étape la roulette choisisse un autre token — le contexte change, les probabilités des mots suivants se déplacent, et le texte part sur une autre route."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Une chaîne de Markov a été entraînée uniquement sur un recueil de recettes de cuisine. Vous lui demandez de poursuivre un texte en partant du mot « palet », qui n'apparaissait pas une seule fois dans les recettes. Que se passe-t-il ?",
+      "options": [
+        "Le modèle choisira le mot des recettes le plus proche par le sens — « poêle », par exemple — et continuera à partir de lui",
+        "Le modèle choisira la suite au hasard : faute de statistiques, tous les mots du vocabulaire deviennent équiprobables",
+        "La table n'a tout simplement pas de ligne pour « palet » — le modèle n'a littéralement rien à proposer",
+        "Le modèle bâtira la suite d'après les règles générales de la grammaire, même sans vocabulaire culinaire"
+      ],
+      "correct": 2,
+      "explain": "La table de transitions ne contient que les mots rencontrés dans le corpus. Pour une clé inconnue, aucune transition n'a été comptée, et la chaîne ne possède rien d'autre que sa table — ni proximité de sens, ni règles, ni plan de secours."
+    },
+    {
+      "q": "Imaginez qu'on retire du générateur son « dé pipé » : à chaque étape, il ne tire plus un mot au hasard proportionnellement aux probabilités, mais prend toujours le plus fréquent. Qu'est-ce qui change ?",
+      "options": [
+        "Les textes deviendront plus sensés : la source d'erreurs aléatoires disparaît",
+        "Pour un même début, le modèle produira toujours exactement la même phrase — la variété disparaît",
+        "Le modèle cessera de fonctionner : sans hasard, l'algorithme de choix ne peut pas faire un seul pas",
+        "Rien ne change : le mot le plus fréquent sort de toute façon à chaque lancer"
+      ],
+      "correct": 1,
+      "explain": "Sans hasard, le choix devient déterminé d'avance : même départ — même enchaînement de mots « les plus fréquents », et cela à chaque fois. C'est justement la pincée de hasard qui crée la variété ; chez les LLM modernes, sa dose se règle par la « température »."
+    },
+    {
+      "q": "Le corpus contient des milliers de phrases avec le mot « automobile » et deux seulement avec le mot « voiture ». La riche statistique d'« automobile » aidera-t-elle la chaîne de Markov à prédire les mots qui suivent « voiture » ?",
+      "options": [
+        "Non : « automobile » et « voiture » sont pour la chaîne deux clés de table sans aucun lien, la statistique de l'une ne se transfère pas à l'autre",
+        "Oui : le modèle remarquera que les deux mots apparaissent dans des contextes semblables et fusionnera leurs comptages",
+        "Oui, mais seulement si l'on monte l'ordre de la chaîne au moins au deuxième",
+        "Non : « voiture » était trop rare et n'entrera même pas dans la table"
+      ],
+      "correct": 0,
+      "explain": "Généraliser, la chaîne ne sait pas le faire, par principe : les clés de la table ne sont que des lignes distinctes, et la « parenté » des mots n'existe pas pour elle. « Voiture » figurera bien dans la table (le mot est apparu), mais ne pourra s'appuyer que sur ses deux occurrences. Le don de transférer l'expérience de mots semblables, seuls les réseaux de neurones l'auront."
+    },
+    {
+      "q": "Une chaîne d'ordre deux poursuit la phrase « la tarte préparée par grand-mère est enfin… ». Sur quoi s'appuiera-t-elle pour choisir le mot suivant ?",
+      "options": [
+        "Sur la phrase entière : la table stocke les fréquences de phrases de n'importe quelle longueur",
+        "Sur le sujet « tarte » — c'est avec lui que la suite doit s'accorder",
+        "Sur le sens global de la phrase : le modèle saisira qu'il est question de nourriture",
+        "Seulement sur les deux derniers mots — « est » et « enfin » ; tout ce qui précède n'existe déjà plus pour elle"
+      ],
+      "correct": 3,
+      "explain": "La clé d'une table d'ordre deux, ce sont exactement les deux mots précédents ; le reste du contexte, le modèle l'a « oublié ». Accorder la suite avec « tarte », il ne le pourra que par hasard — c'est le fameux mur du contexte court."
+    },
+    {
+      "q": "Au corpus d'entraînement du clavier, on a ajouté un million de messages récents où, après « bonne », vient le plus souvent « santé » et non « journée », puis on a recalculé la table. Qu'adviendra-t-il des suggestions ?",
+      "options": [
+        "Rien : les suggestions sont déterminées par les règles de la langue, pas par les textes entrés dans le corpus",
+        "« Journée » restera la première suggestion : une fois calculées, les probabilités sont figées pour toujours",
+        "« Santé » passera en tête : les probabilités ne sont que des proportions dans le corpus, de nouveaux textes les modifient",
+        "Le clavier s'emmêlera entre les variantes et cessera de proposer quoi que ce soit après « bonne »"
+      ],
+      "correct": 2,
+      "explain": "Une chaîne de Markov ne possède rien d'autre que les fréquences du corpus : la probabilité, c'est la part de la paire « X Y » parmi toutes les apparitions de X. Le corpus change — les parts changent, et avec elles l'ordre des suggestions."
+    },
+    {
+      "q": "La phrase « l'hippopotame violet bâille et… » ne figurait sûrement pas dans les textes d'entraînement. La chaîne de Markov y reste muette, tandis qu'un LLM poursuit sans broncher. Grâce à quoi ?",
+      "options": [
+        "La table de transitions du LLM est si gigantesque qu'elle contenait même cette phrase rare",
+        "Le LLM sait généraliser : il a assimilé comment se comportent des mots semblables dans des contextes semblables, et transfère cette expérience à des combinaisons qu'il n'a jamais vues",
+        "Le LLM, au moment de répondre, cherche une phrase semblable sur Internet et s'appuie sur ce qu'il trouve",
+        "Le LLM contient des règles de grammaire permettant de construire la suite de n'importe quelle phrase"
+      ],
+      "correct": 1,
+      "explain": "Toute la différence des mécanismes est là : pour la chaîne, une combinaison jamais vue est une ligne vide de la table et une probabilité nulle, tandis que le réseau de neurones sait qu'« hippopotame » se comporte à peu près comme les autres animaux, et poursuit par analogie. Il n'y a là-dedans ni table de phrases ni recherche en direct."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots comment une chaîne de Markov « apprend » sur des textes et d'où viennent les probabilités de sa table.",
+      "ref": "Le modèle parcourt le corpus et compte les paires : combien de fois le mot Y est apparu après le mot X. La probabilité de transition est une proportion : on divise le nombre de paires « X Y » par le nombre total d'apparitions de X (la paire « chat boit » est apparue 2 fois, « chat » — 3 fois, donc 2/3). Le modèle n'extrait ni règles ni sens — tout son « savoir » tient dans ces compteurs et dépend entièrement des textes entrés dans le corpus."
+    },
+    {
+      "q": "Le corpus se compose de deux phrases : « maman lavait la vitre » et « maman lavait la vaisselle ». Prédisez : quelles phrases une chaîne d'ordre un pourra-t-elle générer en partant du mot « maman », et avec quelles probabilités ?",
+      "ref": "Après « maman » vient toujours « lavait » (100 %), après « lavait » toujours « la » (100 %), et après « la » — « vitre » ou « vaisselle », 50 % chacune. Deux phrases exactement sont donc possibles : « maman lavait la vitre » et « maman lavait la vaisselle », chacune avec la probabilité 1/2. La chaîne n'assemblera rien de neuf ici : les phrases inédites naissent des bifurcations où l'on peut recoller autrement des transitions issues de phrases différentes, et dans ce corpus l'unique bifurcation (après « la ») ne mène qu'à des chemins déjà présents tels quels dans les textes."
+    },
+    {
+      "q": "Inventez votre propre exemple de phrase absurde qu'une chaîne de Markov d'ordre un pourrait tout à fait générer sur un grand corpus, et expliquez pourquoi le modèle « ne remarquera pas » l'absurdité.",
+      "ref": "N'importe quelle phrase convient dès lors que chaque paire de mots voisins, prise à part, est banale dans les textes, mais que l'ensemble est absurde — par exemple « bonne nuit porte conseil » : les paires « bonne nuit » et « nuit porte conseil » sont fréquentes chacune de son côté, mais le collage est saugrenu. Le modèle choisit chaque mot en ne regardant que le précédent, et chacun de ses pas est statistiquement justifié. Vérifier le sens de la phrase entière, il n'en a pas les moyens : sa table ne contient que des fréquences de paires, et le sens n'y figure nulle part."
+    }
+  ]
+}
