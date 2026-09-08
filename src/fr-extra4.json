@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Vous écrivez au modèle un mot inventé, « chatosaure », qui ne figure dans aucun dictionnaire. Que se passe-t-il à l'étape de la tokenisation ?",
+      "options": [
+        "Le tokeniseur renverra une erreur « mot inconnu », et le modèle demandera de reformuler",
+        "Le modèle le remplacera discrètement par le mot connu le plus proche — probablement « chat »",
+        "Le tokeniseur assemblera le mot à partir de morceaux connus comme « chat », « o » et « saure », et le modèle continuera tranquillement à travailler",
+        "Le mot entrera dans le vocabulaire du modèle comme un nouveau token, et il s'en souviendra pour toujours"
+      ],
+      "correct": 2,
+      "explain": "Le vocabulaire de tokens est conçu de façon à ce que n'importe quel texte soit garanti de se découper sans reste : les mots fréquents restent entiers, et les mots rares ou inventés s'assemblent à partir de morceaux, comme avec des pièces de construction. Le modèle ne se heurte jamais à une impasse du type « mot inconnu » — et il n'a pas besoin d'enrichir son vocabulaire à la volée."
+    },
+    {
+      "q": "Un ingénieur propose de simplifier le système : découper le texte en lettres individuelles — un vocabulaire de 26 lettres couvrirait à coup sûr n'importe quel texte. Qu'est-ce qui cloche dans ce plan ?",
+      "options": [
+        "Il y a trop peu de lettres, et le modèle ne pourrait pas distinguer les mots rares des mots fréquents",
+        "Les séquences deviendraient plusieurs fois plus longues, et chaque morceau perdrait tout sens : le réseau dépenserait ses forces à réassembler des mots à partir de lettres",
+        "Contrairement aux tokens, les lettres ne peuvent pas être converties en nombres",
+        "Le modèle se mettrait à faire des fautes d'orthographe, parce qu'il ne verrait plus les mots dans leur intégralité"
+      ],
+      "correct": 1,
+      "explain": "Un vocabulaire minuscule est un véritable avantage du découpage lettre par lettre, mais le prix est élevé : le texte s'étire cinq à six fois, et une lettre comme « c » ne veut rien dire à elle seule. Les tokens sont le compromis : un vocabulaire fini, tout en gardant les mots fréquents comme des morceaux entiers et porteurs de sens."
+    },
+    {
+      "q": "« Chat » et « char » ne diffèrent que d'une lettre. Où se retrouveront-ils dans l'espace des embeddings ?",
+      "options": [
+        "Loin l'un de l'autre : la proximité des points est déterminée par la similarité d'usage et de sens, pas par l'orthographe",
+        "Côte à côte : une orthographe presque identique donne des coordonnées presque identiques",
+        "Côte à côte : les deux mots sont courts et fréquents, et le modèle range ce genre de mots dans le même quartier",
+        "À des points voisins, parce que leurs numéros dans le vocabulaire des tokens se suivent"
+      ],
+      "correct": 0,
+      "explain": "Les embeddings s'apprennent à partir des entourages dans lesquels un mot apparaît : « chat » fréquente le lait et les canapés, « char » fréquente les blindés et les champs de bataille. C'est pourquoi l'un habite le quartier des animaux et l'autre celui de l'armement, bien qu'ils s'écrivent presque pareil."
+    },
+    {
+      "q": "On applique au point « tigre » la flèche qui mène du point « acteur » au point « actrice ». Où atterrit-on le plus probablement ?",
+      "options": [
+        "Exactement de retour à « tigre » : les mots d'animaux n'ont pas de direction « masculin — féminin »",
+        "Au mot « lion » : la flèche déplace le mot vers d'autres prédateurs",
+        "N'importe où au hasard : ce genre de flèche ne fonctionne qu'à l'intérieur d'un même thème, par exemple les métiers",
+        "Approximativement au mot « tigresse » : la direction « du masculin vers le féminin » est à peu près la même dans l'espace pour des paires de mots différentes"
+      ],
+      "correct": 3,
+      "explain": "C'est exactement l'effet de l'arithmétique vectorielle : une relation de sens — par exemple « masculin → féminin » — se révèle être à peu près la même direction pour roi et reine, acteur et actrice, taureau et vache. On n'atterrit pas pile sur le point, mais le voisin le plus proche sera « tigresse »."
+    },
+    {
+      "q": "Imaginez le modèle au tout premier instant de l'entraînement, avant le premier pas de descente de gradient. Comment sont disposés les points « chat » et « chatte » ?",
+      "options": [
+        "Déjà côte à côte : le tokeniseur donne exprès des coordonnées voisines aux mots semblables",
+        "N'importe où, peut-être aux deux extrémités opposées de l'espace : les embeddings démarrent comme des nombres aléatoires, et la carte des sens ne se dessine qu'au fil de l'entraînement",
+        "Leurs points n'existent pas encore : les embeddings n'apparaissent qu'une fois l'entraînement terminé",
+        "Déjà côte à côte : une orthographe semblable donne automatiquement des nombres semblables"
+      ],
+      "correct": 1,
+      "explain": "Les embeddings sont des poids réglables du réseau au même titre que les autres — les mêmes petits poids que dans le troisième module : au départ, ce sont des nombres aléatoires. Seuls des millions de pas de descente de gradient, chacun améliorant un peu la prédiction du token suivant, rapprochent peu à peu les mots à l'usage semblable."
+    },
+    {
+      "q": "Le mot « avocat » a deux sens — le fruit et l'homme de loi — mais un seul token. Comment le modèle se débrouille-t-il avec la phrase « l'avocat plaide au tribunal » ?",
+      "options": [
+        "Le point de base d'« avocat » reste suspendu entre les deux sens, et c'est le mécanisme d'attention — déjà à l'intérieur du modèle — qui les distinguera selon le contexte",
+        "Le token « avocat » a deux embeddings, et le modèle choisit le bon dès l'étape de la tokenisation",
+        "Le tokeniseur découpe le mot différemment : « avocat »-fruit et « avocat »-juriste reçoivent des tokens différents",
+        "Le modèle considère les deux sens comme identiques et ne distingue absolument pas le fruit du juriste"
+      ],
+      "correct": 0,
+      "explain": "Le token n'a qu'un seul point, et pour un mot polysémique, il reste suspendu « entre le potager et le prétoire ». Distinguer les sens à partir des mots voisins est le travail du mécanisme d'attention, la superpuissance du transformeur vue dans le module suivant ; en sortie, le modèle comprend parfaitement qu'à côté de « tribunal », « avocat » désigne le juriste."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots pourquoi la deuxième étape — les embeddings — est nécessaire. Après tout, une fois la tokenisation faite, chaque morceau de texte possède déjà un numéro, donc un nombre — pourquoi cela ne suffit-il pas au réseau ?",
+      "ref": "Le numéro d'un token est une étiquette arbitraire : « chat » et « carburateur » peuvent très bien avoir des numéros voisins, et la proximité des chiffres ne dit rien de la proximité du sens. Le réseau vit de multiplications de nombres, il lui faut donc des nombres où le sens est encodé. L'embedding donne à chaque token des centaines de coordonnées, et les mots proches par le sens deviennent des points proches — sur une telle carte, le réseau peut s'appuyer sur la géométrie : ce qui a été appris sur « chat » fonctionne aussi pour « chatte »."
+    },
+    {
+      "q": "Prédisez ce qui se passera si l'on demande à un LLM d'écrire le mot « électrification » à l'envers. S'en sortira-t-il facilement, et pourquoi ?",
+      "ref": "Il s'en sortira probablement avec difficulté ou en faisant des erreurs. Le modèle ne voit jamais les lettres — le mot lui arrive comme deux ou trois tokens indivisibles, et à l'intérieur d'un token, les lettres individuelles n'existent pas pour lui. Il doit inverser le mot « de mémoire », d'après la façon dont ce mot s'écrit d'habitude, plutôt qu'en regardant une chaîne de lettres — la même raison pour laquelle il se trompe en comptant les « l » de « parallélogramme »."
+    },
+    {
+      "q": "Inventez votre propre « flèche » de sens — une relation entre mots non mentionnée dans le module — et montrez sur deux paires de mots différentes que la direction est la même.",
+      "ref": "N'importe quelle relation stable convient. Par exemple, « petit d'un animal → animal adulte » : la flèche de « chaton » à « chat » est à peu près la même que celle de « chiot » à « chien ». Ou « singulier → pluriel » : de « table » à « tables » et de « maison » à « maisons ». L'essentiel dans la réponse, c'est l'idée elle-même : une relation entre des sens est une seule et même direction dans l'espace, et en appliquant cette flèche à une autre paire, on atterrit à peu près au bon endroit."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Souvenez-vous de la « carte de l'erreur » — ce paysage fait de collines et de vallées. Le réseau a fait un pas de descente de gradient. Que s'est-il passé en termes de cette carte ?",
+      "options": [
+        "Le « brouillard » alentour s'est un peu dissipé : à chaque pas, le réseau voit un morceau de paysage de plus en plus grand",
+        "Le réseau a légèrement modifié ses poids — c'est-à-dire qu'il s'est déplacé vers un point voisin de la carte, un peu plus bas sur la pente",
+        "Le réseau est passé à l'exemple d'entraînement suivant — c'est-à-dire à un autre point de la carte",
+        "Le paysage lui-même a changé : la vallée de l'erreur est devenue plus profonde"
+      ],
+      "correct": 1,
+      "explain": "Chaque point de la carte correspond à une combinaison précise de tous les poids, et la hauteur est l'erreur pour cette combinaison. Un pas de descente ajuste légèrement les poids, c'est-à-dire déplace le réseau vers un point voisin. Le brouillard, lui, ne se dissipe pas : le réseau ne connaît toujours que la pente sous ses pieds."
+    },
+    {
+      "q": "Un poids vaut 0,40 ; la pente au point actuel vaut −3 (ce qui signifie que l'erreur baisse quand on augmente ce poids) ; le taux d'apprentissage est de 0,1. Que va-t-il arriver au poids après un pas ?",
+      "options": [
+        "Il montera à 0,70 : le moins de la formule et le moins de la pente donnent un pas dans le sens de l'augmentation",
+        "Il diminuera à 0,10 : les poids diminuent toujours à chaque pas de descente",
+        "Il ne changera pas : une pente négative signifie que le poids est déjà optimal",
+        "Il deviendra négatif, parce que la pente est négative"
+      ],
+      "correct": 0,
+      "explain": "D'après la formule : nouveau poids = 0,40 − 0,1 × (−3) = 0,70. Moins par moins donne plus — et c'est logique : puisque l'erreur baisse quand on augmente le poids, un pas « vers le bas de la pente » signifie ici augmenter le poids."
+    },
+    {
+      "q": "Un collègue propose de se passer de la rétropropagation (backpropagation) : « Décalons le premier poids, faisons repasser tous les exemples, regardons l'erreur, remettons le poids en place. Puis le deuxième poids, le troisième… Une fois qu'on les aura tous passés en revue, on fera un pas. » Qu'est-ce qui ne va pas dans ce plan ?",
+      "options": [
+        "Il donnera des pentes incorrectes : sans passage arrière, on ne peut absolument pas calculer l'erreur",
+        "Il ne fonctionne que pour les réseaux qui n'ont qu'une seule couche de neurones",
+        "Rien ne cloche : c'est exactement ce que fait la rétropropagation, simplement de façon automatique",
+        "Il estimera bien les pentes, mais au prix de milliards de passages complets pour un seul pas ; la rétropropagation obtient le même résultat en un seul passage arrière"
+      ],
+      "correct": 3,
+      "explain": "Le plan est en principe viable — c'est effectivement une façon de savoir si décaler chaque petit poids aide. Le problème, c'est le prix : avec des milliards de poids, il faudrait un milliard de passages complets pour un seul et unique pas vers le bas. La rétropropagation distribue la « part de responsabilité » à tous les poids d'un coup, en un seul passage arrière — dont le coût équivaut à peu près à faire repasser l'exemple une fois de plus dans le réseau."
+    },
+    {
+      "q": "Vous entraînez un lecteur de chiffres avec des pas extrêmement prudents et minuscules. L'erreur a baissé pendant un moment, puis s'est figée à un niveau médiocre — et les pas suivants ne changent plus rien, alors que de meilleures combinaisons de poids existent assurément. Quelle explication tirée du module est la plus plausible ?",
+      "options": [
+        "Le réseau a atteint sa limite : si l'erreur ne baisse plus, c'est qu'il n'existe pas de meilleurs poids pour lui",
+        "La descente s'est coincée dans un minimum local — un petit creux peu profond sur la pente, dont on ne peut pas sortir à petits pas, alors que la vraie vallée est plus loin et plus bas",
+        "Les époques sont épuisées : on ne peut pas montrer deux fois les mêmes exemples au réseau",
+        "L'erreur a cessé d'être calculée : la fonction d'erreur ne fonctionne qu'au début de l'entraînement"
+      ],
+      "correct": 1,
+      "explain": "Des pas trop petits se coincent facilement dans le premier creux venu : le moindre petit pas qui en sort mène un peu vers le haut, et une descente prudente ne peut pas franchir le rebord. C'est pourquoi, en pratique, on fait des pas plus audacieux au début de l'entraînement, et plus prudents à l'approche de la vallée."
+    },
+    {
+      "q": "Que va-t-il probablement se passer si l'on entraîne un lecteur de chiffres non pas sur des dizaines de milliers d'images, mais sur une vingtaine seulement ?",
+      "options": [
+        "Les pentes, estimées à partir d'une poignée d'exemples, seront bruitées : le réseau s'accrochera à des traits fortuits — il décidera qu'« un sept, c'est quelque chose avec une barre oblique », et le confondra avec le un",
+        "Rien ne changera : la rétropropagation calculera les mêmes pentes que sur un grand ensemble",
+        "L'entraînement ne démarrera pas : la descente de gradient a besoin d'au moins un millier d'exemples",
+        "Le réseau apprendra plus vite et mieux : moins d'exemples, c'est moins de contradictions entre eux"
+      ],
+      "correct": 0,
+      "explain": "La pente est une estimation de « où avancer », moyennée sur les exemples d'entraînement. Sur une vingtaine d'images, elle devient erratique, et les pas mènent au mauvais endroit : le réseau apprend des coïncidences fortuites au lieu des vrais traits distinctifs. D'où le premier appétit des réseaux de neurones : de grandes quantités de données."
+    },
+    {
+      "q": "On montre au lecteur de chiffres les mêmes 60 000 images des dizaines de fois de suite — des dizaines d'époques. Pourquoi répéter, si le réseau a déjà « vu » ces images ?",
+      "options": [
+        "Pour que le réseau apprenne les images par cœur — c'est justement le but de l'entraînement",
+        "Les répétitions ne servent qu'à vérifier : les poids ne changent qu'à la première époque",
+        "Chaque cycle ne déplace les poids que d'un tout petit pas vers le bas de la pente, et la descente jusqu'à la vallée se compose de milliers de pas de ce genre",
+        "Parce qu'après chaque époque, les poids sont réinitialisés à des valeurs aléatoires et tout recommence depuis le début"
+      ],
+      "correct": 2,
+      "explain": "Un seul cycle « montrer — calculer l'erreur — ajuster les poids » n'améliore le réseau que d'un tout petit peu. Pour atteindre le fond de la vallée, il faut des milliers, voire des millions de petits pas, c'est pourquoi les mêmes exemples sont repassés dans le réseau encore et encore."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots : pourquoi l'entraînement a-t-il besoin d'une fonction d'erreur, et pourquoi est-il essentiel que ce soit précisément un seul nombre, et non une impression générale du genre « le réseau répond mal » ?",
+      "ref": "La fonction d'erreur ramène toute la « fausseté » des réponses du réseau à un seul nombre : plus les réponses sont mauvaises, plus il est grand. Un nombre, c'est ce qu'on peut réduire mécaniquement : la tâche floue « rends le réseau plus intelligent » se transforme en une tâche nette, « trouve les poids pour lesquels ce nombre est minimal ». En prime, ce nombre permet de voir si l'entraînement progresse : s'il glisse vers le bas, le réseau devient plus intelligent ; s'il se fige ou augmente, quelque chose cloche."
+    },
+    {
+      "q": "Faites une prédiction : vous entraînez un réseau et vous constatez que l'erreur ne diminue pas mais saute de façon chaotique, tantôt vers le haut, tantôt vers le bas, et grimpe même par moments. Que s'est-il probablement passé, et que changeriez-vous ?",
+      "ref": "Il est probable que le taux d'apprentissage soit trop élevé : les pas sont si grands que le réseau saute par-dessus la vallée d'un bout à l'autre et se retrouve tantôt sur un versant, tantôt sur l'autre — d'où les sauts de l'erreur. Le remède consiste à réduire la taille du pas, ce qui rendra la descente plus douce et fera diminuer l'erreur. Si, après cela, l'entraînement devient trop lent, on ajuste le taux expérimentalement : des pas audacieux au début, prudents à l'approche de la vallée."
+    },
+    {
+      "q": "Donnez votre propre exemple tiré de la vie courante (pas celui du module) où l'on règle quelque chose selon le principe « essayé — mesuré — légèrement corrigé — essayé de nouveau ». Précisez ce qui, dans votre exemple, joue le rôle des poids, de la fonction d'erreur et de la taille du pas.",
+      "ref": "N'importe quel réglage progressif par rétroaction convient. Par exemple, vous salez une soupe : le « poids » est la quantité de sel, la « fonction d'erreur » est l'écart entre le goût obtenu et le goût voulu, la « taille du pas » est la quantité de sel ajoutée à chaque fois : au grain près, il faudrait goûter jusqu'au soir ; à la cuillère à soupe, on risque facilement de « dépasser » la cible et de trop saler. Autres exemples : accorder une corde de guitare à l'oreille, régler son tir aux fléchettes lancer après lancer, ajuster la température de l'eau de la douche — partout, il y a quelque chose à régler, un « à quel point c'est raté » mesurable, et un prix à payer pour un pas trop petit ou trop grand."
+    }
+  ]
+}

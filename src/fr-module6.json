@@ -1,0 +1,103 @@
+{
+  "title": "Le pré-entraînement : lire tout Internet",
+  "minutes": 12,
+  "intro": "Vous savez déjà comment fonctionne le transformeur : tokens, embeddings, attention. Mais pour l'instant, c'est une machine vide — des milliards de poids remplis de nombres aléatoires. Dans ce module : l'événement le plus coûteux et le plus étrange de la vie d'un réseau de neurones — il va lire à peu près tout Internet, en résolvant un seul et unique petit problème d'enfant.",
+  "sections": [
+    {
+      "heading": "Une seule tâche, répétée des billions de fois",
+      "html": "<p>Le pré-entraînement (pretraining) est l'étape où le réseau de neurones passe d'un tas inutile de nombres aléatoires à quelque chose capable de parler. Et le principe en est ridiculement simple. On prend un morceau de texte réel. On montre le début au modèle, on cache la suite. On lui demande de deviner le token suivant. On compare sa réponse à ce qu'il y avait réellement dans le texte. Si le modèle s'est trompé, on ajuste un tout petit peu les poids, exactement par cette descente de gradient que vous avez vue au troisième module. Et on recommence. Des billions de fois.</p><div class=\"example\"><p>Le modèle voit : « Le chat était assis sur le… » — et il produit des probabilités pour chaque token du vocabulaire : « canapé » — 30 %, « tapis » — 20 %, « paillasson » — 10 %, et ainsi de suite. Dans le texte d'origine, la suite était « paillasson ». Dix pour cent, c'est donc trop peu : tous les poids responsables de cette estimation se déplacent d'un tout petit pas, pour que dans une situation semblable « paillasson » obtienne davantage. Une seule correction de ce genre ne change presque rien. Un billion de corrections change tout.</p></div><p>La beauté de ce dispositif, c'est qu'aucun professeur n'est nécessaire. Personne n'annote les données, personne n'écrit de « bonnes réponses » — la bonne réponse est déjà présente dans le texte lui-même, c'est simplement le mot suivant. C'est pourquoi on appelle cette approche l'auto-apprentissage (self-supervised learning) : le texte est à la fois son propre exercice et son propre corrigé.</p><p>Et il faut beaucoup de texte. Dans le corpus (corpus) — c'est ainsi qu'on appelle la collection d'entraînement — entre tout ce qu'on peut attraper : pages web, livres, « Wikipédia », articles scientifiques, forums, actualités, et d'énormes quantités de code source venu de dépôts ouverts. Les grands modèles actuels sont entraînés sur environ 15 billions de tokens — soit de l'ordre de dix billions de mots.</p><p>« Tout Internet », c'est vrai, est une légère exagération : l'Internet brut, c'est surtout du bruit. Avant l'entraînement, le corpus est soigneusement nettoyé : on élimine les doublons, le spam, les pages générées automatiquement, on filtre les textes de mauvaise qualité. Plus le corpus est propre et varié, plus le modèle obtenu est intelligent — c'est pourquoi les laboratoires protègent la composition de leurs données presque plus jalousement que leur code.</p>"
+    },
+    {
+      "heading": "Des milliards de petits poids",
+      "html": "<p>Qu'est-ce donc qui se fait « ajuster » des billions de fois ? Les paramètres (parameters) du modèle — ces mêmes poids-contrepoids du deuxième module, où le neurone pondérait ses entrées. Sauf que là-bas, il y en avait trois ; ici, il y en a des milliards. GPT-3 comptait 175 milliards de paramètres, le modèle ouvert Llama 3 en compte jusqu'à 405 milliards, et les modèles les plus avancés d'aujourd'hui se comptent eux aussi en centaines de milliards.</p><div class=\"example\"><p>Essayons d'imaginer 175 milliards de nombres. Imprimons-les en colonne, 50 par page — cela ferait 3,5 milliards de pages. Une pile de papier de 0,1 mm d'épaisseur par page s'élèverait sur 350 kilomètres — presque jusqu'à l'orbite de l'ISS. Et ce n'est qu'une liste de nombres du genre 0,231 et −1,87, sans un seul mot.</p></div><p>Il faut bien comprendre : à part ces nombres, le modèle n'a rien d'autre. Il n'y a à l'intérieur ni base de données, ni articles sauvegardés, ni moteur de recherche sur ce qu'il a lu. Une fois l'entraînement terminé, on peut effacer le corpus — le modèle n'y jette plus jamais un œil. Tout ce qu'il « sait » du monde, de la langue et de vous est compressé dans ces milliards de poids.</p><p>Remarquez au passage la proportion : des billions de tokens dans le corpus, contre « seulement » des centaines de milliards de paramètres — des dizaines de fois moins. Le modèle est physiquement incapable de retenir mot pour mot tout ce qu'il a lu — ça ne rentrerait pas. Il doit faire ce que fait tout étudiant avant un examen quand ses notes sont plus longues que le temps dont il dispose : ne pas bachoter, mais dégager des régularités générales. Comme nous allons le voir, c'est précisément cette contrainte qui le rend intelligent.</p>"
+    },
+    {
+      "heading": "Pourquoi « devine le mot » enseigne tout sur tout",
+      "html": "<p>À première vue, la tâche paraît dérisoire. Deviner le mot suivant — on pourrait apprendre ça à un perroquet, non ? C'est à peu près ce que faisait la chaîne de Markov du premier module. Mais il y a un piège : un perroquet devine tant bien que mal, alors qu'on exige du modèle qu'il devine <strong>bien</strong> — dans n'importe quel texte du monde. Et c'est là qu'on découvre qu'on ne s'en tire pas à bon compte.</p><p>Regardez ce qu'il faut vraiment savoir pour poursuivre avec assurance des phrases bien différentes :</p><ul><li>« La capitale de l'Australie est… » — il faut des faits : la bonne réponse est « Canberra », même si « Sydney » vient tout de suite à l'esprit.</li><li>« Elle a attrapé un parapluie parce que dehors… » — il faut les liens de cause à effet de la vie courante.</li><li>« Cinq plus sept égale… » — il faut de l'arithmétique.</li><li>« Le coupable était… » à la fin d'un roman policier — il faut garder en tête une intrigue de trois cents pages et en tirer une conclusion à partir des indices.</li><li>Compléter un programme Python pour qu'il fonctionne — il faut de la logique.</li><li>Et dans chaque phrase : « il est allé », mais « elle est allée » — il faut de la grammaire.</li></ul><p>Chaque lacune de connaissance se traduit par une erreur de prédiction. Une erreur, c'est un signal envoyé à la descente de gradient : ajuste les poids. Et les poids sont ajustés jusqu'à ce que finisse par s'y déposer ce qui supprime l'erreur : une règle, un fait, une régularité.</p><div class=\"callout\"><p><strong>L'idée clé du cours.</strong> Personne n'a inscrit dans le modèle les règles de grammaire du français, la table de multiplication ou les capitales des pays. Elles se sont déposées d'elles-mêmes dans les poids — simplement parce qu'elles aident à prédire le token suivant. Grammaire, faits, styles, logique du raisonnement : tout cela n'est que le sous-produit d'une seule tâche primitive, répétée des billions de fois.</p></div><p>Prédire le mot suivant s'est révélé être un examen sur tout à la fois. C'est pour cela qu'un objectif aussi « bête » a donné un résultat si étonnamment intelligent. Et plus le modèle est grand, plus il a vu de textes, plus les régularités qui parviennent à se déposer dans ses poids sont fines : un petit réseau ne maîtrise que la grammaire et les tournures courantes, un réseau moyen commence à retenir des faits, et un réseau vraiment grand sait raisonner de façon cohérente sur plusieurs étapes. Il n'y a aucune magie dans ce passage : un modèle plus grand a simplement assez de « petits poids » pour loger des règles plus complexes.</p>"
+    },
+    {
+      "heading": "Le prix à payer : des mois, des mégawatts, des millions",
+      "html": "<p>Voyons maintenant ce que cela coûte réellement — honnêtement, sans science-fiction. Le pré-entraînement d'un grand modèle, ce n'est pas « on l'a laissé tourner une nuit sur un ordinateur portable ». Ce sont des milliers, et pour les modèles phares des dizaines de milliers, de processeurs graphiques spécialisés (GPU) qui tournent sans interruption pendant des mois. Pourquoi des processeurs graphiques précisément ? Parce que toute la mathématique d'un réseau de neurones consiste en d'immenses tables de multiplication : il faut multiplier des milliards de poids par des milliards de nombres, et les GPU, conçus à l'origine pour l'affichage des jeux vidéo, savent faire des milliers de ces multiplications à la fois. Entraîner un grand modèle coûte des dizaines de millions de dollars, et pour les plus grands, des centaines de millions. Un tel cluster de calcul consomme des mégawatts d'énergie — autant qu'une petite ville.</p><div class=\"example\"><p>Llama 3, le modèle ouvert à 405 milliards de paramètres : environ 15 billions de tokens de corpus, 16 000 GPU, de l'ordre de 30 millions d'heures-GPU — soit deux à trois mois de calcul ininterrompu. Rien que le calcul, aux prix de location du marché, représente plusieurs dizaines de millions de dollars. Et ce n'est même pas le porte-drapeau de l'industrie.</p></div><p>Pour rétablir l'équilibre, deux précisions. D'abord, les modèles plus petits sont entraînés nettement moins cher : la facture se compte en centaines de milliers, voire en millions de dollars, et des dizaines de laboratoires s'y consacrent, pas seulement trois grandes entreprises. Ensuite, tout ce prix n'est payé <em>qu'une seule fois</em>. Les poids entraînés ne sont qu'un fichier ; par la suite, des millions de personnes s'en servent, et chaque réponse individuelle revient à une fraction de centime.</p><p>Et une conséquence de plus, importante pour comprendre vos échanges avec ChatGPT ou Claude : après le pré-entraînement, les poids sont figés. Quand vous discutez avec le modèle, il <strong>n'</strong>apprend <strong>pas</strong> davantage, vos messages ne touchent pas à ses poids. L'entraînement est un événement rare, coûteux, à part ; la conversation n'est qu'une utilisation de poids déjà prêts.</p>"
+    },
+    {
+      "heading": "Le modèle de base : un érudit, mais pas un assistant",
+      "html": "<p>Qu'obtient-on donc au bout de ces mois d'entraînement ? Ce qu'on appelle un modèle de base (base model). Et c'est là qu'une surprise attend beaucoup de gens : ce n'est encore absolument pas ChatGPT.</p><p>Un modèle de base est une géniale autocomplétion. Donnez-lui le début d'une lettre professionnelle — il achèvera la lettre professionnelle. Commencez un poème — il le poursuivra dans le mètre et la rime. Insérez la moitié d'une fonction en Python — il en écrira l'autre moitié. Il a absorbé les styles, les genres et les intonations de tout Internet, et il continuera n'importe quel texte de la façon la plus plausible qui soit.</p><p>Mais demandez-lui : « Comment faire une tarte aux pommes ? » — et il pourrait très bien répondre ainsi :</p><div class=\"example\"><p>« Comment éviter qu'un biscuit ne retombe ? Comment préparer un gâteau au fromage blanc ? Par quoi remplacer les œufs en pâtisserie ? Encore 12 questions que se posent les pâtissiers débutants… »</p></div><p>Ce n'est ni un bug ni une moquerie. Le modèle fait exactement ce qu'on lui a appris à faire : continuer le texte. Et sur Internet, une question est très souvent suivie d'autres questions — sur les forums, dans les blocs « recherches associées », dans les listes « questions fréquentes ». Donc une liste de questions est, statistiquement, une excellente continuation. Le modèle de base n'a pas pour but de vous aider ; il n'a d'ailleurs aucun but, sinon un seul : continuer de façon plausible.</p><p>Ce qui est amusant, c'est que le savoir est déjà là, il faut simplement le faire sortir par la ruse. Écrivez-lui non pas une question mais une amorce du genre « Question : comment faire une tarte aux pommes ? Réponse du chef pâtissier : » — et il livrera docilement la recette, parce que la continuation la plus plausible est désormais précisément la réponse. C'est à peu près ainsi qu'on travaillait avec les premiers modèles : non pas en demandant, mais en construisant un texte dans lequel la réponse voulue viendrait s'inscrire d'elle-même.</p><p>L'écart entre « complète le texte avec génie » et « répond utilement à un humain » forme un gouffre à part, et un pont spécifique y est jeté : l'affinage sur des exemples de bons dialogues et sur les retours des humains. Comment cet érudit sauvage se transforme exactement en interlocuteur courtois, c'est tout l'objet du module suivant, consacré au SFT et au RLHF.</p>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Pour que l'ampleur du corpus cesse d'être un chiffre abstrait, ramenez-la à votre propre échelle. Dans le calculateur ci-dessous, déplacez le curseur « combien de livres lisez-vous par jour » — et regardez en combien de milliers d'années vous viendriez à bout de ce qu'un modèle lit en un seul pré-entraînement. Remarquez que même à un rythme totalement fantaisiste de cent livres par jour, le compte se fait encore en milliers d'années — plus longtemps que l'écriture elle-même n'existe.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Le pré-entraînement (pretraining) est une seule tâche — « devine le token suivant » — répétée des billions de fois sur des textes tirés d'Internet, de livres et de code. La bonne réponse se trouve toujours dans le texte lui-même, si bien qu'aucun étiquetage par un professeur n'est nécessaire.</li><li>Les paramètres du modèle sont ces mêmes poids-contrepoids, sauf qu'il y en a désormais des milliards. À part eux, le modèle n'a rien : ni base de données, ni textes sauvegardés.</li><li>Pour bien prédire n'importe quel texte du monde, il faut apprendre la grammaire, les faits, les styles et la logique. Personne ne les a inscrits explicitement — ils se sont déposés d'eux-mêmes dans les poids, parce qu'ils réduisent l'erreur de prédiction.</li><li>Les ordres de grandeur sont sans fard : des mois d'entraînement, des milliers ou des dizaines de milliers de GPU, des dizaines à des centaines de millions de dollars pour un grand modèle. Cela se paie une seule fois, et vos conversations avec le modèle fini n'en changent plus les poids.</li><li>Le résultat est un modèle de base (base model) : une géniale autocomplétion, mais pas un assistant. À une question, il peut répondre par une liste de questions similaires. Comment on le transforme en interlocuteur — au module suivant.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Quelle tâche le modèle résout-il durant l'étape du pré-entraînement ?",
+      "options": [
+        "Il apprend à répondre poliment et utilement aux questions des utilisateurs",
+        "Il devine le token suivant dans des textes réels — encore et encore",
+        "Il apprend par cœur des règles de grammaire rédigées par des linguistes",
+        "Il recherche et corrige des erreurs factuelles sur Internet"
+      ],
+      "correct": 1,
+      "explain": "Toute l'essence du pré-entraînement tient en une seule tâche : prédire le token suivant, répétée des billions de fois. Le modèle ne devient un interlocuteur utile que plus tard, à l'étape de l'affinage."
+    },
+    {
+      "q": "D'où le modèle de base « connaît »-il les règles de grammaire du français ?",
+      "options": [
+        "Les développeurs y ont chargé des manuels universitaires de grammaire",
+        "Pendant qu'il répond, il consulte des dictionnaires sur Internet",
+        "Des linguistes ont programmé à la main la morphologie et la syntaxe",
+        "Les régularités de la langue se sont déposées d'elles-mêmes dans les poids, parce qu'elles aident à prédire le token suivant"
+      ],
+      "correct": 3,
+      "explain": "Personne n'a inscrit de règles explicites. Un texte grammaticalement cohérent se prédit mieux, si bien que la descente de gradient « trouve » elle-même la grammaire et l'inscrit dans les poids — tout comme les faits, les styles et la logique."
+    },
+    {
+      "q": "Que représentent les « 405 milliards de paramètres » d'un modèle ?",
+      "options": [
+        "Ce sont ses poids — ces mêmes « contrepoids » réglables, où se trouve stocké, après l'entraînement, tout ce qu'il sait faire",
+        "Le nombre de textes qu'il a lus pendant l'entraînement",
+        "Le nombre de tokens dans son vocabulaire",
+        "Le nombre de GPU sur lesquels il a été entraîné"
+      ],
+      "correct": 0,
+      "explain": "Les paramètres sont ces mêmes poids que dans le module sur le neurone, sauf qu'il y en a désormais des milliards. Le modèle ne possède aucune base de textes séparée : tout ce qu'il « sait » est compressé dans ces nombres."
+    },
+    {
+      "q": "Vous demandez à un modèle de base (pas encore affiné) : « Comment réparer un robinet ? » — et il produit une liste de dix questions similaires. Pourquoi ?",
+      "options": [
+        "Le modèle est défectueux : quelque chose s'est mal passé pendant l'entraînement",
+        "Il ne connaît pas la réponse et essaie de le cacher",
+        "Il continue le texte de la façon statistiquement la plus plausible, et sur Internet, une question est souvent suivie d'autres questions",
+        "Il vérifie si vous avez vraiment besoin d'une réponse avant de vous aider"
+      ],
+      "correct": 2,
+      "explain": "Un modèle de base est une autocomplétion : il ne répond pas, il continue. Sur les forums et dans les blocs « recherches associées », une question est effectivement souvent suivie d'autres questions, si bien qu'une telle liste est, statistiquement, une excellente continuation."
+    },
+    {
+      "q": "Laquelle de ces descriptions correspond réellement à l'entraînement d'un grand LLM moderne ?",
+      "options": [
+        "Quelques heures sur un puissant ordinateur de jeu",
+        "Des mois de travail de milliers de GPU et des dizaines à des centaines de millions de dollars",
+        "Le modèle s'entraîne en continu : chaque conversation avec un utilisateur modifie immédiatement ses poids",
+        "Plusieurs années de travail manuel d'éditeurs qui inscrivent des faits dans le modèle"
+      ],
+      "correct": 1,
+      "explain": "Le pré-entraînement d'un grand modèle représente des mois de calcul sur des milliers ou des dizaines de milliers de GPU, avec un budget de dizaines à centaines de millions de dollars. Une fois l'entraînement terminé, les poids sont figés : vos conversations avec le modèle ne les modifient pas."
+    },
+    {
+      "q": "Le corpus de pré-entraînement représente environ 15 billions de tokens, alors que le modèle ne compte « que » des centaines de milliards de paramètres. Qu'en résulte-t-il ?",
+      "options": [
+        "Le modèle conserve tous les textes mot pour mot, simplement sous une forme compressée, comme une archive ZIP",
+        "La majeure partie du corpus n'est pas utilisée : le modèle n'a le temps de lire que le début",
+        "Le modèle ne peut pas mémoriser le corpus mot pour mot et il est contraint d'apprendre des régularités générales — c'est précisément cela qui le rend intelligent",
+        "Les développeurs se sont trompés dans leurs calculs et ont construit un modèle trop petit"
+      ],
+      "correct": 2,
+      "explain": "Le corpus est des dizaines de fois plus volumineux que la « capacité » des poids, si bien qu'un stockage mot pour mot est impossible. Il est plus rentable d'apprendre des régularités générales — grammaire, faits, logique — qui aident à prédire à la fois une multitude de textes différents."
+    }
+  ]
+}

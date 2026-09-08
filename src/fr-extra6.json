@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Un ami en est convaincu : « Pour entraîner un LLM, on a embauché des milliers de personnes qui écrivaient la bonne réponse pour chaque texte. » Qu'est-ce qui cloche dans cette vision du pré-entraînement ?",
+      "options": [
+        "Des gens ont effectivement été embauchés, mais ils n'écrivaient pas de réponses : ils vérifiaient les suppositions du modèle pour y traquer des erreurs factuelles",
+        "Tout est exact, sauf qu'il a fallu bien plus de monde — des millions de personnes",
+        "Aucun étiquetage n'est nécessaire : la « bonne réponse » est le token suivant, qui se trouve déjà dans le texte lui-même",
+        "Les réponses n'ont pas été écrites par une équipe de personnes, mais par une version antérieure du même modèle"
+      ],
+      "correct": 2,
+      "explain": "Le pré-entraînement est de l'auto-apprentissage (self-supervised learning) : le texte est à la fois son propre exercice et son propre corrigé, la bonne réponse se trouve toujours à la place du mot suivant. Les humains s'occupent d'autre chose : rassembler et nettoyer le corpus ; les exemples de bonnes réponses écrites par des humains n'apparaîtront que plus tard, à l'étape de l'affinage."
+    },
+    {
+      "q": "Pendant le pré-entraînement, le modèle voit « La capitale de l'Australie est » et produit : « Sydney » — 45 %, « Canberra » — 15 %. Dans le texte d'entraînement, la suite était « Canberra ». Que va-t-il se passer ?",
+      "options": [
+        "Le modèle inscrira le fait « la capitale de l'Australie est Canberra » dans sa base de faits interne",
+        "Les poids impliqués dans cette estimation se déplaceront d'un tout petit pas — pour que, dans un contexte semblable, « Canberra » obtienne un peu plus de probabilité",
+        "Rien : « Canberra » figurait parmi les options à probabilité non nulle, donc la réponse est considérée comme bonne",
+        "Le modèle mettra l'exemple de côté et relira tous les textes sur l'Australie pour éclaircir la question"
+      ],
+      "correct": 1,
+      "explain": "Une erreur de prédiction est un signal envoyé à la descente de gradient : les poids sont légèrement ajustés. Il n'y a aucune base de faits à l'intérieur ; une seule correction ne change presque rien, mais ce sont des billions de pas de ce genre qui « inscrivent » le savoir dans les poids."
+    },
+    {
+      "q": "Hier, dans un chat, vous avez corrigé le modèle : « La capitale de l'Australie est Canberra, pas Sydney. » Aujourd'hui, votre ami lui pose la même question dans un nouveau chat. Votre correction va-t-elle l'aider ?",
+      "options": [
+        "Oui : le modèle s'affine à chaque conversation, et la correction s'est déjà déposée dans ses poids",
+        "Oui, mais seulement si le modèle a jugé votre argument suffisamment convaincant",
+        "Non : une fois l'entraînement terminé, les poids sont figés, les conversations ne les modifient pas — votre ami obtiendra une réponse issue des mêmes poids qu'avant",
+        "Non : la correction s'est bien conservée dans les poids, mais elle n'agit qu'à l'intérieur de votre compte"
+      ],
+      "correct": 2,
+      "explain": "L'entraînement est un événement rare, coûteux et à part, et la conversation n'est qu'une utilisation de poids déjà prêts. Vos messages ne touchent pas aux petits poids du modèle, si bien qu'un nouveau chat démarre avec exactement les mêmes poids."
+    },
+    {
+      "q": "Un laboratoire a entraîné, sur exactement le même corpus, un modèle qui a cent fois moins de paramètres. Que faut-il attendre du résultat ?",
+      "options": [
+        "Le texte restera correct et fluide, mais les faits et les raisonnements à plusieurs étapes commenceront à faire défaut — il n'y aura pas assez de « petits poids » pour les régularités fines",
+        "Le résultat sera exactement le même, le modèle répondra simplement plus lentement",
+        "Le petit modèle mémorisera le corpus mot pour mot et répondra par des citations exactes",
+        "L'entraînement ne fonctionnera pas du tout : la descente de gradient a besoin d'une taille de modèle minimale"
+      ],
+      "correct": 0,
+      "explain": "Plus le modèle est petit, plus les régularités qu'il peut maîtriser sont grossières : un petit modèle assimile la grammaire et les tournures courantes, un modèle moyen commence à retenir des faits, et seul un grand modèle raisonne de façon cohérente. Quant à mémoriser le corpus mot pour mot, c'est encore moins à sa portée — la capacité manque."
+    },
+    {
+      "q": "Vous avez accès à un modèle de base — encore sans le moindre affinage. Quel est le moyen le plus fiable d'en obtenir une recette de bortsch ?",
+      "options": [
+        "Demander poliment : « Aide-moi, s'il te plaît : comment prépare-t-on un bortsch ? »",
+        "Donner une consigne stricte : « Tu es un assistant utile. Réponds uniquement de façon pertinente »",
+        "Répéter la question plusieurs fois de suite — à force d'essais, il finira par comprendre ce qu'on attend de lui",
+        "Rédiger une amorce pour laquelle la recette est la continuation la plus plausible : « Question : comment prépare-t-on un bortsch ? Réponse du chef cuisinier : »"
+      ],
+      "correct": 3,
+      "explain": "Un modèle de base n'a pas pour but d'aider — il ne fait que continuer le texte, si bien que les demandes et les consignes fonctionnent mal sur lui. On en extrait la réponse voulue par la ruse : on construit un texte dans lequel cette réponse s'inscrira comme la continuation statistiquement la plus plausible."
+    },
+    {
+      "q": "Imaginez qu'un laboratoire ait fait des économies et entraîné un modèle sur l'Internet brut — avec spam, doublons et pages générées automatiquement. Que va-t-il se passer ?",
+      "options": [
+        "Le modèle sera nettement moins bon : il absorbe les régularités de tout ce qu'il lit, et le bruit se déposera dans les poids à égalité avec ce qui est utile",
+        "Aucun problème : la descente de gradient distingue d'elle-même les bons textes des mauvais et n'apprend que sur les bons",
+        "Le modèle sera plus intelligent : il y a plus de données, et plus de données, c'est toujours mieux",
+        "L'entraînement s'arrêtera : la descente de gradient boucle sur les textes répétitifs"
+      ],
+      "correct": 0,
+      "explain": "Le pré-entraînement n'a pas de filtre intégré du type « n'apprends que des bons » : l'erreur de prédiction ajuste les poids sur n'importe quel texte, spam compris. C'est pourquoi le corpus est nettoyé à l'avance — plus les données sont propres et variées, plus le modèle est intelligent, et les laboratoires protègent la composition de leurs données presque plus jalousement que leur code."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots pourquoi le pré-entraînement n'a pas besoin d'annotateurs humains fournissant des « bonnes réponses » — et ce que les humains font tout de même avec les données.",
+      "ref": "La bonne réponse est cachée dans le texte lui-même : c'est simplement le token suivant, si bien que le texte est à la fois son propre exercice et son propre corrigé — une approche appelée auto-apprentissage (self-supervised learning). Il reste aux humains un autre travail : rassembler le corpus et en éliminer les doublons, le spam et les pages de mauvaise qualité. C'est directement de la propreté et de la diversité des données que dépend l'intelligence du modèle obtenu."
+    },
+    {
+      "q": "Inventez votre propre phrase dont la continuation assurée exige du modèle plus que la simple grammaire — un fait, de la logique ou de l'arithmétique. Expliquez comment les erreurs commises sur ce type de phrases rendent progressivement le modèle « intelligent ».",
+      "ref": "N'importe quelle phrase du genre « Trois fois trois font... » ou « Elle a attrapé la trousse de secours parce que l'enfant... » convient — on ne peut les continuer de façon plausible qu'en maîtrisant l'arithmétique ou les liens de cause à effet de la vie courante. Chaque erreur sur une telle phrase est un signal envoyé à la descente de gradient pour ajuster un peu les poids, et avec le temps s'y dépose une régularité qui supprime cette erreur. C'est ainsi que les faits et la logique s'accumulent comme sous-produit de la tâche « bête » consistant à deviner le token suivant."
+    },
+    {
+      "q": "Expliquez avec vos propres mots : pourquoi un modèle de base possède-t-il déjà des connaissances, tout en étant encore peu utile pour un utilisateur ordinaire ? Et que fait-on de lui ensuite ?",
+      "ref": "Un modèle de base est une autocomplétion : il continue n'importe quel texte de la façon la plus plausible qui soit, mais il n'a pas pour but d'aider, si bien qu'à une question directe il peut répondre, disons, par une liste de questions similaires. Le savoir, lui, est déjà compressé dans ses poids — on peut l'en faire sortir en construisant une amorce où la réponse voulue devient la continuation la plus plausible. Pour que cet érudit devienne un assistant, le modèle est affiné sur des exemples de bons dialogues et sur les retours des humains — c'est l'objet du module suivant."
+    }
+  ]
+}

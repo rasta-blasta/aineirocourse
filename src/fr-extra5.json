@@ -1,0 +1,84 @@
+{
+  "quiz2": [
+    {
+      "q": "Dans la phrase « Le chat n'a pas mangé le poisson, parce qu'il n'était pas frais », on remplace le dernier mot : « … parce qu'il était rassasié ». Que va-t-il se passer avec l'attention du modèle lors du traitement du mot « il » ?",
+      "options": [
+        "Rien : la structure de la phrase n'a pas changé, donc les poids d'attention resteront les mêmes",
+        "Le modèle restera bloqué entre les deux possibilités et ne pourra pas traiter la phrase",
+        "Les poids seront recalculés depuis le début : c'est désormais « chat » qui recevra le plus grand poids, car c'est lui qui peut être rassasié, pas le poisson",
+        "Seul le poids du mot « rassasié » lui-même changera, le reste de la répartition restera identique"
+      ],
+      "correct": 2,
+      "explain": "La répartition de l'attention est recalculée pour chaque phrase et dépend du sens de l'ensemble. Un seul mot à la fin change vers qui « se tourne » le pronom : ce qui n'est pas frais, c'est le poisson ; ce qui est rassasié, c'est le chat."
+    },
+    {
+      "q": "En traitant le mot « il », le modèle a attribué au mot « poisson » un poids d'attention de 0,58. Qu'en résulte-t-il pour tous les autres mots de la phrase ?",
+      "options": [
+        "Il reste 0,42 pour tous les autres réunis : les poids sont des parts dont la somme fait un",
+        "Chacun d'eux peut lui aussi recevoir jusqu'à 0,58 — les poids sont attribués indépendamment les uns des autres",
+        "Tous les autres reçoivent exactement zéro : le modèle ne regarde qu'un seul mot, le plus important",
+        "Leurs poids peuvent être n'importe lesquels, pourvu qu'aucun ne dépasse 0,58"
+      ],
+      "correct": 0,
+      "explain": "Les poids d'attention fonctionnent comme des pourcentages : leur somme sur tous les mots vaut un. Si plus de la moitié du « regard » est allée au poisson, les autres se partagent les 0,42 restants — plus un mot en reçoit, moins il en reste pour les autres."
+    },
+    {
+      "q": "Vous avez collé un roman entier dans le chat et posé une question sur un détail du premier chapitre. Pourquoi le transformeur s'en sortira-t-il, alors qu'un réseau récurrent modèle 2015 en serait probablement incapable ?",
+      "options": [
+        "Le transformeur a un vocabulaire plus grand, ce qui lui permet de comprendre plus de mots rares",
+        "Le réseau récurrent traîne le long de la chaîne un « résumé » compressé de sa lecture, et à la fin du roman, le détail du début s'y est dilué ; l'attention, elle, va chercher directement l'endroit voulu",
+        "Les réseaux récurrents étaient en principe incapables de traiter des textes littéraires",
+        "Le transformeur apprend déjà tous les livres par cœur pendant l'entraînement, si bien que le roman lui est déjà familier"
+      ],
+      "correct": 1,
+      "explain": "Le réseau récurrent lisait le texte mot à mot et se racontait à lui-même ce qu'il avait lu — le début d'un long texte finissait inévitablement par se perdre. L'attention, elle, n'a pas besoin de résumé : elle voit tous les mots à la fois et peut donner un poids important à un token même issu du premier chapitre."
+    },
+    {
+      "q": "Dans le texte, le mot-indice se trouve deux cents mots avant le mot traité, et juste à côté se trouve le mot-outil « que ». Comment le mécanisme d'attention va-t-il répartir les poids entre eux ?",
+      "options": [
+        "Le mot voisin recevra toujours plus : le poids d'attention décroît avec la distance",
+        "Les deux recevront à peu près la même part — l'attention se répartit uniformément sur le contexte",
+        "Le modèle ne verra tout simplement pas le mot lointain : il est hors de la fenêtre de deux ou trois mots",
+        "L'indice lointain peut recevoir un poids important, et le « que » voisin un poids presque nul : l'importance est déterminée par le sens, pas par la proximité"
+      ],
+      "correct": 3,
+      "explain": "C'est là la principale différence entre l'attention et la chaîne de Markov : la distance en soi n'est pas une condamnation. Le poids est fixé par la correspondance entre la « requête » du mot et les « badges » des autres mots, si bien qu'un indice venu du lointain début du texte l'emporte facilement sur un voisin vide de sens."
+    },
+    {
+      "q": "Des chercheurs ont découvert, dans un modèle achevé, une tête d'attention qui suit les guillemets ouverts. D'où lui vient cette spécialisation ?",
+      "options": [
+        "Elle s'est formée d'elle-même au cours de l'entraînement : toutes les têtes sont construites à l'identique, et personne ne leur a assigné de rôle",
+        "Les développeurs ont programmé pour elle une règle spécifique sur les guillemets",
+        "La spécialité de chaque tête est assignée à la main avant le lancement de l'entraînement",
+        "Cette tête est construite différemment des autres dès le départ — spécialement pour la ponctuation"
+      ],
+      "correct": 0,
+      "explain": "Les têtes ne diffèrent que par leurs poids appris, et les rôles se forment spontanément — par cette même descente de gradient. Suivre les guillemets s'est révélé utile pour prédire le token suivant, et c'est ainsi que la spécialisation s'est installée."
+    },
+    {
+      "q": "À quel « étage » du transformeur trouvera-t-on le plus probablement un spécialiste capable de comprendre qu'un paragraphe entier est écrit avec ironie ?",
+      "options": [
+        "Dans les couches basses : l'ironie se décèle mot par mot, et c'est leur niveau",
+        "Dans la toute première couche — sinon les autres couches ne pourraient pas comprendre correctement le texte",
+        "Dans les couches hautes : elles s'appuient sur le travail des couches basses et manipulent le sens de l'ensemble, tandis que les couches basses captent le local — mots voisins et grammaire",
+        "Dans n'importe laquelle au hasard : les couches du transformeur ne se distinguent pas par le niveau des tâches qu'elles résolvent"
+      ],
+      "correct": 2,
+      "explain": "Les couches fonctionnent comme une chaîne de montage à complexité croissante : les basses captent des bribes de grammaire, les moyennes les liens à l'intérieur de la phrase, les hautes presque le sens — le thème du paragraphe, l'ironie, les conclusions. L'ironie exige un regard sur l'ensemble : c'est le travail des étages supérieurs."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots comment le mécanisme d'attention résout le problème des mots-caméléons — comme « glace » ou « il » — dont le sens dépend du contexte.",
+      "ref": "En traitant un mot, le modèle attribue à tous les mots du contexte des poids d'importance et mélange dans son vecteur l'information venue des voisins les plus « pesants ». C'est pourquoi une même « glace » en entrée donne des vecteurs différents en sortie : près de « lac », elle se déplace vers l'eau gelée, près de « vanille », vers le dessert. Le sens d'un mot n'est pas stocké tout prêt dans un dictionnaire, il se reconstruit à chaque phrase à partir de son entourage."
+    },
+    {
+      "q": "Faites une prédiction : dans la phrase « Le directeur a rendu le rapport au stagiaire, parce qu'il était plein d'erreurs », le modèle traite le mot « il ». Où ira l'essentiel du poids d'attention ? Et si l'on remplace la fin par « … parce qu'il était occupé » ? Expliquez pourquoi les répartitions seront différentes.",
+      "ref": "Dans la première version, l'essentiel du poids ira à « rapport » : c'est un document, et non une personne, qui peut être plein d'erreurs. Dans la seconde, le poids se déplacera vers les personnes — probablement vers « directeur », car c'est une personne, et non un papier, qui peut être occupée. Les répartitions diffèrent parce que les poids sont recalculés pour chaque phrase à partir du sens de l'ensemble : un seul mot à la fin change vers quoi « se tourne » le pronom — exactement comme « pas frais » et « rassasié » dans l'exemple du chat."
+    },
+    {
+      "q": "Inventez votre propre phrase avec un mot à plusieurs sens — construite de façon à ce que le bon sens soit éclairci par un mot qui ne se trouve pas juste à côté. Précisez à quels mots l'attention devrait donner le plus grand poids en traitant votre mot-caméléon.",
+      "ref": "N'importe quelle phrase convient, du moment qu'un mot polysémique « choisit » son sens grâce à un indice éloigné. Par exemple : « La mine que l'on apercevait au fond de la baie inquiétait les pêcheurs depuis des semaines, jusqu'à ce que les démineurs viennent enfin la neutraliser » — en traitant le mot « mine », les poids les plus élevés doivent revenir à « démineurs » et « neutraliser », bien qu'ils se trouvent tout à la fin. Une bonne réponse nomme à la fois le mot-caméléon lui-même et les mots-indices précis et éloignés que l'attention doit aller chercher par-delà les voisins."
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "title": "Au-delà du chat : mémoire, images, agents",
+  "minutes": 14,
+  "intro": "Pendant neuf modules, vous avez exploré le fonctionnement interne du réseau de neurones. Mais dès qu'on ouvre ChatGPT ou Claude, de nouvelles questions surgissent : pourquoi le bot a-t-il oublié la conversation d'hier, comment « voit »-il les photos, et que sont ces agents qui cherchent tout seuls sur Internet et écrivent du code ? Dans ce module : des réponses honnêtes à tout ce que vous croisez au quotidien.",
+  "sections": [
+    {
+      "heading": "Pourquoi le modèle ne se souvient pas de vous",
+      "html": "<p>Hier, vous avez passé une heure à discuter avec le chatbot de l'intrigue de votre roman ; aujourd'hui, vous ouvrez une nouvelle conversation — et il vous demande poliment : « De quel roman parlez-vous ? » Ce n'est ni un bug ni de la pingrerie des développeurs. C'est le réseau de neurones lui-même qui est fait ainsi.</p><p>Après l'entraînement (modules 3, 6 et 7), les poids du modèle <strong>se figent</strong>. Les milliards de « petits curseurs » sont fixés une fois pour toutes, et vos conversations ne les modifient pas : en discutant avec le bot, vous ne l'entraînez pas davantage. Le modèle traite chaque requête <strong>à partir d'une page blanche</strong> : il reçoit le texte, le fait passer par ses couches, produit la réponse — et il n'en reste aucune trace en lui. Cette propriété se dit « sans état » (<em>stateless</em>).</p><p>Imaginez un consultant génial atteint d'amnésie totale. Il répond brillamment à n'importe quelle question, mais une minute plus tard, il a oublié et la question, et vous. La seule façon de travailler avec lui : avant chaque réponse, poser sur son bureau un dossier — « voici le client, voici ce dont vous avez déjà parlé ». C'est exactement ce que fait l'interface de chat : à chacun de vos messages, elle envoie au modèle <strong>l'intégralité du dialogue</strong>, depuis le tout début. Le modèle relit la conversation et en écrit la suite. Vous avez l'impression que votre interlocuteur se souvient de l'échange — en réalité, il le lit chaque fois pour la première fois, simplement très vite.</p><p>C'est la grande différence avec un humain : un interlocuteur en chair et en os change un peu après une conversation avec vous — il a appris quelque chose, retenu quelque chose. Le modèle, lui, est exactement le même après votre conversation qu'avant. Il n'apprend que dans un processus d'entraînement spécialement organisé, jamais au fil de la discussion.</p><div class=\"callout\"><p>Tout ce que le modèle « sait de vous » à un instant donné, c'est le texte posé devant lui à ce moment précis. Vous fermez le chat — le dossier part au placard, et par défaut, rien n'en passe dans la conversation suivante.</p></div>"
+    },
+    {
+      "heading": "La fenêtre de contexte, un bureau de travail",
+      "html": "<p>Le « dossier » que le modèle voit au moment de répondre porte un nom : la <strong>fenêtre de contexte</strong> (context window). Le plus commode est de l'imaginer comme un bureau : tout ce sur quoi le modèle travaille en ce moment y est étalé. Les instructions des développeurs (« tu es un assistant poli, ne donne pas de conseils dangereux… »), tout votre dialogue depuis le premier message, les fichiers téléversés, les passages de texte collés. L'attention du module 5 parcourt tout le bureau à la fois : n'importe quel mot de la future réponse peut s'appuyer sur n'importe quelle feuille qui s'y trouve.</p><p>Mais le bureau n'est pas infini. Sa taille se mesure en tokens (module 4) : pour les modèles actuels, cela fait des centaines de milliers de tokens — à peu près un gros roman, ou quelques centaines de pages de documents. Cela semble impressionnant, mais un long dialogue de travail, avec fichiers, tableaux et résultats de recherche, dévore la place plus vite qu'on ne le croit.</p><p>Que se passe-t-il quand le bureau déborde ? Deux scénarios typiques. Soit les feuilles les plus anciennes <strong>glissent tout bonnement du bureau</strong> — le modèle cesse de voir le début du dialogue. Soit le service <strong>compresse</strong> discrètement la partie ancienne de la conversation en un bref résumé : au lieu de cinquante messages, il ne reste qu'une fiche — « l'utilisateur écrit un polar, il est convenu que l'assassin est le jardinier ». Le résumé économise de la place, mais perd les détails et les nuances.</p><div class=\"example\"><p>Au vingtième message, vous demandez : « Reviens à la formulation de ma première question. » Si le dialogue a été court, la première question est encore sur le bureau — le modèle la citera exactement. Mais si vous discutez depuis des heures en collant de longs textes, le début a pu glisser ou être compressé, et le modèle « se souviendra » avec aplomb de ce que vous n'avez jamais écrit. Ce n'est pas un mensonge par malice : il travaille honnêtement avec ce qui reste sur le bureau.</p></div>"
+    },
+    {
+      "heading": "Comment marche alors la « mémoire » — et ce qu'est le RAG",
+      "html": "<p>« Attendez, direz-vous, mon chatbot se souvient de mon prénom et de ce sur quoi je travaille ! » Exact. Sauf que ce n'est pas la mémoire du réseau de neurones, mais le <strong>carnet de notes du service</strong>. L'application conserve, à part du modèle, de courtes notes : « l'utilisatrice s'appelle Anna, écrit une thèse sur l'Âge d'argent, préfère des réponses brèves ». Quand vous ouvrez une nouvelle conversation, le service pose sans bruit ces notes sur le bureau — dans le contexte, avant votre premier message. Le modèle les lit comme du texte ordinaire et vous salue : « Bonjour, Anna ! » Les poids, eux, n'ont pas bougé d'un iota. Supprimez la note dans les réglages — et la « mémoire » disparaît sans laisser de trace.</p><p>Le même tour de passe-passe, à l'échelle industrielle, s'appelle le <strong>RAG</strong> (retrieval-augmented generation, « génération augmentée par la recherche »). Le problème à résoudre : apprendre au bot à répondre sur ce qui ne figurait pas dans les données d'entraînement — les nouvelles d'hier, les documents internes d'une entreprise, votre base clients. Ré-entraîner le modèle pour chaque broutille coûte cher et prend du temps. À la place, on procède ainsi :</p><ul><li>Les documents sont découpés à l'avance en fragments, et chaque fragment est transformé en embedding — ces fameuses « coordonnées du sens » du module 4.</li><li>Votre question est elle aussi transformée en embedding, et on cherche dans la base les fragments <em>les plus proches par le sens</em> — même si les mots y sont différents.</li><li>Ce qui a été trouvé est inséré dans le prompt à côté de la question : « Voici des extraits de documents, réponds en t'appuyant dessus. »</li><li>Le modèle rédige sa réponse en regardant un texte réel, au lieu de se remémorer quelque chose de vaguement « inspiré » de son entraînement.</li></ul><p>D'où deux grands avantages. Premièrement, moins d'hallucinations (module 9) : reconstituer des faits à partir de la floue « mémoire des poids » est une chose, restituer un document posé sous ses yeux en est une autre. Deuxièmement, le bot peut « connaître » du récent et du privé : la grille tarifaire du jour, les règlements internes de votre société — tout ce qui n'existait pas sur l'Internet de l'époque de l'entraînement. Au passage : quand un chatbot « cherche sur Internet » avant de répondre, c'est aussi du RAG — les pages trouvées sont simplement posées sur son bureau.</p><div class=\"example\"><p>Un client écrit au bot d'une boutique en ligne : « Où est passée ma commande ? » Le système transforme la question en embedding, retrouve dans la base les règles de livraison et le statut de cette commande précise, les insère dans le prompt — et le modèle répond : « Votre commande a été remise au livreur hier, la livraison prend en général deux jours. » Le modèle lui-même ne savait rien ni de la commande ni des règles de la boutique — tout cela, c'est la recherche qui l'a apporté.</p></div>"
+    },
+    {
+      "heading": "Comment le modèle voit les images",
+      "html": "<p>Vous joignez une photo et demandez : « Quelle est cette plante ? » Comment un modèle de texte s'y prend-il pour regarder ? La réponse est élégante : on transforme l'image… en une sorte de texte.</p><p>L'image est découpée en petits carrés — des <strong>patchs</strong> (patches), par exemple de 16 pixels sur 16, comme une feuille quadrillée. Un petit réseau auxiliaire transforme chaque patch en embedding — un vecteur-« sens » de ce petit morceau : ici du vert et du lisse, ici le bord d'une feuille, ici un reflet de lumière. Au final, la photo devient une <strong>séquence d'embeddings</strong> — une chaîne, exactement comme les tokens d'une phrase. Et ensuite, c'est toujours le même transformeur qui opère : l'attention du module 5 relie les patchs entre eux et avec les mots de la question. Le mot « plante » regarde les patchs de feuilles, le patch avec la fleur précise les patchs de la tige. Pour le modèle, il n'y a pas de fossé entre texte et image : au moment du traitement, l'un comme l'autre ne sont que des rangées de nombres sur un même bureau.</p><p>C'est pourquoi un modèle multimodal peut lire un tableau sur une capture d'écran, expliquer un mème ou repérer l'erreur dans une formule manuscrite : c'est la même machine à tisser des liens de sens, et peu lui importe que les embeddings viennent de lettres ou de pixels. Et ses limites sont les mêmes : un petit détail sur une photo floue, il peut l'« imaginer » avec la même assurance qu'il invente une citation inexistante.</p><div class=\"callout\"><p>Ne confondez pas la <strong>compréhension</strong> des images et leur <strong>génération</strong> — ce sont en général des mécanismes différents. Les modèles qui dessinent fonctionnent le plus souvent par <strong>diffusion</strong> (diffusion) : ils partent d'une image de bruit aléatoire, comme la neige d'un vieux téléviseur, et, en des dizaines d'étapes, en « révèlent » progressivement l'image en la confrontant à la description textuelle — comme un cliché dans un bac de révélateur. Quand un chatbot « dessine », il rédige en général une commande textuelle et la transmet à un modèle de dessin distinct.</p></div>"
+    },
+    {
+      "heading": "Les agents : le modèle qui s'est trouvé des mains",
+      "html": "<p>Jusqu'ici, notre modèle ne savait faire qu'une chose : lire du texte et écrire du texte. Un <strong>agent</strong> (agent), c'est le même LLM, mais lancé <strong>en boucle</strong> et équipé d'outils : recherche sur Internet, exécution de code, ouverture de pages, lecture et écriture de fichiers.</p><p>Voici comment cela marche. Le modèle n'écrit pas seulement une réponse pour l'humain, mais aussi des <em>commandes</em> — des appels aux outils spécialement balisés : « cherche sur Internet “statistiques du tourisme au Portugal 2025” » ou « exécute ce code ». Le programme-enveloppe intercepte la commande, l'exécute, et le résultat — pages trouvées, sortie du programme, contenu du fichier — est <strong>reposé dans le contexte</strong>, sur ce fameux bureau. Le modèle lit le résultat et décide de la suite : préciser la requête, corriger le code, passer à l'étape suivante. Et ainsi — parfois des dizaines d'étapes d'affilée — jusqu'à ce que la tâche soit accomplie. Notez bien : aucune magie nouvelle n'est apparue à l'intérieur. C'est toujours le même prédicteur du token suivant ; c'est le montage autour de lui qui a changé — le texte est devenu des actions, et les résultats des actions reviennent en entrée.</p><p>D'où des exemples que vous avez sûrement croisés. Les assistants-programmeurs qui trouvent eux-mêmes l'erreur, corrigent le fichier, lancent les tests et lisent leur sortie. Les modes de « recherche approfondie » (deep research), où le modèle passe un quart d'heure à parcourir des dizaines de sites et compile un rapport avec les sources à l'appui.</p><div class=\"example\"><p>Vous demandez : « Trouve trois hôtels à Lisbonne au bord de la mer à moins de 150 euros et mets-les dans un tableau. » L'agent cherche, ouvre les pages des hôtels, lit les prix et les avis, remarque qu'un hôtel est fermé pour travaux — et le remplace par un autre. Chaque résultat se dépose dans le contexte, et l'étape suivante tient compte des trouvailles précédentes.</p></div><p>Parlons maintenant franchement des risques. La boucle amplifie non seulement les capacités, mais aussi les erreurs : si à la deuxième étape l'agent s'est appuyé sur le mauvais document ou a mal compris la tâche, toutes les étapes suivantes se bâtissent sur cette erreur — comme au téléphone arabe, où le premier qui entend de travers fausse toute la chaîne. Et rien du module 9 n'a disparu : un ton assuré ne garantit pas d'avoir raison. C'est pourquoi les bons systèmes agentiques se construisent avec des ceintures de sécurité : les actions irréversibles — envoyer un e-mail, payer, supprimer — exigent une confirmation explicite de l'humain, et une longue chaîne mérite d'être vérifiée aux points clés, pas seulement tout à la fin.</p>"
+    },
+    {
+      "heading": "Essayez vous-même",
+      "html": "<p>Voici un RAG miniature que l'on peut observer de l'intérieur. La boulangerie fictive « L'Épi d'or » possède une base de notes : horaires, compositions, promotions. Posez une question en tant que client — et regardez comment le système retrouve les notes pertinentes par le sens, assemble le prompt sous vos yeux et répond en s'appuyant sur ce qu'il a trouvé. Remarquez : le modèle « sait » de la boulangerie exactement ce qui a atterri sur son bureau — et rien de plus.</p>"
+    },
+    {
+      "heading": "L'essentiel",
+      "html": "<ul><li>Le réseau de neurones lui-même est <strong>sans état</strong> (stateless) : les poids sont figés après l'entraînement, chaque requête est traitée à partir de zéro, et par défaut, rien ne subsiste d'une conversation à l'autre.</li><li>La <strong>fenêtre de contexte</strong> est le bureau du modèle : instructions, dialogue, fichiers. Sa taille est limitée ; dans les très longues conversations, le début glisse du bureau ou se voit compressé en bref résumé.</li><li>La « mémoire » des chatbots, ce sont des notes que le service conserve à part et glisse sans bruit dans le contexte de la conversation suivante. Vos échanges ne modifient pas les poids.</li><li><strong>RAG</strong> : la question est transformée en embedding, on retrouve les fragments de documents les plus proches par le sens et on les insère dans le prompt. Le modèle répond en s'appuyant sur du texte — moins d'hallucinations, accès au récent et au privé.</li><li>Les images, le modèle les « voit » en les découpant en patchs et en transformant chacun en embedding — ensuite, c'est le même transformeur avec la même attention. La génération d'images, c'est en général un autre mécanisme : la diffusion à partir du bruit.</li><li>Un <strong>agent</strong>, c'est un LLM en boucle avec des outils : il écrit des commandes, reçoit les résultats dans son contexte et agit pas à pas. Une erreur en début de chaîne entraîne tout le reste — d'où l'importance des vérifications et des confirmations humaines.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "q": "Vous avez fermé la conversation d'hier et en avez ouvert une nouvelle. Pourquoi le modèle « ne se souvient-il pas » de l'échange d'hier ?",
+      "options": [
+        "Les poids du modèle sont figés depuis l'entraînement, et le dialogue d'hier ne se trouve pas dans le contexte de la nouvelle conversation",
+        "Les développeurs effacent chaque nuit la mémoire du modèle pour économiser de l'espace",
+        "Le modèle se souvient de tout, mais les règles de sécurité lui interdisent de le montrer",
+        "La conversation d'hier était trop courte pour que le modèle ait le temps de la mémoriser"
+      ],
+      "correct": 0,
+      "explain": "Le réseau est sans état : chaque requête est traitée à partir de zéro, et il ne « connaît » que le texte qui se trouve à cet instant dans la fenêtre de contexte. Nouvelle conversation — bureau vide."
+    },
+    {
+      "q": "Qu'est-ce que la fenêtre de contexte ?",
+      "options": [
+        "Une partie des poids du modèle où s'enregistrent les nouvelles connaissances sur l'utilisateur",
+        "La période pendant laquelle le modèle conserve ses souvenirs du dialogue",
+        "Tout ce que le modèle voit au moment de répondre : instructions, dialogue, fichiers — et sa taille est limitée",
+        "La fenêtre du navigateur dans laquelle le chat avec le modèle est ouvert"
+      ],
+      "correct": 2,
+      "explain": "La fenêtre de contexte est le « bureau » du modèle : tout le texte dont il dispose pour générer sa réponse. Elle se mesure en tokens et n'est pas infinie."
+    },
+    {
+      "q": "Dans une conversation toute neuve, le chatbot vous a salué par votre prénom. Que s'est-il réellement passé ?",
+      "options": [
+        "Le modèle s'est ré-entraîné sur les conversations passées, et le prénom s'est inscrit dans ses poids",
+        "Le service conserve une note avec votre prénom et l'a glissée sans bruit dans le contexte de la nouvelle conversation",
+        "Le modèle a trouvé votre prénom sur Internet grâce au numéro de votre compte",
+        "Le prénom est entré dans les embeddings du modèle dès le pré-entraînement"
+      ],
+      "correct": 1,
+      "explain": "La « mémoire » des chatbots, ce sont des notes que l'application conserve à part du modèle et insère au début du contexte. Les poids, eux, ne changent pas."
+    },
+    {
+      "q": "Comment un système RAG retrouve-t-il les fragments de documents qui correspondent à la question de l'utilisateur ?",
+      "options": [
+        "Le modèle a appris par cœur tous les documents de l'entreprise pendant son entraînement",
+        "Un opérateur humain sélectionne à la main les bons documents pour chaque question",
+        "Le système cherche les fragments dont les mots coïncident littéralement avec ceux de la question",
+        "La question et les fragments de documents sont transformés en embeddings, et on retrouve les plus proches par le sens"
+      ],
+      "correct": 3,
+      "explain": "Ce sont les « coordonnées du sens » du module 4 qui opèrent : des textes proches par le sens reçoivent des embeddings proches. On retrouve donc aussi des fragments aux mots différents, mais qui parlent de la même chose."
+    },
+    {
+      "q": "Comment un modèle multimodal « voit-il » une photo ?",
+      "options": [
+        "Un programme distinct traduit la photo en description textuelle, et le modèle ne lit que celle-ci",
+        "Le modèle compare la photo à toutes les images de ses données d'entraînement et trouve la plus ressemblante",
+        "La photo est découpée en patchs, chacun transformé en embedding — puis c'est le même transformeur avec son attention qui opère",
+        "Le modèle ne reconnaît que le texte présent sur la photo et devine le reste de façon plausible"
+      ],
+      "correct": 2,
+      "explain": "L'image devient une séquence de « tokens »-patchs, et l'attention les relie aux mots de la question — comme du texte ordinaire."
+    },
+    {
+      "q": "Qu'est-ce qui distingue un agent d'un chatbot ordinaire ?",
+      "options": [
+        "C'est le même LLM, mais lancé en boucle avec des outils : ses commandes sont exécutées, et les résultats reviennent dans le contexte",
+        "L'agent possède une architecture de réseau fondamentalement différente et plus puissante",
+        "L'agent se ré-entraîne en temps réel sur les résultats de chacune de ses actions",
+        "L'agent ne peut pas se tromper, car il revérifie automatiquement chaque étape"
+      ],
+      "correct": 0,
+      "explain": "À l'intérieur, c'est le même prédicteur du token suivant. C'est l'enrobage qui a changé : le texte du modèle est devenu des commandes, dont les résultats sont reposés sur son « bureau »."
+    }
+  ],
+  "quiz2": [
+    {
+      "q": "Vous discutez avec le bot depuis des heures en collant de longs textes. Soudain, il a « oublié » un point convenu au début de la conversation. L'explication la plus probable ?",
+      "options": [
+        "Le modèle s'est « fatigué » du long dialogue et s'est mis à moins bien travailler",
+        "Le début du dialogue a glissé hors de la fenêtre de contexte ou a été compressé en un résumé où ce détail manquait",
+        "Le service supprime automatiquement les anciens messages pour protéger la vie privée de l'utilisateur",
+        "Les poids du modèle ont changé au fil de la conversation et ont évincé l'ancienne information"
+      ],
+      "correct": 1,
+      "explain": "Le bureau a débordé : les vieilles feuilles ont soit glissé, soit été réduites à un bref résumé où ce détail précis s'est perdu."
+    },
+    {
+      "q": "Pourquoi une réponse avec RAG contient-elle en général moins d'hallucinations qu'une réponse « de tête » ?",
+      "options": [
+        "Le RAG utilise un modèle plus gros et plus intelligent",
+        "Le RAG interdit au modèle de répondre quand il n'est pas sûr des faits",
+        "Avec le RAG, on coupe la température, et la réponse devient entièrement déterministe",
+        "Le modèle s'appuie sur un texte réel présent dans le contexte, au lieu de reconstituer les faits à partir de la « mémoire des poids »"
+      ],
+      "correct": 3,
+      "explain": "Restituer un document posé sous ses yeux est plus fiable que se remémorer. Le modèle et l'astuce de génération sont les mêmes — c'est le contenu du prompt qui a changé."
+    },
+    {
+      "q": "Un cabinet juridique veut un bot qui réponde sur des contrats internes mis à jour chaque semaine. Quelle approche est la plus raisonnable ?",
+      "options": [
+        "Le RAG : garder les contrats dans une base, retrouver les fragments pertinents par le sens et les insérer dans le prompt",
+        "Ré-entraîner le modèle chaque semaine sur les versions fraîches des contrats",
+        "Prendre un modèle ordinaire — il a lu tout Internet, donc il connaît aussi ces contrats",
+        "Monter la température pour que le modèle réponde plus hardiment aux questions sur les contrats"
+      ],
+      "correct": 0,
+      "explain": "Des contrats privés n'ont jamais pu figurer dans les données d'entraînement, et un ré-entraînement hebdomadaire coûte cher et prend du temps. Le RAG, lui, se met à jour en remplaçant les textes dans la base."
+    },
+    {
+      "q": "Le chatbot a décrit votre photo et a aussi « dessiné » une nouvelle image sur demande. Qu'est-ce qui est vrai des mécanismes sous le capot ?",
+      "options": [
+        "Compréhension et génération : un seul et même transformeur qui lit et complète des patchs",
+        "La compréhension fonctionne par diffusion, et la génération par transformeur",
+        "La compréhension : un transformeur sur des patchs-embeddings ; la génération : en général un modèle de diffusion distinct, qui révèle l'image à partir du bruit",
+        "Les deux tâches se résolvent en cherchant des images similaires dans une immense base d'images"
+      ],
+      "correct": 2,
+      "explain": "Regarder et dessiner sont des mécanismes différents : la lecture des patchs par le même transformeur d'un côté, la « révélation » pas à pas de l'image à partir du bruit selon une commande textuelle de l'autre."
+    },
+    {
+      "q": "À la troisième étape d'une longue recherche, l'agent s'est appuyé sur un article obsolète. Pourquoi est-ce plus dangereux que la même erreur dans un chat ordinaire ?",
+      "options": [
+        "L'agent est incapable de corriger l'erreur, car il ne relit pas son contexte",
+        "Le résultat de chaque étape entre dans le contexte des suivantes — toutes les étapes ultérieures se bâtissent sur cette erreur",
+        "Les erreurs de l'agent s'inscrivent dans les poids du modèle et le dégradent pour tous les utilisateurs",
+        "Ce n'est pas plus dangereux : l'agent revérifie toujours chaque source par lui-même"
+      ],
+      "correct": 1,
+      "explain": "La boucle amplifie les capacités comme les erreurs : une mauvaise « brique » posée en début de chaîne sert de fondation à toutes les étapes suivantes. D'où la nécessité de vérifications humaines aux points clés."
+    },
+    {
+      "q": "L'utilisateur a supprimé, dans les réglages du service, la note de « mémoire » le concernant. Qu'arrive-t-il alors au réseau de neurones lui-même ?",
+      "options": [
+        "Il faudra ré-entraîner partiellement le modèle pour qu'il oublie ces informations",
+        "Le modèle se souviendra encore quelque temps de ces informations, jusqu'à ce qu'elles « s'évaporent » des poids",
+        "Ces informations resteront à jamais dans les embeddings du modèle, impossible de les supprimer",
+        "Rien : les poids n'ont pas changé, simplement la note ne sera plus glissée dans le contexte des nouvelles conversations"
+      ],
+      "correct": 3,
+      "explain": "La « mémoire » ne vit pas dans le modèle, mais dans le carnet de notes du service. Note supprimée — on ne la posera plus sur le bureau : voilà toute la mécanique de l'oubli."
+    }
+  ],
+  "exercises": [
+    {
+      "q": "Expliquez avec vos propres mots : pourquoi, au sein d'une même conversation, a-t-on l'impression que le modèle se souvient de vous, alors que le réseau lui-même est « sans état » ?",
+      "ref": "Le réseau traite chaque requête à partir de zéro, mais l'interface de chat lui renvoie, à chaque nouveau message, l'intégralité du dialogue. Le modèle relit la conversation et en écrit la suite — d'où l'illusion d'une mémoire continue. En réalité, la « mémoire », c'est le texte présent dans la fenêtre de contexte, pas quelque chose qui se serait conservé dans les poids."
+    },
+    {
+      "q": "Prédisez : un musée lance un bot qui renseigne les visiteurs sur les œuvres, les horaires et les expositions temporaires du mois. Qu'est-ce qui tournera mal avec un LLM ordinaire sans RAG, et comment le RAG résoudra-t-il le problème ?",
+      "ref": "Un modèle ordinaire ne sait que ce qui figurait dans ses données d'entraînement : sur les expositions récentes et les horaires exacts, soit il ne dira rien, soit il inventera avec assurance — une hallucination. Avec le RAG, les descriptions des œuvres et les horaires sont placés dans une base, la question du visiteur est transformée en embedding, on retrouve les fragments les plus proches par le sens et on les insère dans le prompt. Le bot répond en s'appuyant sur du texte réel, et les données peuvent être mises à jour tous les jours sans le moindre ré-entraînement."
+    },
+    {
+      "q": "Inventez votre propre exemple de tâche pour un agent (pas celui du module) et nommez l'étape où vous exigeriez une confirmation humaine. Pourquoi précisément là ?",
+      "ref": "Par exemple, un agent qui sélectionne et réserve un hôtel : il cherche des options, compare prix et avis, dresse une liste restreinte. La confirmation s'impose avant la réservation et le paiement — c'est une action irréversible impliquant de l'argent, et une erreur des premières étapes (mauvaise ville, mauvaises dates) aurait pu se propager discrètement le long de toute la chaîne. Chercher et comparer, l'agent peut le faire librement ; ce qu'il faut faire vérifier par un humain, c'est ce qui est difficile à annuler."
+    }
+  ]
+}
